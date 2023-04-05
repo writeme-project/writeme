@@ -1,6 +1,8 @@
+use std::fs;
 use std::fs::File;
 use std::io::prelude::*;
 use terminal_spinners::{ SpinnerBuilder, DOTS };
+use std::io::Result;
 
 fn animate_loading() {
     let handle = SpinnerBuilder::new().spinner(&DOTS).text(" Writing README.md").start();
@@ -11,20 +13,25 @@ fn animate_loading() {
     }
 }
 
-fn writeme() -> std::io::Result<()> {
+fn writeme() -> Result<()> {
     let mut file = File::create("README.MD")?;
     // make a html string 
-    let html = "<p align='center'>
-    <h1 align='center'>
-        🖋️ WRITEME
-    </h1>
-    <p align='center'> Repo to auto-gen the README.md file from your code </p>
-</p>";
+    let readme = read_template().replace("{title_icon}", "🖋️")
+    .replace("{title_name}", "WRITEME")
+    .replace("{titel_description}", "Repo to auto-gen the README.md file from your code");
 
-    file.write_all(html.as_bytes())?;
+    file.write_all(readme.as_bytes())?;
     Ok(())
+}
+
+fn read_template() -> String {
+    let contents = fs::read_to_string("TEMPLATE.md")
+        .expect("Should have been able to read the template file");
+    return contents;
 }
 
 fn main() {
     animate_loading();
 }
+
+
