@@ -1,16 +1,19 @@
+use handlebars::Handlebars;
+use rand::prelude::*;
+use serde_json::{json, Value};
+use std::error::Error;
 #[allow(dead_code)]
 use std::fs;
 use std::fs::File;
-use rand::prelude::*;
-use std::error::Error;
-use handlebars::Handlebars;
-use serde_json::{ Value, json };
-use terminal_spinners::{ SpinnerBuilder, DOTS };
+use terminal_spinners::{SpinnerBuilder, DOTS};
+
+const EMOJI_LIST: [&str; 16] = [
+    "🖋️", "📝", "📄", "📚", "📖", "📓", "📒", "📃", "📜", "📰", "📑", "🔖", "🔗", "📎", "📐", "📏",
+];
 
 fn config_to_json(path: &str) -> Result<Value, Box<dyn Error>> {
-    let contents = fs
-        ::read_to_string(path)
-        .expect("Should have been able to read the template file");
+    let contents =
+        fs::read_to_string(path).expect("Should have been able to read the template file");
 
     let file_type = path.split(".").last().unwrap();
     match file_type {
@@ -34,26 +37,8 @@ fn config_to_json(path: &str) -> Result<Value, Box<dyn Error>> {
 }
 
 fn random_emoji() -> String {
-    let list_emoji = vec![
-        "🖋️",
-        "📝",
-        "📄",
-        "📚",
-        "📖",
-        "📓",
-        "📒",
-        "📃",
-        "📜",
-        "📰",
-        "📑",
-        "🔖",
-        "🔗",
-        "📎",
-        "📐",
-        "📏"
-    ];
     let mut rng = rand::thread_rng();
-    let random_emoji = list_emoji.choose(&mut rng).unwrap();
+    let random_emoji = *EMOJI_LIST.choose(&mut rng).unwrap();
     return random_emoji.to_string();
 }
 
@@ -83,7 +68,10 @@ fn random_emoji() -> String {
 // }
 
 fn animate_loading() {
-    let handle = SpinnerBuilder::new().spinner(&DOTS).text(" Writing README.md").start();
+    let handle = SpinnerBuilder::new()
+        .spinner(&DOTS)
+        .text(" Writing README.md")
+        .start();
     let res = learn_about_project();
     match res {
         Ok(_) => handle.done(),
@@ -104,7 +92,9 @@ fn learn_about_project() -> Result<(), Box<dyn Error>> {
 fn writeme(readme_contents: Value) -> Result<(), Box<dyn Error>> {
     let mut handlebars = Handlebars::new();
     let mut readme_file = File::create("README.MD")?;
-    handlebars.register_template_file("template", "README.tpl.md").unwrap();
+    handlebars
+        .register_template_file("template", "README.tpl.md")
+        .unwrap();
     handlebars.render_to_write("template", &readme_contents, &mut readme_file)?;
     Ok(())
 }
