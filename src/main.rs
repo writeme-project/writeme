@@ -13,7 +13,6 @@ fn config_to_json(path: &str) -> Result<Value, Box<dyn Error>> {
         .expect("Should have been able to read the template file");
 
     let file_type = path.split(".").last().unwrap();
-    println!("{}\n-----------------\n{}\n-----------------\n", contents, file_type);
     match file_type {
         "json" => {
             let json: Value = serde_json::from_str(contents.as_str()).unwrap();
@@ -25,6 +24,7 @@ fn config_to_json(path: &str) -> Result<Value, Box<dyn Error>> {
         }
         "toml" => {
             let json: Value = toml::from_str(contents.as_str()).unwrap();
+            print!("{}", serde_json::to_string_pretty(&json).unwrap());
             return Ok(json);
         }
         _ => {
@@ -93,7 +93,6 @@ fn animate_loading() {
 
 fn learn_about_project() -> Result<(), Box<dyn Error>> {
     let mut config_json: Value = config_to_json("./assets/Cargo.toml")?;
-    println!("{}", serde_json::to_string_pretty(&config_json).unwrap());
 
     config_json["icon"] = json!(random_emoji());
 
