@@ -10,7 +10,9 @@ license = "MIT OR Apache-2.0"
 handlebars = "4.3.6"
 rand = "0.8.5"
 serde_json = "1.0.95"
+serde_yaml = "0.9.21"
 terminal-spinners = "0.3.2"
+toml = "0.7.3"
 
 [badges]
 maintenance = { status = "enable" }
