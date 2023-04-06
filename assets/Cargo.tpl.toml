@@ -1,0 +1,91 @@
+[package]
+name = "my_project"
+version = "0.1.0"
+authors = ["John Doe <johndoe@example.com>"]
+edition = "2018"
+rust-version = "1.55.0"
+description = "My awesome Rust project."
+documentation = "https://my_project-docs.example.com"
+readme = "README.md"
+homepage = "https://my_project.example.com"
+repository = "https://github.com/my_username/my_project"
+license = "MIT"
+license-file = "LICENSE"
+keywords = ["rust", "example", "project"]
+categories = ["development-tools", "embedded"]
+workspace = "../my_workspace"
+build = "build.rs"
+links = "my_c_library"
+exclude = ["*.txt", "docs/**"]
+include = ["src/**/*.rs", "Cargo.toml"]
+publish = false
+metadata = { "some_tool" = "1.2.3" }
+default-run = "my_binary"
+autobins = false
+autoexamples = false
+autotests = false
+autobenches = false
+resolver = "2"
+
+[lib]
+name = "my_library"
+path = "src/lib.rs"
+crate-type = ["cdylib", "rlib"]
+doctest = true
+test = true
+
+[[bin]]
+name = "my_binary"
+path = "src/main.rs"
+test = true
+
+[[example]]
+name = "my_example"
+path = "examples/my_example.rs"
+test = true
+
+[[test]]
+name = "my_test"
+path = "tests/my_test.rs"
+harness = false
+
+[[bench]]
+name = "my_bench"
+path = "benches/my_bench.rs"
+harness = true
+
+[dependencies]
+my_dependency = "1.0"
+
+[dev-dependencies]
+my_dev_dependency = "2.0"
+
+[build-dependencies]
+my_build_dependency = "1.0"
+
+[target.'cfg(windows)'.dependencies]
+my_platform_dependency = "3.0"
+
+[badges]
+my_badge = { url = "https://badge_url.com", link = "https://link_to_badge.com" }
+
+[features]
+my_feature = ["my_dependency/optional_feature"]
+
+[patch.crates-io]
+my_dependency = { git = "https://github.com/my_username/my_dependency", branch = "main" }
+
+[replace]
+my_dependency = { git = "https://github.com/my_username/my_dependency", branch = "main" }
+
+[profile.dev]
+opt-level = 0
+
+[profile.release]
+opt-level = 3
+
+[workspace]
+members = [
+    "my_project",
+    "my_other_project",
+]
