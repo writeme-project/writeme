@@ -1,13 +1,11 @@
-use rand::prelude::*;
-use serde_json::Value;
-use std::collections::HashMap;
-use std::fs;
-use std::fs::File;
-use std::io::prelude::*;
-use std::io::Result;
 use terminal_spinners::{SpinnerBuilder, DOTS};
-
-// static mut PK_MANAGER: &str = "";
+use std::collections::HashMap;
+use std::io::prelude::*;
+use serde_json::Value;
+use rand::prelude::*;
+use std::io::Result;
+use std::fs::File;
+use std::fs;
 
 fn animate_loading(pk_manager: String) {
     let handle = SpinnerBuilder::new()
@@ -113,7 +111,6 @@ fn random_emoji() -> String {
     return random_emoji.to_string();
 }
 
-// make a fn to ask user a string
 fn ask_user_pk_manager() -> String {
     let mut input = String::new();
     println!("{}", "What package manager do you use? (npm, yarn, cargo)");
@@ -123,7 +120,6 @@ fn ask_user_pk_manager() -> String {
     return input.trim().to_string();
 }
 
-// make a struct shield with a url and a redirect and an output html
 struct Shield {
     label: String,
     message: String,
@@ -131,7 +127,6 @@ struct Shield {
     redirect: String,
 }
 
-// make an impl for the struct shield where the result is a string of html
 impl Shield {
     fn result(&self) -> String {
         let shield_url = "https://img.shields.io/static/v1?label={label}&message={message}&color={color}"
