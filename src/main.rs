@@ -1,8 +1,9 @@
 use terminal_spinners::{ SpinnerBuilder, DOTS };
 use std::collections::HashMap;
-use std::error::Error;
+use handlebars::Handlebars;
 use std::io::prelude::*;
-use serde_json::Value;
+use std::error::Error;
+use serde_json::{ Value, json };
 use rand::prelude::*;
 use std::fs::File;
 use std::fs;
@@ -16,86 +17,27 @@ fn animate_loading() {
     }
 }
 
-fn writeme(keywords: HashMap<&str, &str>) -> Result<(), Box<dyn Error>> {
-    let mut file = File::create("README.MD")?;
-    // make a html string
-    let mut readme = read_template();
-
-    let shield_license = (Shield {
-        label: "license".to_string(),
-        message: "MIT".to_string(),
-        color: "black".to_string(),
-        redirect: "https://opensource.org/licenses/MIT".to_string(),
-    }).result();
-
-    let shield_version = (Shield {
-        label: "license".to_string(),
-        message: "MIT".to_string(),
-        color: "red".to_string(),
-        redirect: "".to_string(),
-    }).result();
-
-    readme = readme.replace("{shields}", format!("{}{}", shield_license, shield_version).as_str());
-    readme = readme.replace("{icon}", random_emoji().as_str());
-
-    for (key, value) in keywords.iter() {
-        println!("{{{}}}: {}", key, value);
-        readme = readme.replace(format!("{{{}}}", key).as_str(), value);
-    }
-
-    file.write_all(readme.as_bytes())?;
+fn writeme(readme_contents: Value) -> Result<(), Box<dyn Error>> {
+    let mut handlebars = Handlebars::new();
+    let mut readme_file = File::create("README.MD")?;
+    handlebars.register_template_file("template", "README.tpl.md").unwrap();
+    handlebars.render_to_write("template", &readme_contents, &mut readme_file)?;
     Ok(())
 }
 
-fn read_template() -> String {
-    let contents = fs
-        ::read_to_string("TEMPLATE.md")
-        .expect("Should have been able to read the template file");
-    return contents;
-}
-
 fn learn_about_project() -> Result<(), Box<dyn Error>> {
+    // read the package.json file and create a json object
     let contents = fs
         ::read_to_string("./assets/package_1.json")
         .expect("Should have been able to read the template file");
+    let mut package_json: Value = serde_json::from_str(contents.as_str()).unwrap();
 
-    let list_project_keys = vec![
-        "name",
-        "version",
-        "description",
-        "keywords",
-        "author",
-        "license",
-        "dependencies",
-        "devDependencies",
-        "scripts",
-        "contributors",
-        "private",
-        "repository",
-        "bugs",
-        "homepage"
-    ];
+    // add a property to the json object
+    package_json["icon"] = json!(random_emoji());
 
-    let _v: Value = serde_json::from_str(contents.as_str())?;
+    println!("package_json: {}", package_json);
 
-    let mut map_project_keys_present: HashMap<&str, &str> = HashMap::new();
-    list_project_keys.iter().for_each(|key| {
-        if _v[key].is_string() {
-            map_project_keys_present.insert(key, _v[key].as_str().unwrap());
-        } else if _v[key].is_object() {
-            // let object = _v[key].as_object().unwrap();
-            // for (key_name, value) in object.iter() {
-            //     map_project_keys_present.insert(
-            //         format!("{}.{}", key, key_name).as_str(),
-            //         value.as_str().unwrap(),
-            //     );
-            // }
-        }
-    });
-
-    println!("\n");
-
-    writeme(map_project_keys_present)?;
+    writeme(package_json)?;
 
     Ok(())
 }
