@@ -127,5 +127,3 @@ The output will be placed on the `docs` folder.
 
 {{author}}
 {{contributors}}
-
-<!-- <a href="{{con_url}}"><img src="con_opencollective" /></a> -->
