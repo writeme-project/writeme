@@ -1,7 +1,7 @@
 use handlebars::Handlebars;
 use rand::prelude::*;
 use serde_json::{ Map, Value, json };
-use std::error::Error;
+use std::{ error::Error };
 #[allow(dead_code)]
 use std::fs;
 use std::fs::File;
@@ -82,30 +82,42 @@ fn random_emoji() -> String {
     return random_emoji.to_string();
 }
 
-// struct Shield {
-//     label: String,
-//     message: String,
-//     color: String,
-//     redirect: String,
-// }
+struct Shield {
+    label: String,
+    message: String,
+    color: String,
+    logo: String,
+    label_color: String,
+    logo_color: String,
+    style: String,
+    logo_width: String,
+    target: String,
+}
 
-// impl Shield {
-//     fn result(&self) -> String {
-//         let shield_url =
-//             "https://img.shields.io/static/v1?label={label}&message={message}&color={color}"
-//                 .replace("{label}", self.label.as_str())
-//                 .replace("{message}", self.message.as_str())
-//                 .replace("{color}", self.color.as_str());
+impl Shield {
+    fn result(&self) -> String {
+        // read SHIELD.md file from src/tpl
+        let shield_tpl = fs::read_to_string("./src/tpl/SHIELD.md").unwrap();
+        // use handlebars to replace placeholders with values
+        let mut handlebars = Handlebars::new();
+        handlebars.register_template_string("shield_tpl", shield_tpl.clone()).unwrap();
+        let data =
+            json!({
+            "label": self.label,
+            "message": self.message,
+            "color": self.color,
+            "logo": self.logo,
+            "label_color": self.label_color,
+            "logo_color": self.logo_color,
+            "style": self.style,
+            "logo_width": self.logo_width,
+            "target": self.target,
+        });
 
-//         let mut shield =
-//             "<a href=\"{shield_redirect}\" target=\"_blank\">
-//         <img src=\"{shield_url}>\">
-//     </a>".to_string();
-//         shield = shield.replace("{shield_redirect}", self.redirect.as_str());
-//         shield = shield.replace("{shield_url}", shield_url.as_str());
-//         return shield;
-//     }
-// }
+        let shield = handlebars.render("shield_tpl", &data).unwrap();
+        return shield;
+    }
+}
 
 fn animate_loading() {
     let handle = SpinnerBuilder::new().spinner(&DOTS).text(" Writing README.md").start();
