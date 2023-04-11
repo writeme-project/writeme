@@ -1,28 +1,35 @@
 {
-        "name": "writeme",
-        "version": "0.1.0",
-        "description": "Auto-gen README.md files for your projects",
-        "main": "src/main.rs",
-        "scripts": {
-            "start": "node index.js",
-			"dev": "nodemon",
-			"lint": "eslint **/*.js"
-        },
-        "dependencies": {
-            "express": "^4.16.4",
-			"compression": "~1.7.4"
-        },
-        "devDependencies": {
-			"eslint": "^5.16.0",
-            "nodemon": "^1.18.11"
-        },
-		"repository": "https://github.com/BabelDev0/writeme",
-		"author": "Jon Church",
-		"contributors": [{
-			"name": "Amber Matz",
-			"email": "example@example.com",
-			"url": "https://www.osiolabs.com/#team"
-		}],
-		"license": "MIT",
-		"keywords": ["server", "osiolabs", "express", "compression"]
-    }
+    "name": "writeme",
+    "version": "0.1.0",
+    "description": "Auto-gen README.md files for your projects",
+    "main": "src/main.rs",
+    "scripts": {
+        "start": "node index.js",
+        "dev": "nodemon",
+        "lint": "eslint **/*.js"
+    },
+    "dependencies": {
+        "express": "^4.16.4",
+        "compression": "~1.7.4"
+    },
+    "devDependencies": {
+        "eslint": "^5.16.0",
+        "nodemon": "^1.18.11"
+    },
+    "repository": "https://github.com/BabelDev0/writeme",
+    "author": "Jon Church",
+    "contributors": [
+        {
+            "name": "Amber Matz",
+            "email": "example@example.com",
+            "url": "https://www.osiolabs.com/#team"
+        }
+    ],
+    "license": "MIT",
+    "keywords": [
+        "server",
+        "osiolabs",
+        "express",
+        "compression"
+    ]
+}

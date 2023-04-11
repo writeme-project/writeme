@@ -1,0 +1,152 @@
+{
+  "author": "Jon Church",
+  "authors": [
+    "John Doe <johndoe@example.com>"
+  ],
+  "autobenches": false,
+  "autobins": false,
+  "autoexamples": false,
+  "autotests": false,
+  "badges": {
+    "my_badge": {
+      "link": "https://link_to_badge.com",
+      "url": "https://badge_url.com"
+    }
+  },
+  "bench": [
+    {
+      "harness": true,
+      "name": "my_bench",
+      "path": "benches/my_bench.rs"
+    }
+  ],
+  "bin": [
+    {
+      "name": "my_binary",
+      "path": "src/main.rs",
+      "test": true
+    }
+  ],
+  "build": "build.rs",
+  "build-dependencies": {
+    "my_build_dependency": "1.0"
+  },
+  "categories": [
+    "development-tools",
+    "embedded"
+  ],
+  "contributors": [
+    {
+      "email": "example@example.com",
+      "name": "Amber Matz",
+      "url": "https://www.osiolabs.com/#team"
+    }
+  ],
+  "default-run": "my_binary",
+  "dependencies": {
+    "my_dependency": "1.0"
+  },
+  "description": "My awesome Rust project.",
+  "dev-dependencies": {
+    "my_dev_dependency": "2.0"
+  },
+  "devDependencies": {
+    "eslint": "^5.16.0",
+    "nodemon": "^1.18.11"
+  },
+  "documentation": "https://my_project-docs.example.com",
+  "edition": "2018",
+  "example": [
+    {
+      "name": "my_example",
+      "path": "examples/my_example.rs",
+      "test": true
+    }
+  ],
+  "exclude": [
+    "*.txt",
+    "docs/**"
+  ],
+  "features": {
+    "my_feature": [
+      "my_dependency/optional_feature"
+    ]
+  },
+  "homepage": "https://my_project.example.com",
+  "icon": "📐",
+  "include": [
+    "src/**/*.rs",
+    "Cargo.toml"
+  ],
+  "keywords": [
+    "rust",
+    "example",
+    "project"
+  ],
+  "lib": {
+    "crate-type": [
+      "cdylib",
+      "rlib"
+    ],
+    "doctest": true,
+    "name": "my_library",
+    "path": "src/lib.rs",
+    "test": true
+  },
+  "license": "MIT",
+  "license-file": "LICENSE",
+  "links": "my_c_library",
+  "main": "src/main.rs",
+  "metadata": {
+    "some_tool": "1.2.3"
+  },
+  "name": "my_project",
+  "patch": {
+    "crates-io": {
+      "my_dependency": {
+        "branch": "main",
+        "git": "https://github.com/my_username/my_dependency"
+      }
+    }
+  },
+  "profile": {
+    "dev": {
+      "opt-level": 0
+    },
+    "release": {
+      "opt-level": 3
+    }
+  },
+  "publish": false,
+  "readme": "README.md",
+  "replace": {
+    "my_dependency": {
+      "branch": "main",
+      "git": "https://github.com/my_username/my_dependency"
+    }
+  },
+  "repository": "https://github.com/my_username/my_project",
+  "resolver": "2",
+  "rust-version": "1.55.0",
+  "scripts": {
+    "dev": "nodemon",
+    "lint": "eslint **/*.js",
+    "start": "node index.js"
+  },
+  "target": {
+    "cfg(windows)": {
+      "dependencies": {
+        "my_platform_dependency": "3.0"
+      }
+    }
+  },
+  "test": [
+    {
+      "harness": false,
+      "name": "my_test",
+      "path": "tests/my_test.rs"
+    }
+  ],
+  "version": "0.1.0",
+  "workspace": "../my_workspace"
+}
