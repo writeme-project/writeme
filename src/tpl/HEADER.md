@@ -11,23 +11,22 @@
 
 <div align="center">
     <h4>
-        <a href="{{repository}}">
+        <a href="{{link_one}}">
             👥 LINK ONE
         </a>
         <span>&nbsp;&nbsp;|&nbsp;&nbsp;</span>
-        <a href="{{repository}}">
-            🤝 LINK DUE
+        <a href="{{link_two}}">
+            🤝 LINK TWO
         </a>
         <span>&nbsp;&nbsp;|&nbsp;&nbsp;</span>
-        <a href="{{repository}}/issues">
+        <a href="{{link_three}}">
             🔎 LINK TRHEE
         </a>
         <span>&nbsp;&nbsp;|&nbsp;&nbsp;</span>
-        <a href="{{repository}}/issues">
-             LINK TRHEE
+        <a href="{{link_four}}">
+            📝 LINK FOUR
         </a>
     </h4>
 </div>
 
-| {{long_description}} |
-| ------------------ |
+{{about}}
