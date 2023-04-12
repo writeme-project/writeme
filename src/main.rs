@@ -1,11 +1,12 @@
+#[allow(dead_code)]
 use handlebars::Handlebars;
 use rand::prelude::*;
 use serde_json::{json, Map, Value};
 use std::error::Error;
-#[allow(dead_code)]
 use std::fs;
 use std::fs::File;
 use terminal_spinners::{SpinnerBuilder, DOTS};
+mod converter;
 
 const EMOJI_LIST: [&str; 16] = [
     "🖋️", "📝", "📄", "📚", "📖", "📓", "📒", "📃", "📜", "📰", "📑", "🔖", "🔗", "📎", "📐", "📏",
