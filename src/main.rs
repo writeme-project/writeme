@@ -24,7 +24,15 @@ fn config_to_json(path: &str) -> Result<Value, Box<dyn Error>> {
     let file_type = path.split(".").last().unwrap();
     match file_type {
         "json" => {
+            let decorator =
+                converter::package_json::PackageJson::new(Rc::new(ConcreteComponent {}));
+
             let json: Value = serde_json::from_str(contents.as_str()).unwrap();
+
+            let output = decorator.convert(contents);
+
+            println!("{:?}", output.unwrap());
+
             return Ok(json);
         }
         "yml" => {
@@ -33,20 +41,12 @@ fn config_to_json(path: &str) -> Result<Value, Box<dyn Error>> {
         }
         "toml" => {
             let decorator = converter::cargo_toml::CargoToml::new(Rc::new(ConcreteComponent {}));
-            let mut json: Value = toml::from_str(contents.as_str()).unwrap();
+            let json: Value = toml::from_str(contents.as_str()).unwrap();
 
             let output = decorator.convert(contents);
 
             println!("{:?}", output.unwrap());
 
-            // // flatten [package] category
-            // for (key, value) in json["package"].clone().as_object().unwrap().iter() {
-            //     json[key] = value.clone();
-            // }
-
-            // json.as_object_mut().unwrap().remove("package");
-
-            // print!("{}", serde_json::to_string_pretty(&json).unwrap());
             return Ok(json);
         }
         _ => {
