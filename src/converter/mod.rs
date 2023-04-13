@@ -85,13 +85,13 @@ pub struct ConverterOutput {
     homepage_url: Option<String>,
 
     /// dependencies of the project
-    dependencies: Option<Vec<Result<Dependency, Error>>>,
+    dependencies: Option<Vec<Dependency>>,
 
     /// dev dependencies of the project
-    dev_dependencies: Option<Vec<Result<Dependency, Error>>>,
+    dev_dependencies: Option<Vec<Dependency>>,
 
     /// build dependencies of the project, not every config file supports this
-    build_dependencies: Option<Vec<Result<Dependency, Error>>>,
+    build_dependencies: Option<Vec<Dependency>>,
 }
 
 impl ConverterOutput {

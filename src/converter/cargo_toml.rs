@@ -130,17 +130,38 @@ impl Component for CargoToml {
         output.homepage_url = Some(json["package"]["homepage"].to_string());
         output.repository_url = Some(json["package"]["repository"].to_string());
 
-        output.dependencies = json["dependencies"]
-            .as_object()
-            .map(|v| v.iter().map(|(k, v)| self.parse_dependency(k, v)).collect());
+        output.dependencies = json["dependencies"].as_object().map(|v| {
+            v.iter()
+                // .map(|(k, v)| self.parse_dependency(k, v))
+                .filter_map(|(key, value)| {
+                    let dependency = self.parse_dependency(key, value);
 
-        output.dev_dependencies = json["dev-dependencies"]
-            .as_object()
-            .map(|v| v.iter().map(|(k, v)| self.parse_dependency(k, v)).collect());
+                    dependency.ok()
+                })
+                .collect()
+        });
 
-        output.build_dependencies = json["build-dependencies"]
-            .as_object()
-            .map(|v| v.iter().map(|(k, v)| self.parse_dependency(k, v)).collect());
+        output.dev_dependencies = json["dev-dependencies"].as_object().map(|v| {
+            v.iter()
+                // .map(|(k, v)| self.parse_dependency(k, v))
+                .filter_map(|(key, value)| {
+                    let dependency = self.parse_dependency(key, value);
+
+                    dependency.ok()
+                })
+                .collect()
+        });
+
+        output.build_dependencies = json["build-dependencies"].as_object().map(|v| {
+            v.iter()
+                // .map(|(k, v)| self.parse_dependency(k, v))
+                .filter_map(|(key, value)| {
+                    let dependency = self.parse_dependency(key, value);
+
+                    dependency.ok()
+                })
+                .collect()
+        });
 
         Ok(output)
     }
