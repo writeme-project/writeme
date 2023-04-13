@@ -3,7 +3,7 @@ use std::rc::Rc;
 
 use anyhow::{anyhow, Error, Ok};
 
-use super::{Component, ConverterOutput, Decorator, Dependency};
+use super::{Component, Contributor, ConverterOutput, Decorator, Dependency};
 
 /// The Cargo.toml file relevant contents
 ///
@@ -80,6 +80,27 @@ impl Decorator for CargoToml {
 }
 
 impl Component for CargoToml {
+    fn parse_contributor(&self, contributor: &Value) -> Result<Contributor, Error> {
+        let as_str = contributor.as_str();
+
+        if as_str.is_none() {
+            return Err(anyhow!(
+                "Could not parse contributor! Value: {}",
+                contributor
+            ));
+        }
+
+        let attrs: Vec<String> = as_str.unwrap().split(" ").map(|s| s.to_string()).collect();
+
+        let name = attrs.get(0).map(|s| s.to_string());
+
+        let email = attrs.get(1).map(|s| s.to_string());
+
+        let url = attrs.get(2).map(|s| s.to_string());
+
+        Ok(Contributor { name, email, url })
+    }
+
     fn parse_dependency(&self, key: &String, value: &Value) -> Result<Dependency, Error> {
         if value.is_string() {
             return Ok(Dependency {
@@ -119,11 +140,24 @@ impl Component for CargoToml {
         output.name = Some(json["package"]["name"].to_string());
         output.description = Some(json["package"]["description"].to_string());
         output.version = Some(json["package"]["version"].to_string());
-        output.authors = json["package"]["authors"]
-            .as_array()
-            .map(|v| v.iter().map(|s| s.to_string()).collect());
+        output.contributors = json["package"]["authors"].as_array().map(|v| {
+            v.iter()
+                .filter_map(|s| {
+                    let contributor = self.parse_contributor(s);
+
+                    contributor.ok()
+                })
+                .collect()
+        });
+
+        // Cargo.toml reference requires at least a license or license-file!
+        // https://doc.rust-lang.org/cargo/reference/manifest.html#the-license-and-license-file-fields
         output.license = Some(json["package"]["license"].to_string());
-        output.license_file = Some(json["package"]["license-file"].to_string());
+
+        if output.license.is_none() {
+            output.license = Some(json["package"]["license-file"].to_string());
+        }
+
         output.keywords = json["package"]["keywords"]
             .as_array()
             .map(|v| v.iter().map(|s| s.to_string()).collect());

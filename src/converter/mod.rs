@@ -10,7 +10,7 @@ use serde_json::Value;
 use std::rc::Rc;
 
 pub mod cargo_toml;
-mod package_json;
+pub mod package_json;
 
 // The base Component trait defines operations that can be altered by
 // decorators.
@@ -18,7 +18,12 @@ pub trait Component {
     /// Convert the config file to the common ConverterOutput object
     fn convert(&self, file_contents: String) -> Result<ConverterOutput, Error>;
 
-    /// Parses a dependency from the config file
+    /// Parses a contributor from the config file since they are not always in the same format depending on the
+    /// config file type
+    fn parse_contributor(&self, contributor: &Value) -> Result<Contributor, Error>;
+
+    /// Parses a dependency from the config file since they are not always in the same format depending on the
+    /// config file type
     fn parse_dependency(&self, key: &String, value: &Value) -> Result<Dependency, Error>;
 }
 
@@ -32,15 +37,22 @@ impl Component for ConcreteComponent {
             name: None,
             description: None,
             version: None,
-            authors: None,
+            contributors: None,
             license: None,
-            license_file: None,
             keywords: None,
             repository_url: None,
             homepage_url: None,
             dependencies: None,
             dev_dependencies: None,
             build_dependencies: None,
+        })
+    }
+
+    fn parse_contributor(&self, contributor: &Value) -> Result<Contributor, Error> {
+        Ok(Contributor {
+            name: contributor["name"].as_str().map(|s| s.to_string()),
+            email: contributor["email"].as_str().map(|s| s.to_string()),
+            url: contributor["url"].as_str().map(|s| s.to_string()),
         })
     }
 
@@ -72,14 +84,21 @@ pub struct Dependency {
 }
 
 #[derive(Debug)]
+/// A contributor to the project
+pub struct Contributor {
+    name: Option<String>,
+    email: Option<String>,
+    url: Option<String>,
+}
+
+#[derive(Debug)]
 /// The output object that will be returned from each converter implementation regardless of the config file provided
 pub struct ConverterOutput {
     name: Option<String>,
     description: Option<String>,
     version: Option<String>,
-    authors: Option<Vec<String>>,
+    contributors: Option<Vec<Contributor>>,
     license: Option<String>,
-    license_file: Option<String>,
     keywords: Option<Vec<String>>,
     repository_url: Option<String>,
     homepage_url: Option<String>,
@@ -101,9 +120,8 @@ impl ConverterOutput {
             name: None,
             description: None,
             version: None,
-            authors: None,
+            contributors: None,
             license: None,
-            license_file: None,
             keywords: None,
             repository_url: None,
             homepage_url: None,
