@@ -1,5 +1,5 @@
 //! The converter module is a decorator pattern implementation which allows us to to convert any given (supported)
-//! config file to a common JSON object.
+//! config file to a common OUTPUT object with the relevant information needed to generate a README file.
 //!
 //! Resources:
 //! - https://refactoring.guru/design-patterns/decorator
@@ -9,23 +9,33 @@ use anyhow::Error;
 use serde_json::{json, Value};
 use std::rc::Rc;
 
-mod cargo_toml;
+pub mod cargo_toml;
 mod package_json;
 
 // The base Component trait defines operations that can be altered by
 // decorators.
-trait Component {
+pub trait Component {
     /// Convert the file to a JSON object
-    fn convert(&self, file_contents: String) -> Result<Value, Error>;
+    fn convert(&self, file_contents: String) -> Result<Output, Error>;
 }
 
 // Concrete Components provide default implementations of the operations.
 // There might be several variations of these classes.
-struct ConcreteComponent {}
+pub struct ConcreteComponent {}
 
 impl Component for ConcreteComponent {
-    fn convert(&self, file_contents: String) -> Result<Value, Error> {
-        Ok(json!({}))
+    fn convert(&self, file_contents: String) -> Result<Output, Error> {
+        Ok(Output {
+            name: None,
+            description: None,
+            version: None,
+            authors: None,
+            license: None,
+            license_file: None,
+            keywords: None,
+            repository_url: None,
+            homepage_url: None,
+        })
     }
 }
 
@@ -34,24 +44,55 @@ impl Component for ConcreteComponent {
 // interface for all concrete decorators. The default implementation of the
 // wrapping code might include a field for storing a wrapped component and
 // the means to initialize it.
-trait Decorator: Component {
+pub trait Decorator: Component {
     fn new(component: Rc<dyn Component>) -> Self;
 }
 
-/// Converts a given config file to a common JSON object
-struct Converter {
+#[derive(Debug)]
+/// The output object that will be returned from each converter implementation regardless of the config file provided
+pub struct Output {
+    name: Option<String>,
+    description: Option<String>,
+    version: Option<String>,
+    authors: Option<Vec<String>>,
+    license: Option<String>,
+    license_file: Option<String>,
+    keywords: Option<Vec<String>>,
+    repository_url: Option<String>,
+    homepage_url: Option<String>,
+}
+
+impl Output {
+    /// Creates a new empty output object
+    fn empty() -> Self {
+        Output {
+            name: None,
+            description: None,
+            version: None,
+            authors: None,
+            license: None,
+            license_file: None,
+            keywords: None,
+            repository_url: None,
+            homepage_url: None,
+        }
+    }
+}
+
+/// Converts a given config file to a common Output object
+pub struct Converter {
     path: String,
 }
 
 impl Converter {
-    fn new(path: String) -> Self {
+    pub fn new(path: String) -> Self {
         Converter { path }
     }
 
-    fn convert<T: Component>(&self, Component: &T) -> Result<Value, Error> {
+    pub fn convert<T: Component>(&self, component: &T) -> Result<Output, Error> {
         let contents = std::fs::read_to_string(&self.path)
             .expect("Should have been able to read the template file");
 
-        Component.convert(contents)
+        component.convert(contents)
     }
 }

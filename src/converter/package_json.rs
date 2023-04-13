@@ -1,9 +1,9 @@
 use serde_json::{json, Value};
 use std::rc::Rc;
 
-use anyhow::Error;
+use anyhow::{Error, Ok};
 
-use super::{Component, Decorator};
+use super::{Component, Decorator, Output};
 
 // Concrete Decorators call the wrapped object and alter its result in some
 // way.
@@ -18,7 +18,9 @@ impl Decorator for PackageJson {
 }
 
 impl Component for PackageJson {
-    fn convert(&self, file_contents: String) -> Result<Value, Error> {
-        Ok(json!({}))
+    fn convert(&self, file_contents: String) -> Result<Output, Error> {
+        let output = Output::empty();
+
+        Ok(output)
     }
 }
