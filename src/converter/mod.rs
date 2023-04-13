@@ -6,7 +6,7 @@
 //! - https://github.com/lpxxn/rust-design-pattern/blob/master/structural/decorator.rs
 
 use anyhow::Error;
-use serde_json::{json, Value};
+use serde_json::Value;
 use std::rc::Rc;
 
 pub mod cargo_toml;
@@ -15,8 +15,11 @@ mod package_json;
 // The base Component trait defines operations that can be altered by
 // decorators.
 pub trait Component {
-    /// Convert the file to a JSON object
-    fn convert(&self, file_contents: String) -> Result<Output, Error>;
+    /// Convert the config file to the common ConverterOutput object
+    fn convert(&self, file_contents: String) -> Result<ConverterOutput, Error>;
+
+    /// Parses a dependency from the config file
+    fn parse_dependency(&self, key: &String, value: &Value) -> Result<Dependency, Error>;
 }
 
 // Concrete Components provide default implementations of the operations.
@@ -24,8 +27,8 @@ pub trait Component {
 pub struct ConcreteComponent {}
 
 impl Component for ConcreteComponent {
-    fn convert(&self, file_contents: String) -> Result<Output, Error> {
-        Ok(Output {
+    fn convert(&self, file_contents: String) -> Result<ConverterOutput, Error> {
+        Ok(ConverterOutput {
             name: None,
             description: None,
             version: None,
@@ -35,6 +38,16 @@ impl Component for ConcreteComponent {
             keywords: None,
             repository_url: None,
             homepage_url: None,
+            dependencies: None,
+            dev_dependencies: None,
+            build_dependencies: None,
+        })
+    }
+
+    fn parse_dependency(&self, key: &String, value: &Value) -> Result<Dependency, Error> {
+        Ok(Dependency {
+            name: key.to_string(),
+            version: Some(value.to_string()),
         })
     }
 }
@@ -49,8 +62,18 @@ pub trait Decorator: Component {
 }
 
 #[derive(Debug)]
+/// Holds the information of a dependency in a config file
+pub struct Dependency {
+    /// The name of the dependency
+    name: String,
+
+    /// The version of the dependency, it may be missing!
+    version: Option<String>,
+}
+
+#[derive(Debug)]
 /// The output object that will be returned from each converter implementation regardless of the config file provided
-pub struct Output {
+pub struct ConverterOutput {
     name: Option<String>,
     description: Option<String>,
     version: Option<String>,
@@ -60,12 +83,21 @@ pub struct Output {
     keywords: Option<Vec<String>>,
     repository_url: Option<String>,
     homepage_url: Option<String>,
+
+    /// dependencies of the project
+    dependencies: Option<Vec<Result<Dependency, Error>>>,
+
+    /// dev dependencies of the project
+    dev_dependencies: Option<Vec<Result<Dependency, Error>>>,
+
+    /// build dependencies of the project, not every config file supports this
+    build_dependencies: Option<Vec<Result<Dependency, Error>>>,
 }
 
-impl Output {
+impl ConverterOutput {
     /// Creates a new empty output object
     fn empty() -> Self {
-        Output {
+        ConverterOutput {
             name: None,
             description: None,
             version: None,
@@ -75,6 +107,9 @@ impl Output {
             keywords: None,
             repository_url: None,
             homepage_url: None,
+            dependencies: None,
+            dev_dependencies: None,
+            build_dependencies: None,
         }
     }
 }
@@ -89,7 +124,7 @@ impl Converter {
         Converter { path }
     }
 
-    pub fn convert<T: Component>(&self, component: &T) -> Result<Output, Error> {
+    pub fn convert<T: Component>(&self, component: &T) -> Result<ConverterOutput, Error> {
         let contents = std::fs::read_to_string(&self.path)
             .expect("Should have been able to read the template file");
 

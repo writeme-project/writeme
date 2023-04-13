@@ -1,9 +1,9 @@
 use serde_json::{json, Value};
 use std::rc::Rc;
 
-use anyhow::{Error, Ok};
+use anyhow::{anyhow, Error, Ok};
 
-use super::{Component, Decorator, Output};
+use super::{Component, ConverterOutput, Decorator, Dependency};
 
 /// The Cargo.toml file relevant contents
 ///
@@ -80,8 +80,39 @@ impl Decorator for CargoToml {
 }
 
 impl Component for CargoToml {
-    fn convert(&self, file_contents: String) -> Result<Output, Error> {
-        let mut output = Output::empty();
+    fn parse_dependency(&self, key: &String, value: &Value) -> Result<Dependency, Error> {
+        if value.is_string() {
+            return Ok(Dependency {
+                name: key.to_string(),
+                version: Some(value.to_string()),
+            });
+        } else if value.is_object() {
+            let version = value["version"].as_str();
+
+            // there must be a better way to do the below but my rust skills are 🥴
+            // future us: improve this!
+            if version.is_some() {
+                return Ok(Dependency {
+                    name: key.to_string(),
+                    version: Some(version.unwrap().to_string()),
+                });
+            } else {
+                return Ok(Dependency {
+                    name: key.to_string(),
+                    version: None,
+                });
+            }
+        }
+
+        Err(anyhow!(
+            "Could not parse dependency! Key: {}, Value: {}",
+            key,
+            value
+        ))
+    }
+
+    fn convert(&self, file_contents: String) -> Result<ConverterOutput, Error> {
+        let mut output = ConverterOutput::empty();
 
         let json: Value = toml::from_str(&file_contents.as_str()).unwrap();
 
@@ -98,6 +129,18 @@ impl Component for CargoToml {
             .map(|v| v.iter().map(|s| s.to_string()).collect());
         output.homepage_url = Some(json["package"]["homepage"].to_string());
         output.repository_url = Some(json["package"]["repository"].to_string());
+
+        output.dependencies = json["dependencies"]
+            .as_object()
+            .map(|v| v.iter().map(|(k, v)| self.parse_dependency(k, v)).collect());
+
+        output.dev_dependencies = json["dev-dependencies"]
+            .as_object()
+            .map(|v| v.iter().map(|(k, v)| self.parse_dependency(k, v)).collect());
+
+        output.build_dependencies = json["build-dependencies"]
+            .as_object()
+            .map(|v| v.iter().map(|(k, v)| self.parse_dependency(k, v)).collect());
 
         Ok(output)
     }

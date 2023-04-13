@@ -1,10 +1,12 @@
+use converter::{Component, ConcreteComponent, Converter, Decorator};
 #[allow(dead_code)]
 use handlebars::Handlebars;
 use rand::prelude::*;
 use serde_json::{json, Map, Value};
-use std::error::Error;
 use std::fs;
 use std::fs::File;
+use std::rc::Rc;
+use std::{error::Error, rc};
 use terminal_spinners::{SpinnerBuilder, DOTS};
 
 mod converter;
@@ -15,6 +17,7 @@ const EMOJI_LIST: [&str; 16] = [
 ];
 
 fn config_to_json(path: &str) -> Result<Value, Box<dyn Error>> {
+    let converter = Converter::new(path.to_string());
     let contents =
         fs::read_to_string(path).expect("Should have been able to read the template file");
 
@@ -29,14 +32,19 @@ fn config_to_json(path: &str) -> Result<Value, Box<dyn Error>> {
             return Ok(json);
         }
         "toml" => {
+            let decorator = converter::cargo_toml::CargoToml::new(Rc::new(ConcreteComponent {}));
             let mut json: Value = toml::from_str(contents.as_str()).unwrap();
 
-            // flatten [package] category
-            for (key, value) in json["package"].clone().as_object().unwrap().iter() {
-                json[key] = value.clone();
-            }
+            let output = decorator.convert(contents);
 
-            json.as_object_mut().unwrap().remove("package");
+            println!("{:?}", output.unwrap());
+
+            // // flatten [package] category
+            // for (key, value) in json["package"].clone().as_object().unwrap().iter() {
+            //     json[key] = value.clone();
+            // }
+
+            // json.as_object_mut().unwrap().remove("package");
 
             // print!("{}", serde_json::to_string_pretty(&json).unwrap());
             return Ok(json);
@@ -95,23 +103,23 @@ fn random_emoji() -> String {
 }
 
 fn learn_about_project() -> Result<(), Box<dyn Error>> {
-    let cargo: Value = config_to_json("./assets/Cargo.tpl.toml")?;
+    let cargo: Value = config_to_json("./assets/Cargo.toml")?;
     let package: Value = config_to_json("./assets/package_1.json")?;
 
-    let mut config = match merge_json_objects(cargo, package) {
-        Ok(merged) => merged,
-        Err(_) => {
-            return Err("Failed to merge JSON objects".into());
-        }
-    };
+    // let mut config = match merge_json_objects(cargo, package) {
+    //     Ok(merged) => merged,
+    //     Err(_) => {
+    //         return Err("Failed to merge JSON objects".into());
+    //     }
+    // };
 
-    config["icon"] = json!(random_emoji());
+    // config["icon"] = json!(random_emoji());
 
-    // write config to file
-    let fs = File::create("config.json")?;
-    serde_json::to_writer_pretty(fs, &config)?;
+    // // write config to file
+    // let fs = File::create("config.json")?;
+    // serde_json::to_writer_pretty(fs, &config)?;
 
-    writeme(config)?;
+    // writeme(config)?;
 
     Ok(())
 }
@@ -127,17 +135,17 @@ fn writeme(readme_contents: Value) -> Result<(), Box<dyn Error>> {
 }
 
 fn main() {
-    // let handle = SpinnerBuilder::new()
-    //     .spinner(&DOTS)
-    //     .text(" Writing README.md")
-    //     .start();
+    let handle = SpinnerBuilder::new()
+        .spinner(&DOTS)
+        .text(" Writing README.md")
+        .start();
 
-    // let res = learn_about_project();
+    let res = learn_about_project();
 
-    // match res {
-    //     Ok(_) => handle.done(),
-    //     Err(_) => handle.error(),
-    // }
+    match res {
+        Ok(_) => handle.done(),
+        Err(_) => handle.error(),
+    }
 
     scanner::scanner::list_technologies();
 }
