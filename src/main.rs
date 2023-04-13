@@ -6,7 +6,9 @@ use std::error::Error;
 use std::fs;
 use std::fs::File;
 use terminal_spinners::{SpinnerBuilder, DOTS};
+
 mod converter;
+mod scanner;
 
 const EMOJI_LIST: [&str; 16] = [
     "🖋️", "📝", "📄", "📚", "📖", "📓", "📒", "📃", "📜", "📰", "📑", "🔖", "🔗", "📎", "📐", "📏",
@@ -92,44 +94,6 @@ fn random_emoji() -> String {
     return random_emoji.to_string();
 }
 
-struct Shield {
-    label: String,
-    message: String,
-    color: String,
-    logo: String,
-    label_color: String,
-    logo_color: String,
-    style: String,
-    logo_width: String,
-    target: String,
-}
-
-impl Shield {
-    fn result(&self) -> String {
-        // read SHIELD.md file from src/tpl
-        let shield_tpl = fs::read_to_string("./src/tpl/SHIELD.md").unwrap();
-        // use handlebars to replace placeholders with values
-        let mut handlebars = Handlebars::new();
-        handlebars
-            .register_template_string("shield_tpl", shield_tpl.clone())
-            .unwrap();
-        let data = json!({
-            "label": self.label,
-            "message": self.message,
-            "color": self.color,
-            "logo": self.logo,
-            "label_color": self.label_color,
-            "logo_color": self.logo_color,
-            "style": self.style,
-            "logo_width": self.logo_width,
-            "target": self.target,
-        });
-
-        let shield = handlebars.render("shield_tpl", &data).unwrap();
-        return shield;
-    }
-}
-
 fn learn_about_project() -> Result<(), Box<dyn Error>> {
     let cargo: Value = config_to_json("./assets/Cargo.tpl.toml")?;
     let package: Value = config_to_json("./assets/package_1.json")?;
@@ -163,15 +127,17 @@ fn writeme(readme_contents: Value) -> Result<(), Box<dyn Error>> {
 }
 
 fn main() {
-    let handle = SpinnerBuilder::new()
-        .spinner(&DOTS)
-        .text(" Writing README.md")
-        .start();
+    // let handle = SpinnerBuilder::new()
+    //     .spinner(&DOTS)
+    //     .text(" Writing README.md")
+    //     .start();
 
-    let res = learn_about_project();
+    // let res = learn_about_project();
 
-    match res {
-        Ok(_) => handle.done(),
-        Err(_) => handle.error(),
-    }
+    // match res {
+    //     Ok(_) => handle.done(),
+    //     Err(_) => handle.error(),
+    // }
+
+    scanner::scanner::list_technologies();
 }

@@ -8,9 +8,13 @@ license = "MIT OR Apache-2.0"
 
 [dependencies]
 anyhow = "1.0.70"
+derive = "1.0.0"
 dialoguer = "0.10.4"
+glob = "0.3.1"
 handlebars = "4.3.6"
 rand = "0.8.5"
+regex = "1.7.3"
+serde = { version = "1.0.160", features = ["derive"] }
 serde_json = { version = "1.0.95", features = ["indexmap", "raw_value"] }
 serde_yaml = "0.9.21"
 terminal-spinners = "0.3.2"
