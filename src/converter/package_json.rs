@@ -53,7 +53,16 @@ impl Component for PackageJson {
             .as_array()
             .map(|v| v.iter().map(|s| s.to_string()).collect());
         output.homepage_url = Some(json["package"]["homepage"].to_string());
-        output.repository_url = Some(json["package"]["repository"].to_string());
+
+        if json["repository"].as_object().is_some() {
+            let repo = json["repository"].as_object().unwrap();
+
+            if repo["url"].as_str().is_some() {
+                output.repository_url = Some(repo["url"].to_string());
+            }
+        } else if json["repository"].as_str().is_some() {
+            output.repository_url = Some(json["repository"].to_string());
+        }
 
         output.dependencies = json["dependencies"].as_object().map(|v| {
             v.iter()
