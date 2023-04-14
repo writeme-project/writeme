@@ -1,12 +1,10 @@
-use converter::{Component, ConcreteComponent, Converter, Decorator};
+use anyhow::Error;
+use converter::{Component, Decorator};
 #[allow(dead_code)]
 use handlebars::Handlebars;
 use rand::prelude::*;
 use serde_json::{json, Map, Value};
-use std::fs;
 use std::fs::File;
-use std::rc::Rc;
-use std::{error::Error, rc};
 use terminal_spinners::{SpinnerBuilder, DOTS};
 
 mod converter;
@@ -16,45 +14,7 @@ const EMOJI_LIST: [&str; 16] = [
     "🖋️", "📝", "📄", "📚", "📖", "📓", "📒", "📃", "📜", "📰", "📑", "🔖", "🔗", "📎", "📐", "📏",
 ];
 
-fn config_to_json(path: &str) -> Result<Value, Box<dyn Error>> {
-    let converter = Converter::new(path.to_string());
-    let contents =
-        fs::read_to_string(path).expect("Should have been able to read the template file");
-
-    let file_type = path.split(".").last().unwrap();
-    match file_type {
-        "json" => {
-            let decorator = converter::package_json::PackageJson::new();
-
-            let json: Value = serde_json::from_str(contents.as_str()).unwrap();
-
-            let output = decorator.convert(contents);
-
-            println!("{:?}", output.unwrap());
-
-            return Ok(json);
-        }
-        "yml" => {
-            let json: Value = serde_yaml::from_str(contents.as_str()).unwrap();
-            return Ok(json);
-        }
-        "toml" => {
-            let decorator = converter::cargo_toml::CargoToml::new();
-            let json: Value = toml::from_str(contents.as_str()).unwrap();
-
-            let output = decorator.convert(contents);
-
-            println!("{:?}", output.unwrap());
-
-            return Ok(json);
-        }
-        _ => {
-            return Err("File type not supported".into());
-        }
-    }
-}
-
-fn merge_json_objects(obj1: Value, obj2: Value) -> Result<Value, Box<dyn Error>> {
+fn merge_json_objects(obj1: Value, obj2: Value) -> Result<Value, Error> {
     let obj1: Map<String, Value> = obj1.as_object().unwrap().clone();
     let obj2: Map<String, Value> = obj2.as_object().unwrap().clone();
 
@@ -101,10 +61,12 @@ fn random_emoji() -> String {
     return random_emoji.to_string();
 }
 
-fn learn_about_project() -> Result<(), Box<dyn Error>> {
-    let cargo: Value = config_to_json("./assets/Cargo.toml")?;
-    let package: Value = config_to_json("./assets/package_1.json")?;
-    let package: Value = config_to_json("./assets/composer.json")?;
+fn learn_about_project() -> Result<(), Error> {
+    let converter = converter::Converter::new();
+
+    let cargo = converter.convert("./assets/Cargo.toml");
+    let package = converter.convert("./assets/package_1.json");
+    let package = converter.convert("./assets/composer.json");
 
     // let mut config = match merge_json_objects(cargo, package) {
     //     Ok(merged) => merged,
@@ -124,7 +86,7 @@ fn learn_about_project() -> Result<(), Box<dyn Error>> {
     Ok(())
 }
 
-fn writeme(readme_contents: Value) -> Result<(), Box<dyn Error>> {
+fn writeme(readme_contents: Value) -> Result<(), Error> {
     let mut handlebars = Handlebars::new();
     let mut readme_file = File::create("README.MD")?;
     handlebars
