@@ -104,6 +104,7 @@ fn random_emoji() -> String {
 fn learn_about_project() -> Result<(), Box<dyn Error>> {
     let cargo: Value = config_to_json("./assets/Cargo.toml")?;
     let package: Value = config_to_json("./assets/package_1.json")?;
+    let package: Value = config_to_json("./assets/composer.json")?;
 
     // let mut config = match merge_json_objects(cargo, package) {
     //     Ok(merged) => merged,
