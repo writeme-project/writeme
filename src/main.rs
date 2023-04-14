@@ -24,8 +24,7 @@ fn config_to_json(path: &str) -> Result<Value, Box<dyn Error>> {
     let file_type = path.split(".").last().unwrap();
     match file_type {
         "json" => {
-            let decorator =
-                converter::package_json::PackageJson::new(Rc::new(ConcreteComponent {}));
+            let decorator = converter::package_json::PackageJson::new();
 
             let json: Value = serde_json::from_str(contents.as_str()).unwrap();
 
@@ -40,7 +39,7 @@ fn config_to_json(path: &str) -> Result<Value, Box<dyn Error>> {
             return Ok(json);
         }
         "toml" => {
-            let decorator = converter::cargo_toml::CargoToml::new(Rc::new(ConcreteComponent {}));
+            let decorator = converter::cargo_toml::CargoToml::new();
             let json: Value = toml::from_str(contents.as_str()).unwrap();
 
             let output = decorator.convert(contents);

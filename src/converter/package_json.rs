@@ -8,12 +8,13 @@ use super::{Component, Contributor, ConverterOutput, Decorator, Dependency};
 // Concrete Decorators call the wrapped object and alter its result in some
 // way.
 pub struct PackageJson {
-    component: Rc<dyn Component>,
+    // component: Rc<dyn Component>,
 }
 
 impl Decorator for PackageJson {
-    fn new(component: Rc<dyn Component>) -> Self {
-        PackageJson { component }
+    fn new(/* component: Rc<dyn Component> */) -> Self {
+        // PackageJson { component }
+        PackageJson {}
     }
 }
 

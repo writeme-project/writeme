@@ -70,12 +70,12 @@ struct CargoTomlOutput {
 // Concrete Decorators call the wrapped object and alter its result in some
 // way.
 pub struct CargoToml {
-    component: Rc<dyn Component>,
+    // component: Rc<dyn Component>,
 }
 
 impl Decorator for CargoToml {
-    fn new(component: Rc<dyn Component>) -> Self {
-        CargoToml { component }
+    fn new() -> Self {
+        CargoToml {}
     }
 }
 

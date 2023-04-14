@@ -70,7 +70,7 @@ impl Component for ConcreteComponent {
 // wrapping code might include a field for storing a wrapped component and
 // the means to initialize it.
 pub trait Decorator: Component {
-    fn new(component: Rc<dyn Component>) -> Self;
+    fn new(/* component: Rc<dyn Component> */) -> Self;
 }
 
 #[derive(Debug)]
