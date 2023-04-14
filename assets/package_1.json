@@ -8,6 +8,7 @@
         "dev": "nodemon",
         "lint": "eslint **/*.js"
     },
+    "funding": "https://www.osiolabs.com/#contact",
     "dependencies": {
         "express": "^4.16.4",
         "compression": "~1.7.4"

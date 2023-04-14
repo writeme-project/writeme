@@ -199,4 +199,8 @@ impl Component for CargoToml {
 
         Ok(output)
     }
+
+    fn parse_funding(&self, funding: &Value) -> Result<super::Funding, Error> {
+        Err(anyhow!("Funding is not supported for Cargo.toml!"))
+    }
 }

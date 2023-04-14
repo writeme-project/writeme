@@ -7,9 +7,9 @@
 
 use anyhow::Error;
 use serde_json::Value;
-use std::rc::Rc;
 
 pub mod cargo_toml;
+pub mod composer_json;
 pub mod package_json;
 
 // The base Component trait defines operations that can be altered by
@@ -25,6 +25,8 @@ pub trait Component {
     /// Parses a dependency from the config file since they are not always in the same format depending on the
     /// config file type
     fn parse_dependency(&self, key: &String, value: &Value) -> Result<Dependency, Error>;
+
+    fn parse_funding(&self, funding: &Value) -> Result<Funding, Error>;
 }
 
 // Concrete Components provide default implementations of the operations.
@@ -45,6 +47,7 @@ impl Component for ConcreteComponent {
             dependencies: None,
             dev_dependencies: None,
             build_dependencies: None,
+            funding: None,
         })
     }
 
@@ -60,6 +63,13 @@ impl Component for ConcreteComponent {
         Ok(Dependency {
             name: key.to_string(),
             version: Some(value.to_string()),
+        })
+    }
+
+    fn parse_funding(&self, funding: &Value) -> Result<Funding, Error> {
+        Ok(Funding {
+            f_type: funding["type"].as_str().map(|s| s.to_string()),
+            url: funding["url"].as_str().map(|s| s.to_string()),
         })
     }
 }
@@ -92,6 +102,13 @@ pub struct Contributor {
 }
 
 #[derive(Debug)]
+/// How a project could be funded
+pub struct Funding {
+    f_type: Option<String>,
+    url: Option<String>,
+}
+
+#[derive(Debug)]
 /// The output object that will be returned from each converter implementation regardless of the config file provided
 pub struct ConverterOutput {
     name: Option<String>,
@@ -111,6 +128,9 @@ pub struct ConverterOutput {
 
     /// build dependencies of the project, not every config file supports this
     build_dependencies: Option<Vec<Dependency>>,
+
+    /// funding of the project, not every config file supports this (eg. Cargo.toml)
+    funding: Option<Vec<Funding>>,
 }
 
 impl ConverterOutput {
@@ -128,6 +148,7 @@ impl ConverterOutput {
             dependencies: None,
             dev_dependencies: None,
             build_dependencies: None,
+            funding: None,
         }
     }
 }

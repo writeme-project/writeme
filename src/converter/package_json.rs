@@ -3,7 +3,7 @@ use std::rc::Rc;
 
 use anyhow::{anyhow, Error, Ok};
 
-use super::{Component, Contributor, ConverterOutput, Decorator, Dependency};
+use super::{Component, Contributor, ConverterOutput, Decorator, Dependency, Funding};
 
 // Concrete Decorators call the wrapped object and alter its result in some
 // way.
@@ -50,7 +50,7 @@ impl Component for PackageJson {
 
         output.license = json["license"].as_str().map(|s| s.to_string());
 
-        output.keywords = json["package"]["keywords"]
+        output.keywords = json["keywords"]
             .as_array()
             .map(|v| v.iter().map(|s| s.to_string()).collect());
         output.homepage_url = Some(json["package"]["homepage"].to_string());
@@ -87,6 +87,17 @@ impl Component for PackageJson {
                 .collect()
         });
 
+        if json["funding"].is_array() {
+            output.funding = json["funding"].as_array().map(|v| {
+                v.iter()
+                    .map(|f| self.parse_funding(f))
+                    .filter_map(|f| f.ok())
+                    .collect()
+            });
+        } else if json["funding"].is_object() || json["funding"].is_string() {
+            output.funding = Some(vec![self.parse_funding(&json["funding"]).unwrap()]);
+        }
+
         Ok(output)
     }
 
@@ -114,5 +125,25 @@ impl Component for PackageJson {
             name: key.to_string(),
             version: Some(value.to_string()),
         })
+    }
+
+    fn parse_funding(&self, funding: &Value) -> Result<super::Funding, Error> {
+        if funding.is_string() {
+            return Ok(Funding {
+                url: Some(funding.as_str().unwrap().to_string()),
+                f_type: None,
+            });
+        }
+
+        if funding.is_object() {
+            let attrs = funding.as_object().unwrap();
+
+            return Ok(Funding {
+                url: attrs["url"].as_str().map(|s| s.to_string()),
+                f_type: attrs["type"].as_str().map(|s| s.to_string()),
+            });
+        }
+
+        Err(anyhow!("Could not parse funding! Value: {}", funding))
     }
 }
