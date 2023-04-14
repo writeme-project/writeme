@@ -1,12 +1,12 @@
-use serde_json::{json, Value};
-use std::rc::Rc;
+use serde_json::Value;
 
 use anyhow::{anyhow, Error, Ok};
 
 use super::{Component, Contributor, ConverterOutput, Decorator, Dependency, Funding};
 
-// Concrete Decorators call the wrapped object and alter its result in some
-// way.
+/// The package.json parser
+///
+/// Reference: https://docs.npmjs.com/cli/v9/configuring-npm/package-json#dependencies
 pub struct PackageJson {
     // component: Rc<dyn Component>,
 }

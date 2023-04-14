@@ -1,5 +1,4 @@
-use serde_json::{json, Value};
-use std::rc::Rc;
+use serde_json::Value;
 
 use anyhow::{anyhow, Error, Ok};
 
@@ -67,8 +66,9 @@ struct CargoTomlOutput {
     workspace: Option<String>,
 }
 
-// Concrete Decorators call the wrapped object and alter its result in some
-// way.
+/// The Cargo.toml parser
+///
+/// Reference: https://doc.rust-lang.org/cargo/reference/manifest.html
 pub struct CargoToml {
     // component: Rc<dyn Component>,
 }
