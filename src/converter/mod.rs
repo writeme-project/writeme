@@ -102,7 +102,7 @@ impl SupportedFile {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone)]
 /// Holds the information of a dependency in a config file
 pub struct Dependency {
     /// The name of the dependency
@@ -112,7 +112,7 @@ pub struct Dependency {
     version: Option<String>,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone)]
 /// A contributor to the project
 pub struct Contributor {
     name: Option<String>,
@@ -120,14 +120,14 @@ pub struct Contributor {
     url: Option<String>,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone)]
 /// How a project could be funded
 pub struct Funding {
     f_type: Option<String>,
     url: Option<String>,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone)]
 /// The output object that will be returned from each converter implementation regardless of the config file provided
 pub struct ConverterOutput {
     pub name: Option<String>,
