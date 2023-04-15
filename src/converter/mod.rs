@@ -5,7 +5,7 @@
 //! - https://refactoring.guru/design-patterns/decorator
 //! - https://github.com/lpxxn/rust-design-pattern/blob/master/structural/decorator.rs
 
-use std::{fs, path::Path};
+use std::{fmt::Display, fs, path::Path};
 
 use anyhow::{anyhow, Error};
 use serde_json::Value;
@@ -112,12 +112,87 @@ pub struct Dependency {
     version: Option<String>,
 }
 
+impl Display for Dependency {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "{} {}",
+            self.name,
+            self.version.as_ref().unwrap_or(&"None".to_string())
+        )
+    }
+}
+
+#[derive(Debug, Clone)]
+/// This Vec variant is needed to implement the Display trait for the Vec<T> scenarios
+///
+/// Reference: https://stackoverflow.com/a/30633256/11802618
+pub struct Dependencies(Vec<Dependency>);
+
+impl Display for Dependencies {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let mut dependencies = String::new();
+        for dependency in &self.0 {
+            dependencies.push_str(&format!("{} ", dependency));
+        }
+        write!(f, "{}", dependencies)
+    }
+}
+
+impl FromIterator<Dependency> for Dependencies {
+    fn from_iter<I: IntoIterator<Item = Dependency>>(iter: I) -> Self {
+        let mut dependencies = Vec::new();
+        for dependency in iter {
+            dependencies.push(dependency);
+        }
+        Dependencies(dependencies)
+    }
+}
+
 #[derive(Debug, Clone)]
 /// A contributor to the project
 pub struct Contributor {
     name: Option<String>,
     email: Option<String>,
     url: Option<String>,
+}
+
+impl Display for Contributor {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "{} {} {}",
+            self.name.as_ref().unwrap_or(&"None".to_string()),
+            self.email.as_ref().unwrap_or(&"None".to_string()),
+            self.url.as_ref().unwrap_or(&"None".to_string())
+        )
+    }
+}
+
+#[derive(Debug, Clone)]
+/// This Vec variant is needed to implement the Display trait for the Vec<T> scenarios
+///
+/// Reference: https://stackoverflow.com/a/30633256/11802618
+pub struct Contributors(Vec<Contributor>);
+
+impl Display for Contributors {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let mut contributors = String::new();
+        for contributor in &self.0 {
+            contributors.push_str(&format!("{} ", contributor));
+        }
+        write!(f, "{}", contributors)
+    }
+}
+
+impl FromIterator<Contributor> for Contributors {
+    fn from_iter<I: IntoIterator<Item = Contributor>>(iter: I) -> Self {
+        let mut contributors = Vec::new();
+        for contributor in iter {
+            contributors.push(contributor);
+        }
+        Contributors(contributors)
+    }
 }
 
 #[derive(Debug, Clone)]
@@ -127,29 +202,66 @@ pub struct Funding {
     url: Option<String>,
 }
 
+impl Display for Funding {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "{} {}",
+            self.f_type.as_ref().unwrap_or(&"None".to_string()),
+            self.url.as_ref().unwrap_or(&"None".to_string())
+        )
+    }
+}
+
+#[derive(Debug, Clone)]
+/// This Vec variant is needed to implement the Display trait for the Vec<T> scenarios
+///
+/// Reference: https://stackoverflow.com/a/30633256/11802618
+pub struct Fundings(Vec<Funding>);
+
+impl Display for Fundings {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let mut fundings = String::new();
+        for funding in &self.0 {
+            fundings.push_str(&format!("{} ", funding));
+        }
+        write!(f, "{}", fundings)
+    }
+}
+
+impl FromIterator<Funding> for Fundings {
+    fn from_iter<I: IntoIterator<Item = Funding>>(iter: I) -> Self {
+        let mut fundings = Vec::new();
+        for funding in iter {
+            fundings.push(funding);
+        }
+        Fundings(fundings)
+    }
+}
+
 #[derive(Debug, Clone)]
 /// The output object that will be returned from each converter implementation regardless of the config file provided
 pub struct ConverterOutput {
     pub name: Option<String>,
     pub description: Option<String>,
     pub version: Option<String>,
-    pub contributors: Option<Vec<Contributor>>,
+    pub contributors: Option<Contributors>,
     pub license: Option<String>,
     pub keywords: Option<Vec<String>>,
     pub repository_url: Option<String>,
     pub homepage_url: Option<String>,
 
     /// dependencies of the project
-    pub dependencies: Option<Vec<Dependency>>,
+    pub dependencies: Option<Dependencies>,
 
     /// dev dependencies of the project
-    pub dev_dependencies: Option<Vec<Dependency>>,
+    pub dev_dependencies: Option<Dependencies>,
 
     /// build dependencies of the project, not every config file supports this
-    pub build_dependencies: Option<Vec<Dependency>>,
+    pub build_dependencies: Option<Dependencies>,
 
     /// funding of the project, not every config file supports this (eg. Cargo.toml)
-    pub funding: Option<Vec<Funding>>,
+    pub funding: Option<Fundings>,
 }
 
 impl ConverterOutput {

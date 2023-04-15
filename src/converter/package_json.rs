@@ -2,7 +2,9 @@ use serde_json::Value;
 
 use anyhow::{anyhow, Error, Ok};
 
-use super::{Component, Contributor, ConverterOutput, Decorator, Dependency, Funding};
+use super::{
+    Component, Contributor, Contributors, ConverterOutput, Decorator, Dependency, Funding, Fundings,
+};
 
 /// The package.json parser
 ///
@@ -32,7 +34,7 @@ impl Component for PackageJson {
             let author = self.parse_contributor(&json["author"]);
 
             if author.is_ok() {
-                output.contributors = Some(vec![author.unwrap()]);
+                output.contributors = Some(Contributors(vec![author.unwrap()]));
             }
         }
 
@@ -95,7 +97,9 @@ impl Component for PackageJson {
                     .collect()
             });
         } else if json["funding"].is_object() || json["funding"].is_string() {
-            output.funding = Some(vec![self.parse_funding(&json["funding"]).unwrap()]);
+            output.funding = Some(Fundings(vec![self
+                .parse_funding(&json["funding"])
+                .unwrap()]));
         }
 
         Ok(output)
