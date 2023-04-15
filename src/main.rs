@@ -8,6 +8,7 @@ use std::fs::File;
 use terminal_spinners::{SpinnerBuilder, DOTS};
 
 mod converter;
+mod merger;
 mod scanner;
 
 const EMOJI_LIST: [&str; 16] = [
@@ -64,24 +65,20 @@ fn random_emoji() -> String {
 fn learn_about_project() -> Result<(), Error> {
     let converter = converter::Converter::new();
 
-    let cargo = converter.convert("./assets/Cargo.toml");
-    let package = converter.convert("./assets/package_1.json");
-    let package = converter.convert("./assets/composer.json");
+    let cargo_result = converter.convert("./assets/Cargo.toml");
+    if let Err(e) = cargo_result {
+        println!("Error: Failed to convert './assets/Cargo.toml': {}", e);
+    }
 
-    // let mut config = match merge_json_objects(cargo, package) {
-    //     Ok(merged) => merged,
-    //     Err(_) => {
-    //         return Err("Failed to merge JSON objects".into());
-    //     }
-    // };
+    let package_result = converter.convert("./assets/package_1.json");
+    if let Err(e) = package_result {
+        println!("Error: Failed to convert './assets/package_1.json': {}", e);
+    }
 
-    // config["icon"] = json!(random_emoji());
-
-    // // write config to file
-    // let fs = File::create("config.json")?;
-    // serde_json::to_writer_pretty(fs, &config)?;
-
-    // writeme(config)?;
+    let package_1_result = converter.convert("./assets/composer.json");
+    if let Err(e) = package_1_result {
+        println!("Error: Failed to convert './assets/composer.json': {}", e);
+    }
 
     Ok(())
 }
@@ -97,17 +94,39 @@ fn writeme(readme_contents: Value) -> Result<(), Error> {
 }
 
 fn main() {
+    let converter = converter::Converter::new();
+    let merger = merger::Merger::new();
     let handle = SpinnerBuilder::new()
         .spinner(&DOTS)
         .text(" Writing README.md")
         .start();
 
-    let res = learn_about_project();
+    let cargo = converter
+        .convert("./assets/Cargo.toml")
+        .unwrap_or_else(|e| {
+            println!("Error: Failed to convert './assets/Cargo.toml': {}", e);
+            std::process::exit(1);
+        });
 
-    match res {
-        Ok(_) => handle.done(),
-        Err(_) => handle.error(),
-    }
+    let package = converter
+        .convert("./assets/package.json")
+        .unwrap_or_else(|e| {
+            println!("Error: Failed to convert './assets/package.json': {}", e);
+            std::process::exit(1);
+        });
+
+    let package_1 = converter
+        .convert("./assets/composer.json")
+        .unwrap_or_else(|e| {
+            println!("Error: Failed to convert './assets/composer.json': {}", e);
+            std::process::exit(1);
+        });
+
+    let merged = merger.merge(vec![cargo, package, package_1]);
+
+    println!("{:?}", merged);
+
+    handle.done();
 
     scanner::scanner::list_technologies();
 }

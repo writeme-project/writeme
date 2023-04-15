@@ -102,7 +102,7 @@ impl SupportedFile {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 /// Holds the information of a dependency in a config file
 pub struct Dependency {
     /// The name of the dependency
@@ -112,7 +112,7 @@ pub struct Dependency {
     version: Option<String>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 /// A contributor to the project
 pub struct Contributor {
     name: Option<String>,
@@ -120,41 +120,41 @@ pub struct Contributor {
     url: Option<String>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 /// How a project could be funded
 pub struct Funding {
     f_type: Option<String>,
     url: Option<String>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 /// The output object that will be returned from each converter implementation regardless of the config file provided
 pub struct ConverterOutput {
-    name: Option<String>,
-    description: Option<String>,
-    version: Option<String>,
-    contributors: Option<Vec<Contributor>>,
-    license: Option<String>,
-    keywords: Option<Vec<String>>,
-    repository_url: Option<String>,
-    homepage_url: Option<String>,
+    pub name: Option<String>,
+    pub description: Option<String>,
+    pub version: Option<String>,
+    pub contributors: Option<Vec<Contributor>>,
+    pub license: Option<String>,
+    pub keywords: Option<Vec<String>>,
+    pub repository_url: Option<String>,
+    pub homepage_url: Option<String>,
 
     /// dependencies of the project
-    dependencies: Option<Vec<Dependency>>,
+    pub dependencies: Option<Vec<Dependency>>,
 
     /// dev dependencies of the project
-    dev_dependencies: Option<Vec<Dependency>>,
+    pub dev_dependencies: Option<Vec<Dependency>>,
 
     /// build dependencies of the project, not every config file supports this
-    build_dependencies: Option<Vec<Dependency>>,
+    pub build_dependencies: Option<Vec<Dependency>>,
 
     /// funding of the project, not every config file supports this (eg. Cargo.toml)
-    funding: Option<Vec<Funding>>,
+    pub funding: Option<Vec<Funding>>,
 }
 
 impl ConverterOutput {
     /// Creates a new empty output object
-    fn empty() -> Self {
+    pub fn empty() -> Self {
         ConverterOutput {
             name: None,
             description: None,
