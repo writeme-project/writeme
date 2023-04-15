@@ -52,46 +52,6 @@
             "target": "https://prettier.io/"
         }
     },
-    "npm":{
-        "config_files": [
-            "package.json"
-        ],
-        "dependency_names": [
-            "npm"
-        ],
-        "shield": {
-            "label": "package%20manager",
-            "message": "npm",
-            "color": "cb3837",
-            "logo": "npm",
-            "label_color": "",
-            "logo_color": "white",
-            "style": "flat-square",
-            "logo_width": 20,
-            "alt_text": "Package manager npm",
-            "target": "https://www.npmjs.com/"
-        }
-    },
-    "Cargo":{
-        "config_files": [
-            "Cargo.toml"
-        ],
-        "dependency_names": [
-            "cargo"
-        ],
-        "shield": {
-            "label": "package%20manager",
-            "message": "cargo",
-            "color": "cb3837",
-            "logo": "rust",
-            "label_color": "",
-            "logo_color": "white",
-            "style": "flat-square",
-            "logo_width": 20,
-            "alt_text": "Package manager cargo",
-            "target": "https://www.npmjs.com/"
-        }
-    },
     "Laravel":{
         "config_files": [
             "composer.json"
@@ -109,7 +69,7 @@
             "style": "flat-square",
             "logo_width": 20,
             "alt_text": "Framework laravel",
-            "target": "https://www.npmjs.com/"
+            "target": "https://laravel.com/"
         }
     }
 }
