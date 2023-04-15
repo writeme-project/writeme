@@ -308,6 +308,7 @@ impl Converter {
         path.file_name().and_then(|s| s.to_str())
     }
 
+    /// Converts a given config file to a common Output object
     pub fn convert(&self, path: &str) -> Result<ConverterOutput, Error> {
         let contents =
             fs::read_to_string(path).expect("Should have been able to read the template file");
