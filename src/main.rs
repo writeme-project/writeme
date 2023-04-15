@@ -1,15 +1,15 @@
 use anyhow::Error;
-use converter::{Component, Decorator};
 #[allow(dead_code)]
 use handlebars::Handlebars;
 use rand::prelude::*;
-use serde_json::{json, Map, Value};
-use std::{collections::HashMap, fs::File};
+use serde_json::Value;
+use std::fs::File;
 use terminal_spinners::{SpinnerBuilder, DOTS};
 
 mod converter;
 mod merger;
 mod scanner;
+mod utils;
 
 const EMOJI_LIST: [&str; 16] = [
     "🖋️", "📝", "📄", "📚", "📖", "📓", "📒", "📃", "📜", "📰", "📑", "🔖", "🔗", "📎", "📐", "📏",
@@ -25,17 +25,17 @@ fn learn_about_project() -> Result<(), Error> {
     let converter = converter::Converter::new();
     let merger = merger::Merger::new();
 
-    let techs = scanner::list_project_technologies().unwrap();
+    let configs = scanner::scan_configs().unwrap();
     let mut outputs = vec![];
 
-    for tech in techs {
-        let output = converter.convert(&tech.config_file);
+    for config in configs {
+        let output = converter.convert(&config);
 
         // if unable to convert the file skip it
         if output.is_err() {
             println!(
                 "Error: Failed to convert {}: {}",
-                tech.config_file,
+                config,
                 output.unwrap_err()
             );
             continue;
@@ -52,9 +52,9 @@ fn learn_about_project() -> Result<(), Error> {
 
 fn writeme(readme_contents: Value) -> Result<(), Error> {
     let mut handlebars = Handlebars::new();
-    let mut readme_file = File::create("README.MD")?;
+    let mut readme_file = File::create(utils::paths::README)?;
     handlebars
-        .register_template_file("template", "README.tpl.md")
+        .register_template_file("template", utils::paths::TEMPLATE)
         .unwrap();
     handlebars.render_to_write("template", &readme_contents, &mut readme_file)?;
     Ok(())
