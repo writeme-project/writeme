@@ -7,7 +7,12 @@ use std::{
     collections::HashMap,
     fs::{self, File},
     io::BufReader,
+    path,
 };
+use utils::paths;
+
+#[path = "../utils/mod.rs"]
+mod utils;
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Shield {
@@ -25,7 +30,7 @@ pub struct Shield {
 
 impl Shield {
     pub fn gen_md(&self) -> String {
-        let shield_tpl = fs::read_to_string("./assets/tpl/SHIELD.md").unwrap();
+        let shield_tpl = fs::read_to_string(paths::SHIELD).unwrap();
         let mut handlebars = Handlebars::new();
         handlebars
             .register_template_string("shield_tpl", shield_tpl.clone())
@@ -60,17 +65,43 @@ pub struct Project_Tech {
     pub tech: Tech,
 }
 
+pub fn scan_configs() -> Result<Vec<String>, Error> {
+    let contents =
+        fs::read_to_string(paths::CONFIGS).expect("Something went wrong reading the file");
+    let all_configs: HashMap<String, Vec<String>> = serde_yaml::from_str(&contents).unwrap();
+    let all_configs: Vec<String> = all_configs
+        .values()
+        .flatten()
+        .map(|c| format!(r"{}$", c))
+        .collect();
+
+    let regex_set = regex::RegexSet::new(all_configs).unwrap();
+
+    let paths = glob::glob("./**/*").unwrap();
+
+    let mut configs_present: Vec<String> = vec![];
+    for path in paths {
+        let path = path.unwrap();
+        let path_str = path.to_str().unwrap();
+        let matches: Vec<_> = regex_set.matches(path_str).into_iter().collect();
+        if !matches.is_empty() {
+            configs_present.push(path_str.to_string());
+        }
+    }
+    Ok(configs_present)
+}
+
 pub fn list_project_technologies() -> Result<Vec<Project_Tech>, Error> {
     let techs: HashMap<String, Tech> = list_technologies().unwrap();
     let mut project_techs: Vec<Project_Tech> = vec![];
+    let paths = glob::glob("./**/*").unwrap();
+    let paths: Vec<std::path::PathBuf> = paths.into_iter().map(|x| x.unwrap()).collect();
 
     for (name, tech) in techs {
         let config_files = tech.config_files.clone();
         let reg_set = regex::RegexSet::new(config_files).unwrap();
-        let paths = glob::glob("./**/*").unwrap();
 
-        for path in paths {
-            let path = path.unwrap();
+        for path in &paths {
             let path_str = path.to_str().unwrap();
             let matches: Vec<_> = reg_set.matches(path_str).into_iter().collect();
             if !matches.is_empty() {
@@ -83,12 +114,11 @@ pub fn list_project_technologies() -> Result<Vec<Project_Tech>, Error> {
             }
         }
     }
-
     Ok(project_techs)
 }
 
 pub fn list_technologies() -> Result<HashMap<String, Tech>, Error> {
-    let file = File::open("./src/tech_conf.json").expect("file not found");
+    let file = File::open(paths::TECHS).expect("file not found");
     let reader = BufReader::new(file);
     let objects: Value = serde_json::from_reader(reader).unwrap();
 
