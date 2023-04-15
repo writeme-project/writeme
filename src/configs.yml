@@ -1,0 +1,10 @@
+---
+# This file contains the name of configuration files that should be searched in the project
+configs:
+  - composer.json
+  - composer.lock
+  - package.json
+  - package-lock.json
+  - Cargo.toml
+  - Cargo.lock
+  - docker-compose.yml
