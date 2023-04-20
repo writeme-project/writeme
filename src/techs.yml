@@ -1,0 +1,63 @@
+eslint:
+  config_files:
+    - .eslintrc
+    - .eslintrc.js
+    - .eslintrc.json
+    - .eslintrc.yml
+  dependency_names:
+    - eslint
+    - eslint-config-airbnb
+    - eslint-config-prettier
+    - eslint-plugin-import
+    - eslint-plugin-jsx-a11y
+    - eslint-plugin-prettier
+    - eslint-plugin-react
+    - eslint-plugin-react-hooks
+  shield:
+    label: linter
+    message: eslint
+    color: 8080f2
+    logo: eslint
+    label_color: ''
+    logo_color: white
+    style: flat-square
+    logo_width: 20
+    alt_text: Linter eslint
+    target: https://eslint.org/
+
+Prettier:
+  config_files:
+    - .prettierrc
+    - .prettierrc.js
+    - .prettierrc.json
+    - .prettierrc.yml
+  dependency_names:
+    - prettier
+  shield:
+    label: code%20style
+    message: prettier
+    color: f8bc45
+    logo: prettier
+    label_color: ''
+    logo_color: ''
+    style: flat-square
+    logo_width: 20
+    alt_text: Code style prettier
+    target: https://prettier.io/
+
+Laravel:
+  config_files:
+    - composer.json
+  dependency_names:
+    - laravel
+  shield:
+    label: framework
+    message: laravel
+    color: cb3837
+    logo: laravel
+    label_color: ''
+    logo_color: white
+    style: flat-square
+    logo_width: 20
+    alt_text: Framework laravel
+    target: https://laravel.com/
