@@ -1,57 +1,17 @@
 #[allow(dead_code)]
 use anyhow::Error;
-use handlebars::Handlebars;
 use serde::{Deserialize, Serialize};
-use serde_json::{json, Value};
+use serde_json::Value;
 use std::{
     collections::HashMap,
     fs::{self, File},
     io::BufReader,
-    path,
 };
-use utils::paths;
+use utils::{paths, Shield};
 
 #[path = "../utils/mod.rs"]
 mod utils;
 
-#[derive(Debug, Serialize, Deserialize, Clone)]
-pub struct Shield {
-    label: String,
-    message: String,
-    color: String,
-    logo: String,
-    label_color: String,
-    logo_color: String,
-    style: String,
-    logo_width: i32,
-    alt_text: String,
-    target: String,
-}
-
-impl Shield {
-    pub fn gen_md(&self) -> String {
-        let shield_tpl = fs::read_to_string(paths::SHIELD).unwrap();
-        let mut handlebars = Handlebars::new();
-        handlebars
-            .register_template_string("shield_tpl", shield_tpl.clone())
-            .unwrap();
-        let data = json!({
-            "label": self.label,
-            "message": self.message,
-            "color": self.color,
-            "logo": self.logo,
-            "label_color": self.label_color,
-            "logo_color": self.logo_color,
-            "style": self.style,
-            "logo_width": self.logo_width,
-            "alt_text": self.alt_text,
-            "target": self.target,
-        });
-
-        let shield = handlebars.render("shield_tpl", &data).unwrap();
-        return shield;
-    }
-}
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Tech {
     pub config_files: Vec<String>,
@@ -90,6 +50,8 @@ pub fn scan_configs() -> Result<Vec<String>, Error> {
     }
     Ok(configs_present)
 }
+
+pub fn scan_techs() {}
 
 pub fn list_project_technologies() -> Result<Vec<Project_Tech>, Error> {
     let techs: HashMap<String, Tech> = list_technologies().unwrap();
