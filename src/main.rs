@@ -43,9 +43,9 @@ fn learn_about_project() -> Result<(), Error> {
         outputs.push(output.unwrap());
     }
 
+    let techs = scanner::scan_techs().unwrap();
+    let shields = techs.join("\n");
     let merged = merger.merge(outputs);
-
-    println!("{:?}", merged);
 
     Ok(())
 }
@@ -66,7 +66,14 @@ fn main() {
         .text(" Writing README.md")
         .start();
 
-    learn_about_project();
+    let ok = learn_about_project();
 
-    handle.done();
+    match ok {
+        Ok(_) => {
+            handle.done();
+        }
+        Err(e) => {
+            handle.error();
+        }
+    }
 }
