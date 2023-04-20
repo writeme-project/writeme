@@ -1,11 +1,9 @@
 #[allow(dead_code)]
 use anyhow::Error;
 use serde::{Deserialize, Serialize};
-use serde_json::Value;
 use std::{
     collections::HashMap,
-    fs::{self, File},
-    io::BufReader,
+    fs::{self},
 };
 use utils::{paths, Shield};
 
@@ -19,15 +17,10 @@ pub struct Tech {
     pub shield: Shield,
 }
 
-pub struct Project_Tech {
-    pub name: String,
-    pub config_file: String,
-    pub tech: Tech,
-}
-
+// Returns list of config files present in the project
 pub fn scan_configs() -> Result<Vec<String>, Error> {
     let contents =
-        fs::read_to_string(paths::CONFIGS).expect("Something went wrong reading the file");
+        fs::read_to_string(paths::CONFIGS).expect("Something went wrong reading the config file");
     let all_configs: HashMap<String, Vec<String>> = serde_yaml::from_str(&contents).unwrap();
     let all_configs: Vec<String> = all_configs
         .values()
@@ -51,43 +44,27 @@ pub fn scan_configs() -> Result<Vec<String>, Error> {
     Ok(configs_present)
 }
 
-pub fn scan_techs() {}
+// Returns the list of shield urls for the technologies found through the config files
+pub fn scan_techs() -> Result<Vec<String>, Error> {
+    let contents: String =
+        fs::read_to_string(paths::TECHS).expect("Something went wrong reading the techs file");
+    let all_techs: HashMap<String, Tech> = serde_yaml::from_str(&contents).unwrap();
+    let all_techs: Vec<Tech> = all_techs.values().cloned().collect();
 
-pub fn list_project_technologies() -> Result<Vec<Project_Tech>, Error> {
-    let techs: HashMap<String, Tech> = list_technologies().unwrap();
-    let mut project_techs: Vec<Project_Tech> = vec![];
-    let paths = glob::glob("./**/*").unwrap();
-    let paths: Vec<std::path::PathBuf> = paths.into_iter().map(|x| x.unwrap()).collect();
+    let mut techs_present: Vec<String> = vec![];
+    for tech in all_techs {
+        let regex_set = regex::RegexSet::new(tech.config_files).unwrap();
 
-    for (name, tech) in techs {
-        let config_files = tech.config_files.clone();
-        let reg_set = regex::RegexSet::new(config_files).unwrap();
-
-        for path in &paths {
+        let paths = glob::glob("./**/*").unwrap();
+        for path in paths {
+            let path = path.unwrap();
             let path_str = path.to_str().unwrap();
-            let matches: Vec<_> = reg_set.matches(path_str).into_iter().collect();
+            let matches: Vec<_> = regex_set.matches(path_str).into_iter().collect();
             if !matches.is_empty() {
-                let project_tech = Project_Tech {
-                    name: name.clone(),
-                    config_file: path_str.to_string(),
-                    tech: tech.clone(),
-                };
-                project_techs.push(project_tech);
+                techs_present.push(tech.shield.gen_md());
+                break;
             }
         }
     }
-    Ok(project_techs)
-}
-
-pub fn list_technologies() -> Result<HashMap<String, Tech>, Error> {
-    let file = File::open(paths::TECHS).expect("file not found");
-    let reader = BufReader::new(file);
-    let objects: Value = serde_json::from_reader(reader).unwrap();
-
-    let mut techs: HashMap<String, Tech> = HashMap::new();
-    for (name, obj) in objects.as_object().unwrap().iter() {
-        let tech: Tech = serde_json::from_value(obj.clone()).unwrap();
-        techs.insert(name.to_string(), tech);
-    }
-    Ok(techs)
+    Ok(techs_present)
 }
