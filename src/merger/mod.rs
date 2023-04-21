@@ -2,6 +2,7 @@ use std::fmt::{Debug, Display};
 
 use crate::converter::ConverterOutput;
 use anyhow::{Error, Ok};
+use dialoguer::console::style;
 use itertools::Itertools;
 
 /// Merges the information of multiple config files into a single object
@@ -41,8 +42,8 @@ impl Merger {
         // ask the user which value to keep
         let selection = dialoguer::Select::new()
             .with_prompt(format!(
-                "Found conflicting values for field {}, select one:",
-                field_name
+                "\nFound conflicting values for field {}, select one",
+                style(field_name).green()
             ))
             .items(&with_value)
             .default(0)
