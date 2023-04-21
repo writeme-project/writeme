@@ -5,6 +5,7 @@ use serde_json::Value;
 use std::fs::File;
 use terminal_spinners::{SpinnerBuilder, DOTS};
 
+mod assembler;
 mod converter;
 mod merger;
 mod scanner;
@@ -32,8 +33,21 @@ fn learn_about_project() -> Result<(), Error> {
         outputs.push(output.unwrap());
     }
 
-    let shields = scanner::scan_techs().unwrap().join("\n");
-    let merged = merger.merge(outputs);
+    let merged = match merger.merge(outputs) {
+        Ok(merged) => merged,
+        Err(e) => {
+            println!("Error: Failed to merge: {}", e);
+            return Err(e);
+        }
+    };
+
+    match assembler::Assembler::new(merged).assemble() {
+        Ok(_) => {}
+        Err(e) => {
+            println!("Error: Failed to assemble: {}", e);
+            return Err(e);
+        }
+    };
 
     Ok(())
 }

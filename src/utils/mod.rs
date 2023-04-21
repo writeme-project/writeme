@@ -11,6 +11,10 @@ pub mod paths {
     pub const SHIELD: &str = "./assets/tpl/SHIELD.md";
     pub const README: &str = "./README.md";
     pub const TECHS: &str = "./src/techs.yml";
+
+    pub const HEADER: &str = "./assets/tpl/HEADER.md";
+    pub const BODY: &str = "./assets/tpl/BODY.md";
+    pub const FOOTER: &str = "./assets/tpl/FOOTER.md";
 }
 
 /// Structure used to represent shields.io badges
@@ -69,14 +73,4 @@ impl Shield {
 
         return handlebars.render("shield_tpl", &data).unwrap();
     }
-}
-
-const EMOJI_LIST: [&str; 16] = [
-    "🖋️", "📝", "📄", "📚", "📖", "📓", "📒", "📃", "📜", "📰", "📑", "🔖", "🔗", "📎", "📐", "📏",
-];
-
-fn random_emoji() -> String {
-    let mut rng = rand::thread_rng();
-    let random_emoji = *EMOJI_LIST.choose(&mut rng).unwrap();
-    return random_emoji.to_string();
 }

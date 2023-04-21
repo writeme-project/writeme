@@ -6,7 +6,7 @@
 </p>
 
 <p align="center">
-    {{shield.one}}{{shield.two}}
+    {{{shields}}}
 </p>
 
 <div align="center">
