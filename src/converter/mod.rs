@@ -149,6 +149,14 @@ impl FromIterator<Dependency> for Dependencies {
     }
 }
 
+impl Iterator for Dependencies {
+    type Item = Dependency;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        self.0.pop()
+    }
+}
+
 #[derive(Debug, Clone)]
 /// A contributor to the project
 pub struct Contributor {

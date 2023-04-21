@@ -88,6 +88,30 @@ impl Merger {
                 .collect(),
         );
 
+        output.dependencies = Some(
+            converted_configs
+                .iter()
+                .flat_map(|config| config.dependencies.clone())
+                .flatten()
+                .collect(),
+        );
+
+        output.dev_dependencies = Some(
+            converted_configs
+                .iter()
+                .flat_map(|config| config.dev_dependencies.clone())
+                .flatten()
+                .collect(),
+        );
+
+        output.build_dependencies = Some(
+            converted_configs
+                .iter()
+                .flat_map(|config| config.build_dependencies.clone())
+                .flatten()
+                .collect(),
+        );
+
         Ok(output)
     }
 }
