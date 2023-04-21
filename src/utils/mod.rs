@@ -13,7 +13,7 @@ pub mod paths {
     pub const TECHS: &str = "./src/techs.yml";
 }
 
-// Struct used to represent shields.io badges of a technology
+/// Structure used to represent shields.io badges
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Shield {
     label: String,
@@ -28,11 +28,9 @@ pub struct Shield {
     target: String,
 }
 
-/*
-    Implementation of the Shield struct with the following methods:
-    - new() creates a new instance of the Shield struct
-    - gen_md() generates the markdown code for the shield
-*/
+/// Implementation of the shield structure, with the following methods:
+/// new() creates a new instance of the Shield struct
+/// gen_md() generates the markdown code for the shield
 impl Shield {
     pub fn new(
         label: String,
