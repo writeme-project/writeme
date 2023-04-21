@@ -1,7 +1,6 @@
 use anyhow::Error;
 #[allow(dead_code)]
 use handlebars::Handlebars;
-use rand::prelude::*;
 use serde_json::Value;
 use std::fs::File;
 use terminal_spinners::{SpinnerBuilder, DOTS};
@@ -10,16 +9,6 @@ mod converter;
 mod merger;
 mod scanner;
 mod utils;
-
-const EMOJI_LIST: [&str; 16] = [
-    "🖋️", "📝", "📄", "📚", "📖", "📓", "📒", "📃", "📜", "📰", "📑", "🔖", "🔗", "📎", "📐", "📏",
-];
-
-fn random_emoji() -> String {
-    let mut rng = rand::thread_rng();
-    let random_emoji = *EMOJI_LIST.choose(&mut rng).unwrap();
-    return random_emoji.to_string();
-}
 
 fn learn_about_project() -> Result<(), Error> {
     let converter = converter::Converter::new();
@@ -43,8 +32,7 @@ fn learn_about_project() -> Result<(), Error> {
         outputs.push(output.unwrap());
     }
 
-    let techs = scanner::scan_techs().unwrap();
-    let shields = techs.join("\n");
+    let shields = scanner::scan_techs().unwrap().join("\n");
     let merged = merger.merge(outputs);
 
     Ok(())

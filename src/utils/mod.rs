@@ -1,7 +1,8 @@
 use handlebars::Handlebars;
+use rand::prelude::*;
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
-use std::{fs, io::Write};
+use std::fs;
 
 // Paths to significant files
 pub mod paths {
@@ -70,4 +71,14 @@ impl Shield {
 
         return handlebars.render("shield_tpl", &data).unwrap();
     }
+}
+
+const EMOJI_LIST: [&str; 16] = [
+    "🖋️", "📝", "📄", "📚", "📖", "📓", "📒", "📃", "📜", "📰", "📑", "🔖", "🔗", "📎", "📐", "📏",
+];
+
+fn random_emoji() -> String {
+    let mut rng = rand::thread_rng();
+    let random_emoji = *EMOJI_LIST.choose(&mut rng).unwrap();
+    return random_emoji.to_string();
 }
