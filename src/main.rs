@@ -1,4 +1,5 @@
 use anyhow::Error;
+use colored::*;
 #[allow(dead_code)]
 use handlebars::Handlebars;
 use serde_json::Value;
@@ -7,6 +8,7 @@ use terminal_spinners::{SpinnerBuilder, DOTS};
 
 mod assembler;
 mod converter;
+mod dialoguer;
 mod merger;
 mod scanner;
 mod utils;
@@ -63,19 +65,6 @@ fn writeme(readme_contents: Value) -> Result<(), Error> {
 }
 
 fn main() {
-    let handle = SpinnerBuilder::new()
-        .spinner(&DOTS)
-        .text(" Writing README.md")
-        .start();
-
+    dialoguer::header();
     let ok = learn_about_project();
-
-    match ok {
-        Ok(_) => {
-            handle.done();
-        }
-        Err(e) => {
-            handle.error();
-        }
-    }
 }
