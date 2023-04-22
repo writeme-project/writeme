@@ -7,8 +7,10 @@
 
 use std::{fmt::Display, fs, path::Path};
 
+use crate::utils::{paths, GenMarkdown};
 use anyhow::{anyhow, Error};
-use serde_json::Value;
+use serde::Serialize;
+use serde_json::{json, Value};
 
 pub mod cargo_toml;
 pub mod composer_json;
@@ -157,12 +159,12 @@ impl Iterator for Dependencies {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize)]
 /// A contributor to the project
 pub struct Contributor {
-    name: Option<String>,
-    email: Option<String>,
-    url: Option<String>,
+    pub name: Option<String>,
+    pub email: Option<String>,
+    pub url: Option<String>,
 }
 
 impl Display for Contributor {
@@ -174,6 +176,35 @@ impl Display for Contributor {
             self.email.as_ref().unwrap_or(&"None".to_string()),
             self.url.as_ref().unwrap_or(&"None".to_string())
         )
+    }
+}
+
+impl GenMarkdown for Contributor {
+    fn gen_md(&self) -> Result<String, Error> {
+        if self.name.is_none() {
+            return Err(anyhow!("Contributor name is missing"));
+        }
+
+        // build md string if at least name and one of the other fields are present
+        if self.name.is_some() && (self.url.is_some() || self.email.is_some()) {
+            let author_tpl = fs::read_to_string(paths::AUTHOR).unwrap();
+            let mut handlebars = handlebars::Handlebars::new();
+            handlebars
+                .register_template_string("author_tpl", author_tpl.clone())
+                .unwrap();
+
+            // extract the url field from the url or email field, at least one of them is present if we are here
+            let url = self.url.as_ref().unwrap_or(self.email.as_ref().unwrap());
+
+            let data: Value = json!({
+                "name": self.name.as_ref().unwrap(),
+                "url": url,
+            });
+
+            return Ok(handlebars.render("author_tpl", &data).unwrap());
+        }
+
+        Ok(self.name.clone().unwrap().to_string())
     }
 }
 
@@ -200,6 +231,14 @@ impl FromIterator<Contributor> for Contributors {
             contributors.push(contributor);
         }
         Contributors(contributors)
+    }
+}
+
+impl Iterator for Contributors {
+    type Item = Contributor;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        self.0.pop()
     }
 }
 

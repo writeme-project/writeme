@@ -1,20 +1,31 @@
+use anyhow::Error;
 use handlebars::Handlebars;
-use rand::prelude::*;
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
 use std::fs;
 
-// Paths to significant files
+/// Paths to significant files
 pub mod paths {
     pub const CONFIGS: &str = "./src/configs.yml";
     pub const TEMPLATE: &str = "./assets/tpl/TEMPLATE.md";
-    pub const SHIELD: &str = "./assets/tpl/SHIELD.md";
     pub const README: &str = "./README.md";
     pub const TECHS: &str = "./src/techs.yml";
 
+    // small pieces of markdown which require some data to be filled in
+    pub const SHIELD: &str = "./assets/tpl/SHIELD.md";
+    pub const AUTHOR: &str = "./assets/tpl/AUTHOR.md";
+
+    // large macro templates of the README file
     pub const HEADER: &str = "./assets/tpl/HEADER.md";
+    pub const TOC: &str = "./assets/tpl/TABLE_OF_CONTENT.md";
     pub const BODY: &str = "./assets/tpl/BODY.md";
     pub const FOOTER: &str = "./assets/tpl/FOOTER.md";
+}
+
+/// Used from entities that can be displayed as markdown
+pub trait GenMarkdown {
+    /// Generates the markdown code for the given object
+    fn gen_md(&self) -> Result<String, Error>;
 }
 
 /// Structure used to represent shields.io badges
@@ -61,8 +72,10 @@ impl Shield {
             target,
         }
     }
+}
 
-    pub fn gen_md(&self) -> String {
+impl GenMarkdown for Shield {
+    fn gen_md(&self) -> Result<String, Error> {
         let shield_tpl = fs::read_to_string(paths::SHIELD).unwrap();
         let mut handlebars = Handlebars::new();
         handlebars
@@ -71,6 +84,6 @@ impl Shield {
 
         let data: Value = json!(self);
 
-        return handlebars.render("shield_tpl", &data).unwrap();
+        return Ok(handlebars.render("shield_tpl", &data).unwrap());
     }
 }

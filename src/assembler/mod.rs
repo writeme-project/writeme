@@ -1,15 +1,15 @@
+use crate::scanner;
+use anyhow::Error;
+
+use handlebars::Handlebars;
 use std::fs::{self, File};
 use std::io::Write;
 
-use anyhow::Error;
-use handlebars::Handlebars;
+use crate::converter::ConverterOutput;
+use crate::utils::paths;
+use crate::utils::GenMarkdown;
 use rand::seq::SliceRandom;
-use serde::Serialize;
-
-use crate::converter::{Contributors, ConverterOutput};
-use crate::scanner;
-use crate::utils::{paths, Shield};
-use serde_json::{json, Value};
+use serde_json::json;
 
 const EMOJI_LIST: [&str; 16] = [
     "🖋️", "📝", "📄", "📚", "📖", "📓", "📒", "📃", "📜", "📰", "📑", "🔖", "🔗", "📎", "📐", "📏",
@@ -21,49 +21,95 @@ fn random_emoji() -> String {
     return random_emoji.to_string();
 }
 
-#[derive(Debug, Serialize)]
-struct Header {
-    icon: Option<String>,
-    title: Option<String>,
-    description: Option<String>,
-    about: Option<String>,
-    shields: Option<String>,
-}
-
 #[derive(Debug)]
-pub struct Assembler {
+pub struct Assembler<'a> {
+    handlebars: Handlebars<'a>,
     converted_config: ConverterOutput,
-    header: Option<Header>,
 }
 
-impl Assembler {
+impl<'a> Assembler<'a> {
     pub fn new(converted_config: ConverterOutput) -> Self {
         Assembler {
+            handlebars: Handlebars::new(),
             converted_config,
-            header: None,
         }
     }
 
-    fn assemble_header(&self) -> String {
+    fn assemble_header(&mut self) -> String {
         let header_tpl = fs::read_to_string(paths::HEADER).unwrap();
 
         let shields = scanner::scan_techs().unwrap().join("\n");
 
-        let header = Header {
-            icon: Some(random_emoji()),
-            title: self.converted_config.name.clone(),
-            description: self.converted_config.description.clone(),
-            shields: Some(shields),
-            about: Some("miao".to_string()),
-        };
+        let header = json!({
+            "icon": Some(random_emoji()),
+            "title": self.converted_config.name.clone(),
+            "description": self.converted_config.description.clone(),
+            "shields": Some(shields),
+            "about": Some("miao".to_string()),
+        });
 
-        let mut handlebars = Handlebars::new();
-
-        handlebars
+        self.handlebars
             .register_template_string("header_tpl", header_tpl.clone())
             .unwrap();
 
-        handlebars.render("header_tpl", &json!(header)).unwrap()
+        self.handlebars.render("header_tpl", &header).unwrap()
+    }
+
+    fn assemble_table_of_contents(&self) -> String {
+        let toc_tpl = fs::read_to_string(paths::TOC).unwrap();
+
+        toc_tpl
+    }
+
+    fn assemble_body(&mut self) -> String {
+        let body_tpl = fs::read_to_string(paths::BODY).unwrap();
+
+        let body = json!({
+            "license": self.converted_config.license.clone(),
+        });
+
+        self.handlebars
+            .register_template_string("body_tpl", body_tpl.clone())
+            .unwrap();
+
+        self.handlebars.render("body_tpl", &body).unwrap()
+    }
+
+    fn assemble_footer(&mut self) -> String {
+        let footer_tpl = fs::read_to_string(paths::FOOTER).unwrap();
+
+        let authors: Option<String> = match self.converted_config.contributors.clone() {
+            Some(contributors) => {
+                let mut authors = String::new();
+
+                for c in contributors {
+                    let author = "- ".to_string();
+
+                    match c.gen_md() {
+                        Ok(md) => {
+                            authors.push_str(&author);
+                            authors.push_str(&md);
+                            authors.push_str("\n");
+                        }
+                        Err(e) => println!("{:?}", e),
+                    }
+                }
+
+                Some(authors)
+            }
+            None => None,
+        };
+
+        let footer = json!({
+            "name": self.converted_config.name.clone(),
+            "authors": authors
+        });
+
+        self.handlebars
+            .register_template_string("footer_tpl", footer_tpl.clone())
+            .unwrap();
+
+        self.handlebars.render("footer_tpl", &footer).unwrap()
     }
 
     pub fn assemble(&mut self) -> Result<(), Error> {
@@ -75,8 +121,19 @@ impl Assembler {
         };
 
         let header = self.assemble_header();
+        let toc = self.assemble_table_of_contents();
+        let body = self.assemble_body();
+        let footer = self.assemble_footer();
 
         readme_file.write_all(header.as_bytes())?;
+        readme_file.write_all(b"\n")?;
+        readme_file.write_all(toc.as_bytes())?;
+        readme_file.write_all(b"\n")?;
+        readme_file.write_all(body.as_bytes())?;
+        readme_file.write_all(b"\n")?;
+        readme_file.write_all(footer.as_bytes())?;
+
+        println!("{:?}", self.converted_config.license);
 
         Ok(())
     }

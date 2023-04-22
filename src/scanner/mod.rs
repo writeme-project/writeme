@@ -5,7 +5,7 @@ use std::{
     collections::HashMap,
     fs::{self},
 };
-use utils::{paths, Shield};
+use utils::{paths, GenMarkdown, Shield};
 
 #[path = "../utils/mod.rs"]
 mod utils;
@@ -60,8 +60,13 @@ pub fn scan_techs() -> Result<Vec<String>, Error> {
             let path = path.unwrap();
             let path_str = path.to_str().unwrap();
             let matches: Vec<_> = regex_set.matches(path_str).into_iter().collect();
+
             if !matches.is_empty() {
-                techs_present.push(tech.shield.gen_md());
+                match tech.shield.gen_md() {
+                    Ok(md) => techs_present.push(md),
+                    Err(e) => println!("Error: {}", e),
+                }
+
                 break;
             }
         }
