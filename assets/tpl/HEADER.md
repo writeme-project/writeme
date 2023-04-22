@@ -1,6 +1,6 @@
 <p align="center">
     <h1 align="center">
-        {{icon}} {{name}}
+        {{icon}} {{title}}
     </h1>
     <p align="center">{{description}}</p>
 </p>
