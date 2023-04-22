@@ -133,8 +133,6 @@ impl<'a> Assembler<'a> {
         readme_file.write_all(b"\n")?;
         readme_file.write_all(footer.as_bytes())?;
 
-        println!("{:?}", self.converted_config.license);
-
         Ok(())
     }
 }

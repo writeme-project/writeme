@@ -81,6 +81,14 @@ impl Merger {
                 .collect(),
         );
 
+        output.license = self.merge_field(
+            "license",
+            converted_configs
+                .iter()
+                .map(|config| config.license.clone())
+                .collect(),
+        );
+
         output.contributors = self.merge_field(
             "contributors",
             converted_configs

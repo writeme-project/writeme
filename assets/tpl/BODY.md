@@ -36,4 +36,4 @@ Add notes about how to use the system.
 - [NodeJs](https://nodejs.org/en/) - Server Environment
 
 ## 📄 License <a name = "license"></a>
-{{License}}
+{{license}}
