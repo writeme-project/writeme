@@ -1,11 +1,35 @@
 {
-    "private": true,
+    "name": "writeme",
+    "version": "0.1.0",
+    "description": "Auto-gen README.md files for your projects",
+    "main": "src/main.rs",
     "scripts": {
-        "version": "auto-changelog --template .github/auto-changelog/astranoto-template.hbs --commit-limit false && git add CHANGELOG.md && git commit -m 'updated CHANGELOG.md with upcoming changes' && git push",
+        "start": "node index.js",
+        "lint": "eslint **/*.js",
         "dev": "vite",
         "build": "vite build"
     },
+    "funding": "https://www.osiolabs.com/#contact",
+    "dependencies": {
+        "express": "^4.16.4",
+        "compression": "~1.7.4",
+        "@formkit/auto-animate": "^1.0.0-beta.3",
+        "@types/downloadjs": "^1.4.3",
+        "@types/ziggy-js": "^1.3.1",
+        "@vueuse/core": "^8.4.2",
+        "auto-changelog": "^2.4.0",
+        "chance": "^1.1.8",
+        "downloadjs": "^1.4.7",
+        "material-icons": "^1.11.4",
+        "ml-matrix": "^6.10.0",
+        "moment": "^2.29.3",
+        "vue-contenteditable": "^3.0.4",
+        "vue-select": "^4.0.0-beta.3",
+        "vue3-popper": "^1.4.2"
+    },
     "devDependencies": {
+        "eslint": "^5.16.0",
+        "nodemon": "^1.18.11",
         "@inertiajs/inertia": "^0.10.0",
         "@inertiajs/inertia-vue3": "^0.5.1",
         "@inertiajs/progress": "^0.2.6",
@@ -22,7 +46,6 @@
         "browser-sync": "^2.27.7",
         "browser-sync-webpack-plugin": "^2.3.0",
         "cypress": "^9.6.1",
-        "eslint": "^8.17.0",
         "eslint-config-prettier": "^8.5.0",
         "eslint-config-standard": "^17.0.0",
         "eslint-config-ts-standard": "^1.0.5",
@@ -47,19 +70,23 @@
         "vue-eslint-parser": "^9.0.2",
         "vue-loader": "^16.1.2"
     },
-    "dependencies": {
-        "@formkit/auto-animate": "^1.0.0-beta.3",
-        "@types/downloadjs": "^1.4.3",
-        "@types/ziggy-js": "^1.3.1",
-        "@vueuse/core": "^8.4.2",
-        "auto-changelog": "^2.4.0",
-        "chance": "^1.1.8",
-        "downloadjs": "^1.4.7",
-        "material-icons": "^1.11.4",
-        "ml-matrix": "^6.10.0",
-        "moment": "^2.29.3",
-        "vue-contenteditable": "^3.0.4",
-        "vue-select": "^4.0.0-beta.3",
-        "vue3-popper": "^1.4.2"
-    }
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/BabelDev0/writeme"
+    },
+    "author": "Jon Church",
+    "contributors": [
+        {
+            "name": "Amber Matz",
+            "email": "example@example.com",
+            "url": "https://www.osiolabs.com/#team"
+        }
+    ],
+    "license": "MIT",
+    "keywords": [
+        "server",
+        "osiolabs",
+        "express",
+        "compression"
+    ]
 }
