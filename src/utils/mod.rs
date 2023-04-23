@@ -2,7 +2,7 @@ use anyhow::Error;
 use handlebars::Handlebars;
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
-use std::fs;
+use std::{collections::HashMap, fs};
 
 /// Paths to significant files
 pub mod paths {
@@ -41,6 +41,14 @@ pub struct Shield {
     logo_width: i32,
     alt_text: String,
     target: String,
+}
+
+/// Structure used to represent a technology possibly used in the project
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct Tech {
+    pub config_files: Vec<String>,
+    pub dependency_names: Vec<String>,
+    pub shield: Shield,
 }
 
 /// Implementation of the shield structure, with the following methods:
@@ -92,4 +100,22 @@ impl GenMarkdown for Shield {
 /// This is used only in cargo_toml.rs for now
 pub fn trim(s: String) -> Result<String, Error> {
     Ok(s.trim().trim_matches('"').to_string())
+}
+
+/// Returns the markdown of shields related with the technologies in the project
+pub fn shields(techs: Vec<String>) -> Result<String, Error> {
+    let contents: String =
+        fs::read_to_string(paths::TECHS).expect("Something went wrong reading the techs file");
+    let all_techs: HashMap<String, Tech> = serde_yaml::from_str(&contents).unwrap();
+    let mut shields: String = String::new();
+    for (name, tech) in all_techs {
+        if techs.contains(&name) {
+            match tech.shield.gen_md() {
+                Ok(md) => shields.push_str(&md),
+                Err(e) => println!("Error: {}", e),
+            }
+        }
+    }
+
+    Ok(shields)
 }
