@@ -87,3 +87,9 @@ impl GenMarkdown for Shield {
         return Ok(handlebars.render("shield_tpl", &data).unwrap());
     }
 }
+
+/// Used to trim string removing quotes and spaces from the extremities
+/// This is used only in cargo_toml.rs for now
+pub fn trim(s: String) -> Result<String, Error> {
+    Ok(s.trim().trim_matches('"').to_string())
+}

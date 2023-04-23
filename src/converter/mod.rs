@@ -7,7 +7,7 @@
 
 use std::{fmt::Display, fs, path::Path};
 
-use crate::utils::{paths, GenMarkdown};
+use crate::utils::{paths, trim, GenMarkdown};
 use anyhow::{anyhow, Error};
 use serde::Serialize;
 use serde_json::{json, Value};
@@ -328,6 +328,16 @@ impl ConverterOutput {
             build_dependencies: None,
             funding: None,
         }
+    }
+
+    // trim all the fields removing quotes and spaces from start and end
+    pub fn trim(&mut self) {
+        self.name = self.name.take().map(|s| trim(s).unwrap());
+        self.description = self.description.take().map(|s| trim(s).unwrap());
+        self.version = self.version.take().map(|s| trim(s).unwrap());
+        self.license = self.license.take().map(|s| trim(s).unwrap());
+        self.repository_url = self.repository_url.take().map(|s| trim(s).unwrap());
+        self.homepage_url = self.homepage_url.take().map(|s| trim(s).unwrap());
     }
 }
 

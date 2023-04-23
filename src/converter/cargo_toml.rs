@@ -197,6 +197,7 @@ impl Component for CargoToml {
                 .collect()
         });
 
+        output.trim();
         Ok(output)
     }
 
