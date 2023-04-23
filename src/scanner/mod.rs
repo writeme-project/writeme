@@ -1,5 +1,4 @@
 use crate::utils::{paths, Tech};
-#[allow(dead_code)]
 use anyhow::Error;
 use std::{
     collections::HashMap,

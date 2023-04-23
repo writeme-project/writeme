@@ -1,11 +1,3 @@
-use anyhow::Error;
-use colored::*;
-#[allow(dead_code)]
-use handlebars::Handlebars;
-use serde_json::Value;
-use std::fs::File;
-use terminal_spinners::{SpinnerBuilder, DOTS};
-
 mod assembler;
 mod converter;
 mod dialoguer;
@@ -13,7 +5,8 @@ mod merger;
 mod scanner;
 mod utils;
 
-fn learn_about_project() -> Result<(), Error> {
+/// Method used to Scan the project merges the data found and assembles it to create a README file
+fn learn_about_project() {
     let converter = converter::Converter::new();
     let merger = merger::Merger::new();
 
@@ -25,11 +18,6 @@ fn learn_about_project() -> Result<(), Error> {
 
         // if unable to convert the file skip it
         if output.is_err() {
-            println!(
-                "Error: Failed to convert {}: {}",
-                config,
-                output.unwrap_err()
-            );
             continue;
         }
         outputs.push(output.unwrap());
@@ -39,7 +27,7 @@ fn learn_about_project() -> Result<(), Error> {
         Ok(merged) => merged,
         Err(e) => {
             println!("Error: Failed to merge: {}", e);
-            return Err(e);
+            return;
         }
     };
 
@@ -47,24 +35,12 @@ fn learn_about_project() -> Result<(), Error> {
         Ok(_) => {}
         Err(e) => {
             println!("Error: Failed to assemble: {}", e);
-            return Err(e);
+            return;
         }
     };
-
-    Ok(())
-}
-
-fn writeme(readme_contents: Value) -> Result<(), Error> {
-    let mut handlebars = Handlebars::new();
-    let mut readme_file = File::create(utils::paths::README)?;
-    handlebars
-        .register_template_file("template", utils::paths::TEMPLATE)
-        .unwrap();
-    handlebars.render_to_write("template", &readme_contents, &mut readme_file)?;
-    Ok(())
 }
 
 fn main() {
     dialoguer::header();
-    let ok = learn_about_project();
+    learn_about_project();
 }
