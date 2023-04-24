@@ -1,3 +1,1 @@
-<p align="center">
-<br>
-<a href="{{url}}" target="_blank"><img src="./../img/support_me.png" data-text="Support me" alt="Buy Me A Coffee" style="width: 150px !important;" ></a>
+<a href="{{url}}" target="_blank"><img src="{{support_img}}" data-text="Support me" alt="Support me" style="width: 150px !important;" ></a>

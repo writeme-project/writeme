@@ -60,3 +60,7 @@ The subject contains a succinct description of the change:
 - Hat tip to anyone whose code was used
 - Inspiration
 - References
+
+<p align="center">
+<br>
+{{{fundings}}}
