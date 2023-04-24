@@ -260,6 +260,30 @@ impl Display for Funding {
     }
 }
 
+impl GenMarkdown for Funding {
+    fn gen_md(&self) -> Result<String, Error> {
+        if self.url.is_none() {
+            return Err(anyhow!("Funding url is missing"));
+        } else {
+            let support_tpl: String = fs::read_to_string(paths::SUPPORT).unwrap();
+            let mut handlebars = handlebars::Handlebars::new();
+            handlebars
+                .register_template_string("support_tpl", support_tpl.clone())
+                .unwrap();
+
+            // use only url for now type is useless
+            let url = self.url.as_ref().unwrap();
+
+            let data: Value = json!({
+                "url": url ,
+                "support_img": paths::SUPPORT_GENERIC,
+            });
+
+            return Ok(handlebars.render("support_tpl", &data).unwrap());
+        }
+    }
+}
+
 #[derive(Debug, Clone)]
 /// This Vec variant is needed to implement the Display trait for the Vec<T> scenarios
 ///
@@ -283,6 +307,14 @@ impl FromIterator<Funding> for Fundings {
             fundings.push(funding);
         }
         Fundings(fundings)
+    }
+}
+
+impl Iterator for Fundings {
+    type Item = Funding;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        self.0.pop()
     }
 }
 

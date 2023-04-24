@@ -14,12 +14,16 @@ pub mod paths {
     // small pieces of markdown which require some data to be filled in
     pub const SHIELD: &str = "./assets/tpl/SHIELD.md";
     pub const AUTHOR: &str = "./assets/tpl/AUTHOR.md";
+    pub const SUPPORT: &str = "./assets/tpl/SUPPORT.md";
 
     // large macro templates of the README file
     pub const HEADER: &str = "./assets/tpl/HEADER.md";
     pub const TOC: &str = "./assets/tpl/TABLE_OF_CONTENT.md";
     pub const BODY: &str = "./assets/tpl/BODY.md";
     pub const FOOTER: &str = "./assets/tpl/FOOTER.md";
+
+    // images assets
+    pub const SUPPORT_GENERIC: &str = "./assets/img/support_generic.png";
 }
 
 /// Used from entities that can be displayed as markdown

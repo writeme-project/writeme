@@ -121,6 +121,14 @@ impl Merger {
                 .collect(),
         );
 
+        output.funding = Some(
+            converted_configs
+                .iter()
+                .flat_map(|config| config.funding.clone())
+                .flatten()
+                .collect(),
+        );
+
         Ok(output)
     }
 }
