@@ -1,7 +1,11 @@
-use std::{io::stdout, thread::sleep, time::Duration};
-
 use colored::Colorize;
+use dialoguer::console::Style;
+use dialoguer::Select;
+use dialoguer::{console::style, theme::ColorfulTheme};
+use itertools::Itertools;
 use log_update::LogUpdate;
+use std::fmt::{Debug, Display};
+use std::{io::stdout, thread::sleep, time::Duration};
 
 pub fn header() {
     let app_name = format!("{}", "WRITEME:".cyan());
@@ -71,14 +75,46 @@ fn wirtino(app_name: String, catch_phrase: String) {
     }
 }
 
-// fn conflict<T>(field_name: &str, values: Vec<Option<T>>) -> Option<T> {
-//     put a space before and after the field name
-//     let field_name = format!(" {} ", field_name);
-//     let label = format!(
-//         "{}\t{}",
-//         field_name.bright_white().on_purple(),
-//         "Witch of these you wanna have in your awsome README?".bright_white()
-//     );
-//     print!("{}", label);
-//     return None;
-// }
+pub fn conflict<T: Clone + Debug + Display>(field_name: &str, values: Vec<Option<T>>) -> Option<T> {
+    // put a space before and after the field name
+    let field_name = format!(" {} ", field_name);
+    let label = format!(
+        "{} {}",
+        field_name.bright_white().on_truecolor(127, 0, 255),
+        "Which of these do you want in your awesome README?".bright_white()
+    );
+
+    let with_value = values
+        .iter()
+        .filter(|s| s.is_some())
+        .map(|s| s.as_ref().unwrap())
+        .collect_vec();
+
+    // every value of the field is empty, return None
+    if with_value.is_empty() {
+        return None;
+    }
+
+    // does the field need merging? it does so when the filtered non-None values are more than one
+    let needs_merge = with_value.len() > 1;
+
+    if !needs_merge {
+        return Some(with_value[0].clone());
+    }
+
+    let theme: ColorfulTheme = ColorfulTheme {
+        values_style: Style::new().yellow().dim(),
+        active_item_prefix: style("○".to_string()).for_stderr().green(),
+        ..ColorfulTheme::default()
+    };
+
+    // ask the user which value to keep
+    let selection = Select::with_theme(&theme)
+        .with_prompt(label.to_string())
+        .items(&with_value)
+        .default(0)
+        .interact()
+        .unwrap_or(0);
+
+    Some(with_value[selection].clone())
+}
