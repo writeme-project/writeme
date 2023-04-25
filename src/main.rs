@@ -41,6 +41,6 @@ fn learn_about_project() {
 }
 
 fn main() {
-    dialoguer::header();
+    dialoguer::hello();
     learn_about_project();
 }

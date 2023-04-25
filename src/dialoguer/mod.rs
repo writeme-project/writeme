@@ -3,76 +3,68 @@ use dialoguer::console::Style;
 use dialoguer::Select;
 use dialoguer::{console::style, theme::ColorfulTheme};
 use itertools::Itertools;
-use log_update::LogUpdate;
 use std::fmt::{Debug, Display};
-use std::{io::stdout, thread::sleep, time::Duration};
+// use log_update::LogUpdate;
+// use std::{io::stdout, thread::sleep, time::Duration};
 
-pub fn header() {
-    let app_name = format!("{}", "WRITEME:".cyan());
-    let catch_phrase = format!("{}", "Let's write your README!");
-    wirtino(app_name, catch_phrase);
+pub fn hello() {
+    wirtino();
 }
 
-fn wirtino(app_name: String, catch_phrase: String) {
-    let mut log_update = LogUpdate::new(stdout()).unwrap();
-
+fn wirtino() {
     let eyes = vec!["•", "o", "•", "o"];
-
     let mouths = vec!["O", "•", "O", "•"];
-
     let walls = vec!["─", "|"];
-
     let corners = vec!["╭", "╮", "╰", "╯"];
 
-    let loading = vec![".", " ", " ", " "];
+    println!("{}{}{}", corners[0], walls[0], corners[1]);
+    println!(
+        "{}{}{}\t{}",
+        eyes[1].cyan().italic(),
+        " ",
+        eyes[1].cyan().italic(),
+        "HI! I AM WRITINO:".cyan()
+    );
+    println!(
+        "{}{}{}\t{}",
+        walls[1], " ", walls[1], "Let's write your README!"
+    );
+    println!("{}{}{}", corners[2], mouths[0].cyan().italic(), corners[3]);
+    let f = format!("{} {}", "WRITEME".cyan(), "v0.1.0".bright_green());
+    println!("{}", f);
 
-    // println!("{}{}{}", corners[0], walls[0], corners[1]);
-    // println!(
-    //     "{}{}{}\t{}",
-    //     eyes[1].cyan().italic(),
-    //     " ",
-    //     eyes[1].cyan().italic(),
-    //     app_name
-    // );
-    // println!("{}{}{}\t{}", walls[1], " ", walls[1], catch_phrase);
-    // println!("{}{}{}", corners[2], mouths[0].cyan().italic(), corners[3]);
-    // let f = format!(
-    //     "\n{}\t{}",
-    //     "v0.1.0".bright_green(),
-    //     "I'm reading your stuff...."
-    // );
-    // println!("{}", f);
+    // let mut log_update = LogUpdate::new(stdout()).unwrap();
+    // let loading = vec![".", " ", " ", " "];
+    // for i in 0..5 {
+    //     let ind = i % 4;
+    //     log_update
+    //         .render(&format!(
+    //             "{}{}{}\n{}{}{}\t{}\n{}{}{}\t{}\n{}{}{}\n{}\t{}{}{}{}{}\n",
+    //             corners[0],
+    //             walls[0],
+    //             corners[1],
+    //             eyes[ind].cyan().italic(),
+    //             " ",
+    //             eyes[ind].cyan().italic(),
+    //             app_name,
+    //             walls[1],
+    //             " ",
+    //             walls[1],
+    //             catch_phrase,
+    //             corners[2],
+    //             mouths[ind].cyan().italic(),
+    //             corners[3],
+    //             "v0.1.0".bright_green(),
+    //             "I'm reading your stuff",
+    //             loading[(ind) % 4],
+    //             loading[(ind + 3) % 4],
+    //             loading[(ind + 2) % 4],
+    //             loading[(ind + 1) % 4],
+    //         ))
+    //         .unwrap();
 
-    for i in 0..5 {
-        let ind = i % 4;
-        log_update
-            .render(&format!(
-                "{}{}{}\n{}{}{}\t{}\n{}{}{}\t{}\n{}{}{}\n{}\t{}{}{}{}{}\n",
-                corners[0],
-                walls[0],
-                corners[1],
-                eyes[ind].cyan().italic(),
-                " ",
-                eyes[ind].cyan().italic(),
-                app_name,
-                walls[1],
-                " ",
-                walls[1],
-                catch_phrase,
-                corners[2],
-                mouths[ind].cyan().italic(),
-                corners[3],
-                "v0.1.0".bright_green(),
-                "I'm reading your stuff",
-                loading[(ind) % 4],
-                loading[(ind + 3) % 4],
-                loading[(ind + 2) % 4],
-                loading[(ind + 1) % 4],
-            ))
-            .unwrap();
-
-        sleep(Duration::from_millis(300));
-    }
+    //     sleep(Duration::from_millis(300));
+    // }
 }
 
 pub fn conflict<T: Clone + Debug + Display>(field_name: &str, values: Vec<Option<T>>) -> Option<T> {
