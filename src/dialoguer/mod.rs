@@ -81,7 +81,7 @@ pub fn conflict<T: Clone + Debug + Display>(field_name: &str, values: Vec<Option
     let label = format!(
         "{} {}",
         field_name.bright_white().on_truecolor(127, 0, 255),
-        "Which of these do you want in your awesome README?".bright_white()
+        "Which of these do you want in your awesome README?"
     );
 
     let with_value = values
