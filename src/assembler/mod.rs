@@ -100,11 +100,11 @@ impl<'a> Assembler<'a> {
             None => None,
         };
 
-        let fundings: Option<String> = match self.converted_config.funding.clone() {
-            Some(fundings) => {
+        let funding: Option<String> = match self.converted_config.funding.clone() {
+            Some(funding) => {
                 let mut supports: String = String::new();
 
-                for f in fundings {
+                for f in funding {
                     match f.gen_md() {
                         Ok(md) => {
                             supports.push_str(&md);
@@ -122,7 +122,7 @@ impl<'a> Assembler<'a> {
         let footer = json!({
             "name": self.converted_config.name.clone(),
             "authors": authors,
-            "fundings": fundings,
+            "funding": funding,
         });
 
         self.handlebars

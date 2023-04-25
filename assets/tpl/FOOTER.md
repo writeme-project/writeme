@@ -63,4 +63,4 @@ The subject contains a succinct description of the change:
 
 <p align="center">
 <br>
-{{{fundings}}}
+{{{funding}}}

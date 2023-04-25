@@ -292,21 +292,21 @@ pub struct Fundings(Vec<Funding>);
 
 impl Display for Fundings {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let mut fundings = String::new();
-        for funding in &self.0 {
-            fundings.push_str(&format!("{} ", funding));
+        let mut funding = String::new();
+        for f in &self.0 {
+            funding.push_str(&format!("{} ", f));
         }
-        write!(f, "{}", fundings)
+        write!(f, "{}", funding)
     }
 }
 
 impl FromIterator<Funding> for Fundings {
     fn from_iter<I: IntoIterator<Item = Funding>>(iter: I) -> Self {
-        let mut fundings = Vec::new();
-        for funding in iter {
-            fundings.push(funding);
+        let mut funding = Vec::new();
+        for f in iter {
+            funding.push(f);
         }
-        Fundings(fundings)
+        Fundings(funding)
     }
 }
 
