@@ -7,7 +7,6 @@ use std::{collections::HashMap, fs};
 /// Paths to significant files
 pub mod paths {
     pub const CONFIGS: &str = "./src/configs.yml";
-    pub const TEMPLATE: &str = "./assets/tpl/TEMPLATE.md";
     pub const README: &str = "./README.md";
     pub const TECHS: &str = "./src/techs.yml";
 
@@ -53,37 +52,6 @@ pub struct Tech {
     pub config_files: Vec<String>,
     pub dependency_names: Vec<String>,
     pub shield: Shield,
-}
-
-/// Implementation of the shield structure, with the following methods:
-/// new() creates a new instance of the Shield struct
-/// gen_md() generates the markdown code for the shield
-impl Shield {
-    pub fn new(
-        label: String,
-        message: String,
-        color: String,
-        logo: String,
-        label_color: String,
-        logo_color: String,
-        style: String,
-        logo_width: i32,
-        alt_text: String,
-        target: String,
-    ) -> Self {
-        Shield {
-            label,
-            message,
-            color,
-            logo,
-            label_color,
-            logo_color,
-            style,
-            logo_width,
-            alt_text,
-            target,
-        }
-    }
 }
 
 impl GenMarkdown for Shield {

@@ -7,7 +7,7 @@ use super::{Component, Contributor, ConverterOutput, Decorator, Dependency};
 /// The Cargo.toml file relevant contents
 ///
 /// Reference: https://doc.rust-lang.org/cargo/reference/manifest.html
-struct CargoTomlOutput {
+struct _CargoTomlOutput {
     // [package]
     /// The name of the package
     name: Option<String>,
@@ -201,7 +201,7 @@ impl Component for CargoToml {
         Ok(output)
     }
 
-    fn parse_funding(&self, funding: &Value) -> Result<super::Funding, Error> {
+    fn parse_funding(&self, _funding: &Value) -> Result<super::Funding, Error> {
         Err(anyhow!("Funding is not supported for Cargo.toml!"))
     }
 }

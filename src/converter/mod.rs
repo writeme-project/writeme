@@ -38,7 +38,7 @@ pub trait Component {
 pub struct ConcreteComponent {}
 
 impl Component for ConcreteComponent {
-    fn convert(&self, file_contents: String) -> Result<ConverterOutput, Error> {
+    fn convert(&self, _file_contents: String) -> Result<ConverterOutput, Error> {
         Ok(ConverterOutput {
             name: None,
             description: None,
