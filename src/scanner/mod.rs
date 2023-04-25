@@ -39,7 +39,11 @@ pub fn scan_techs() -> Result<Vec<String>, Error> {
     let all_techs: HashMap<String, Tech> = serde_yaml::from_str(&contents).unwrap();
 
     let mut techs_present: Vec<String> = vec![];
+    let index = 0;
     for (name, tech) in all_techs {
+        if index > 40 {
+            break;
+        }
         let regex_set = regex::RegexSet::new(tech.config_files).unwrap();
 
         let paths = glob::glob("./**/*").unwrap();

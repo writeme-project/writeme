@@ -1,3 +1,4 @@
+# https://simpleicons.org/
 eslint:
   config_files:
     - .eslintrc
@@ -47,9 +48,8 @@ Prettier:
 
 Laravel:
   config_files:
-    - composer.json
   dependency_names:
-    - laravel
+    - laravel/framework
   shield:
     label: framework
     message: laravel
@@ -61,3 +61,309 @@ Laravel:
     logo_width: 20
     alt_text: Framework laravel
     target: https://laravel.com/
+
+vue:
+  config_files:
+    - vue.js
+    - vue.min.js
+  dependency_names:
+    - vue
+  shield:
+    label: framework
+    message: vue
+    color: 4fc08d
+    logo: vue.js
+    label_color: ''
+    logo_color: white
+    style: flat-square
+    logo_width: 20
+    alt_text: Framework vue
+    target: https://vuejs.org/
+
+react:
+  config_files:
+    - react.js
+    - react.min.js
+  dependency_names:
+    - react
+  shield:
+    label: framework
+    message: react
+    color: 61dafb 
+    logo: react
+    label_color: ''
+    logo_color: white
+    style: flat-square
+    logo_width: 20
+    alt_text: Framework react
+    target: https://reactjs.org/
+
+angular:
+  config_files:
+    - angular.js
+    - angular.min.js
+  dependency_names:
+    - angular
+  shield:
+    label: framework
+    message: angular
+    color: dd0031
+    logo: angular
+    label_color: ''
+    logo_color: white
+    style: flat-square
+    logo_width: 20
+    alt_text: Framework angular
+    target: https://angular.io/
+
+svelte:
+  config_files:
+    - svelte.js
+    - svelte.min.js
+  dependency_names:
+    - svelte
+  shield:
+    label: framework
+    message: svelte
+    color: FF3E00
+    logo: svelte
+    label_color: ''
+    logo_color: white
+    style: flat-square
+    logo_width: 20
+    alt_text: Framework svelte
+    target: https://svelte.dev/
+
+cypress:
+  config_files:
+    - cypress.json
+  dependency_names:
+    - cypress
+  shield:
+    label: e2e%20testing
+    message: cypress
+    color: 17202c
+    logo: cypress
+    label_color: ''
+    logo_color: white
+    style: flat-square
+    logo_width: 20
+    alt_text: E2E testing cypress
+    target: https://www.cypress.io/
+
+pest:
+  config_files:
+    - pest.php
+  dependency_names:
+    - pestphp/pest
+  shield:
+    label: e2e%20testing
+    message: pest
+    color: 00b894
+    logo:
+    label_color: ''
+    logo_color: white
+    style: flat-square
+    logo_width: 0
+    alt_text: E2E testing pest
+    target: https://pestphp.com/
+
+phpunit:
+  config_files:
+    - phpunit.xml
+  dependency_names:
+    - phpunit/phpunit
+  shield:
+    label: unit%20testing
+    message: phpunit
+    color: 777bb4
+    logo:
+    label_color: ''
+    logo_color: white
+    style: flat-square
+    logo_width: 0
+    alt_text: Unit testing phpunit
+    target: https://phpunit.de/
+
+jest:
+  config_files:
+    - jest.config.js
+  dependency_names:
+    - jest
+  shield:
+    label: unit%20testing
+    message: jest
+    color: c21325
+    logo: jest
+    label_color: ''
+    logo_color: white
+    style: flat-square
+    logo_width: 20
+    alt_text: Unit testing jest
+    target: https://jestjs.io/
+
+yarn:
+  config_files:
+    - yarn.lock
+  dependency_names:
+  shield:
+    label: package%20manager
+    message: yarn
+    color: 2c8ebb
+    logo: yarn
+    label_color: ''
+    logo_color: white
+    style: flat-square
+    logo_width: 20
+    alt_text: Package manager yarn
+    target: https://yarnpkg.com/
+
+npm:
+  config_files:
+    - package-lock.json
+  dependency_names:
+  shield:
+    label: package%20manager
+    message: npm
+    color: cb3837
+    logo: npm
+    label_color: ''
+    logo_color: white
+    style: flat-square
+    logo_width: 20
+    alt_text: Package manager npm
+    target: https://www.npmjs.com/
+
+pnpm:
+  config_files:
+    - pnpm-lock.yaml
+  dependency_names:
+  shield:
+    label: package%20manager
+    message: pnpm
+    color: F69220
+    logo: pnpm
+    label_color: ''
+    logo_color: white
+    style: flat-square
+    logo_width: 20
+    alt_text: Package manager pnpm
+    target: https://pnpm.js.org/
+
+composer:
+  config_files:
+    - composer.lock
+  dependency_names:
+  shield:
+    label: package%20manager
+    message: composer
+    color: 885630
+    logo: composer
+    label_color: ''
+    logo_color: white
+    style: flat-square
+    logo_width: 20
+    alt_text: Package manager composer
+    target: https://getcomposer.org/
+
+vite:
+  config_files:
+    - vite.config.js
+  dependency_names:
+    - vite
+  shield:
+    label: bundler
+    message: vite
+    color: 646CFF
+    logo: vite
+    label_color: ''
+    logo_color: white
+    style: flat-square
+    logo_width: 20
+    alt_text: Bundler vite
+    target: https://vitejs.dev/
+
+tailwind:
+  config_files:
+    - tailwind.config.js
+  dependency_names:
+    - tailwindcss
+  shield:
+    label: css%20framework
+    message: tailwind
+    color: 06B6D4
+    logo: tailwind-css
+    label_color: ''
+    logo_color: white
+    style: flat-square
+    logo_width: 20
+    alt_text: CSS framework tailwind
+    target: https://tailwindcss.com/
+
+bootstrap:
+  config_files:
+    - bootstrap.min.js
+    - bootstrap.min.css
+    - glyphicons-halflings-regular.woff2
+  dependency_names:
+    - bootstrap
+  shield:
+    label: css%20framework
+    message: bootstrap
+    color: 7952B3
+    logo: bootstrap
+    label_color: ''
+    logo_color: white
+    style: flat-square
+    logo_width: 20
+    alt_text: CSS framework bootstrap
+    target: https://getbootstrap.com/
+
+inertia:
+  config_files:
+  dependency_names:
+    - inertiajs/inertia-laravel
+  shield:
+    label: inertia
+    message: inertia
+    color: 646CFF
+    logo: 
+    label_color: ''
+    logo_color: white
+    style: flat-square
+    logo_width: 0
+    alt_text: Inertia inertia
+    target: https://inertiajs.com/
+
+tauri:
+  config_files:
+  dependency_names:
+    - tauri
+  shield:
+    label: tauri
+    message: tauri
+    color: FFC131
+    logo: tauri
+    label_color: ''
+    logo_color: white
+    style: flat-square
+    logo_width: 20
+    alt_text: Tauri tauri
+    target: https://tauri.studio/
+
+express:
+  config_files:
+    - express.js
+  dependency_names:
+    - express
+  shield:
+    label: framework
+    message: express
+    color: 000000
+    logo: express
+    label_color: ''
+    logo_color: white
+    style: flat-square
+    logo_width: 20
+    alt_text: Framework express
+    target: https://expressjs.com/
