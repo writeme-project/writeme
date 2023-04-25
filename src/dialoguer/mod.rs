@@ -9,6 +9,7 @@ use std::fmt::{Debug, Display};
 
 pub fn hello() {
     wirtino();
+    println!("{} {}\n", "WRITEME".cyan(), "v0.1.0".bright_green());
 }
 
 fn wirtino() {
@@ -20,18 +21,21 @@ fn wirtino() {
     println!("{}{}{}", corners[0], walls[0], corners[1]);
     println!(
         "{}{}{}\t{}",
-        eyes[1].cyan().italic(),
+        eyes[0].cyan().italic(),
         " ",
-        eyes[1].cyan().italic(),
+        eyes[0].cyan().italic(),
         "HI! I AM WRITINO:".cyan()
     );
     println!(
         "{}{}{}\t{}",
         walls[1], " ", walls[1], "Let's write your README!"
     );
-    println!("{}{}{}", corners[2], mouths[0].cyan().italic(), corners[3]);
-    let f = format!("{} {}", "WRITEME".cyan(), "v0.1.0".bright_green());
-    println!("{}", f);
+    println!(
+        "{}{}{}\n",
+        corners[2],
+        mouths[0].cyan().italic(),
+        corners[3]
+    );
 
     // let mut log_update = LogUpdate::new(stdout()).unwrap();
     // let loading = vec![".", " ", " ", " "];
@@ -108,5 +112,15 @@ pub fn conflict<T: Clone + Debug + Display>(field_name: &str, values: Vec<Option
         .interact()
         .unwrap_or(0);
 
+    println!(" ");
+
     Some(with_value[selection].clone())
+}
+
+pub fn bye() {
+    println!(
+        "{} {}",
+        "🎉".bright_green(),
+        "Your README is ready!".bright_green()
+    );
 }

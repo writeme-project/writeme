@@ -6,7 +6,7 @@ mod scanner;
 mod utils;
 
 /// Method used to Scan the project merges the data found and assembles it to create a README file
-fn learn_about_project() {
+fn writeme() {
     let converter = converter::Converter::new();
     let merger = merger::Merger::new();
 
@@ -42,5 +42,6 @@ fn learn_about_project() {
 
 fn main() {
     dialoguer::hello();
-    learn_about_project();
+    writeme();
+    dialoguer::bye();
 }
