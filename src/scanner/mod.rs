@@ -6,7 +6,7 @@ use std::{
 };
 
 // Returns list of config files present in the project
-pub fn scan_configs() -> Result<Vec<String>, Error> {
+pub fn scan_configs(project_location: &str) -> Result<Vec<String>, Error> {
     let contents =
         fs::read_to_string(paths::CONFIGS).expect("Something went wrong reading the config file");
     let all_configs: HashMap<String, Vec<String>> = serde_yaml::from_str(&contents).unwrap();
@@ -18,7 +18,7 @@ pub fn scan_configs() -> Result<Vec<String>, Error> {
 
     let regex_set = regex::RegexSet::new(all_configs).unwrap();
 
-    let paths = glob::glob("./**/*").unwrap();
+    let paths = glob::glob(format!("{}/**/*", project_location).as_str()).unwrap();
 
     let mut configs_present: Vec<String> = vec![];
     for path in paths {

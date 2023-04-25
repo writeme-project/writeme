@@ -4,10 +4,14 @@ use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
 use std::{collections::HashMap, fs};
 
+/// Paths to output files saved to disk produced by the application
+pub mod outputs {
+    pub const README: &str = "README.md";
+}
+
 /// Paths to significant files
 pub mod paths {
     pub const CONFIGS: &str = "./src/configs.yml";
-    pub const README: &str = "./README.md";
     pub const TECHS: &str = "./src/techs.yml";
 
     // small pieces of markdown which require some data to be filled in

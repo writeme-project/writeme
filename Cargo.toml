@@ -8,6 +8,7 @@ license = "MIT OR Apache-2.0"
 
 [dependencies]
 anyhow = "1.0.70"
+clap = { version = "4.2.4", features = ["derive"] }
 colored = "2.0.0"
 derive = "1.0.0"
 dialoguer = "0.10.4"

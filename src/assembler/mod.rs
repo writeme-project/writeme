@@ -132,8 +132,8 @@ impl<'a> Assembler<'a> {
         self.handlebars.render("footer_tpl", &footer).unwrap()
     }
 
-    pub fn assemble(&mut self) -> Result<(), Error> {
-        let mut readme_file = match File::create(paths::README) {
+    pub fn assemble(&mut self, output_path: &str) -> Result<(), Error> {
+        let mut readme_file = match File::create(output_path) {
             Ok(f) => f,
             Err(e) => {
                 return Err(Error::new(e));
