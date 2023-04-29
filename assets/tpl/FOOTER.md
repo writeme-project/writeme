@@ -1,6 +1,6 @@
 # 🔭 Contributing <a name = "contributing"></a>
 
-🎉 Thank you for being interested in contributing to {{name}} project! 🎉 
+🎉 Thank you for being interested in contributing to {{title}} project! 🎉 
 
 Feel welcome and read the following sections in order to know how to ask questions and how to work on something.
 
