@@ -12,6 +12,7 @@ clap = { version = "4.2.4", features = ["derive"] }
 colored = "2.0.0"
 derive = "1.0.0"
 dialoguer = "0.10.4"
+git2 = "0.17.1"
 handlebars = "4.3.6"
 itertools = "0.10.5"
 log-update = "0.1.0"
