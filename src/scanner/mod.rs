@@ -11,6 +11,8 @@ pub fn scan_configs(paths: &Vec<String>) -> Result<Vec<String>, Error> {
     let contents: String =
         fs::read_to_string(paths::CONFIGS).expect("Something went wrong reading the config file");
     let all_configs: HashMap<String, Vec<String>> = serde_yaml::from_str(&contents).unwrap();
+
+    // list configs as they are always at the end of the path
     let all_configs: Vec<String> = all_configs
         .values()
         .flatten()
@@ -21,6 +23,8 @@ pub fn scan_configs(paths: &Vec<String>) -> Result<Vec<String>, Error> {
 
     let mut configs_present: Vec<String> = vec![];
 
+    // for each file in the project check if it matches any of the config files
+    // if it does add it to the list of configs present
     for path in paths {
         let path_str = path.as_str();
         let matches: Vec<_> = regex_set.matches(path_str).into_iter().collect();
@@ -39,6 +43,10 @@ pub fn scan_techs(paths: &Vec<String>) -> Result<Vec<String>, Error> {
 
     let mut techs_present: Vec<String> = vec![];
     let index = 0;
+
+    // for each tech check if any of the config files match any of the files in the project
+    // if it does add it to the list of techs present
+    // the index is used to limit the number of techs to 40
     for (name, tech) in all_techs {
         if index > 40 {
             break;
