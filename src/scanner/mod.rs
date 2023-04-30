@@ -1,4 +1,4 @@
-use crate::utils::{paths, Project, Tech};
+use crate::utils::{paths, Tech};
 use anyhow::Error;
 use std::{
     collections::HashMap,
