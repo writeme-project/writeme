@@ -1,8 +1,13 @@
+use std::str::FromStr;
+
 use serde_json::Value;
 
-use anyhow::{anyhow, Error, Ok};
+use anyhow::{anyhow, Error};
 
-use super::{Component, Contributor, ConverterOutput, Decorator, Dependency, Funding};
+use super::{
+    Component, Contributor, ConverterOutput, Decorator, Dependency, EnumIterator, Funding,
+    FundingType,
+};
 
 /// The composer.json parser
 ///
@@ -118,9 +123,31 @@ impl Component for ComposerJson {
     }
 
     fn parse_funding(&self, funding: &Value) -> Result<Funding, Error> {
-        Ok(Funding {
-            f_type: funding["type"].as_str().map(|s| s.to_string()),
-            url: funding["url"].as_str().map(|s| s.to_string()),
-        })
+        let possible_values = FundingType::enum_iterator()
+            .map(|t| t.to_string())
+            .collect::<Vec<_>>();
+
+        let f_type = funding["type"].to_string();
+        let url = funding["url"].to_string();
+
+        for possible_value in possible_values.iter() {
+            if f_type.contains(possible_value) || url.contains(possible_value) {
+                let f_type = match FundingType::from_str(&possible_value) {
+                    Ok(t) => t,
+                    Err(_e) => {
+                        return Err(anyhow!("Unsupported funding type"));
+                    }
+                };
+
+                let funding = Funding {
+                    f_type,
+                    url: Some(url),
+                };
+
+                return Ok(funding);
+            }
+        }
+
+        Err(anyhow!("Unsupported funding type"))
     }
 }

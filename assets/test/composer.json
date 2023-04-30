@@ -98,6 +98,12 @@
             "pestphp/pest-plugin": true
         }
     },
+    "funding": [
+        {
+            "url": "https://github.com/dragonmantank",
+            "type": "github"
+        }
+    ],
     "minimum-stability": "dev",
     "prefer-stable": true
 }

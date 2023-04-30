@@ -9,7 +9,7 @@
         "dev": "vite",
         "build": "vite build"
     },
-    "funding": "https://www.osiolabs.com/#contact",
+    "funding": "https://github.com/sebastianbergmann",
     "dependencies": {
         "express": "^4.16.4",
         "compression": "~1.7.4",

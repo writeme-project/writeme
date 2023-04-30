@@ -10,6 +10,7 @@ use std::{
     fs,
     hash::{Hash, Hasher},
     path::Path,
+    str::FromStr,
 };
 
 use crate::utils::{paths, trim, GenMarkdown};
@@ -76,10 +77,37 @@ impl Component for ConcreteComponent {
     }
 
     fn parse_funding(&self, funding: &Value) -> Result<Funding, Error> {
-        Ok(Funding {
-            f_type: funding["type"].as_str().map(|s| s.to_string()),
-            url: funding["url"].as_str().map(|s| s.to_string()),
-        })
+        let possible_values: [&str; 6] = [
+            &FundingType::BITCOIN.to_string(),
+            &FundingType::BUY_ME_A_COFFEE.to_string(),
+            &FundingType::GITHUB.to_string(),
+            &FundingType::KOFI.to_string(),
+            &FundingType::PATREON.to_string(),
+            &FundingType::GITHUB.to_string(),
+        ];
+
+        let f_type = funding["type"].to_string();
+        let url = funding["url"].to_string();
+
+        for possible_value in possible_values.iter() {
+            if possible_value.contains(&f_type) || possible_value.contains(&url) {
+                let f_type = match FundingType::from_str(&possible_value) {
+                    Ok(t) => t,
+                    Err(_e) => {
+                        return Err(anyhow!("Unsupported funding type"));
+                    }
+                };
+
+                let funding = Funding {
+                    f_type,
+                    url: Some(url),
+                };
+
+                return Ok(funding);
+            }
+        }
+
+        Err(anyhow!("Unsupported funding type"))
     }
 }
 
@@ -264,8 +292,74 @@ impl Iterator for Contributors {
 #[derive(Debug, Clone)]
 /// How a project could be funded
 pub struct Funding {
-    f_type: Option<String>,
+    f_type: FundingType,
     url: Option<String>,
+}
+
+#[derive(Debug, Clone)]
+/// The possible funding types
+enum FundingType {
+    PAYPAL,
+    PATREON,
+    BITCOIN,
+    BUY_ME_A_COFFEE,
+    KOFI,
+    GITHUB,
+}
+
+impl FundingType {
+    fn to_string(&self) -> &'static str {
+        match self {
+            FundingType::BITCOIN => "bitcoin",
+            FundingType::BUY_ME_A_COFFEE => "buymeacoffee",
+            FundingType::GITHUB => "github",
+            FundingType::KOFI => "kofi",
+            FundingType::PATREON => "patreon",
+            FundingType::PAYPAL => "paypal",
+        }
+    }
+}
+
+enum FundingError {
+    FundingNotSupported,
+}
+
+impl FromStr for FundingType {
+    type Err = FundingError;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "bitcoin" => Ok(FundingType::BITCOIN),
+            "buymeacoffee" => Ok(FundingType::BUY_ME_A_COFFEE),
+            "github" => Ok(FundingType::GITHUB),
+            "kofi" => Ok(FundingType::KOFI),
+            "patreon" => Ok(FundingType::PATREON),
+            "paypal" => Ok(FundingType::PAYPAL),
+            _ => Err(FundingError::FundingNotSupported),
+        }
+    }
+}
+
+trait EnumIterator {
+    type Item;
+
+    fn enum_iterator() -> std::slice::Iter<'static, Self::Item>;
+}
+
+impl EnumIterator for FundingType {
+    type Item = FundingType;
+
+    fn enum_iterator() -> std::slice::Iter<'static, FundingType> {
+        static VARIANTS: [FundingType; 6] = [
+            FundingType::BITCOIN,
+            FundingType::BUY_ME_A_COFFEE,
+            FundingType::GITHUB,
+            FundingType::KOFI,
+            FundingType::PATREON,
+            FundingType::PAYPAL,
+        ];
+        VARIANTS.iter()
+    }
 }
 
 impl Display for Funding {
@@ -273,7 +367,7 @@ impl Display for Funding {
         write!(
             f,
             "{} {}",
-            self.f_type.as_ref().unwrap_or(&"None".to_string()),
+            self.f_type.to_string(),
             self.url.as_ref().unwrap_or(&"None".to_string())
         )
     }
@@ -283,23 +377,32 @@ impl GenMarkdown for Funding {
     fn gen_md(&self) -> Result<String, Error> {
         if self.url.is_none() {
             return Err(anyhow!("Funding url is missing"));
-        } else {
-            let support_tpl: String = fs::read_to_string(paths::SUPPORT).unwrap();
-            let mut handlebars = handlebars::Handlebars::new();
-            handlebars
-                .register_template_string("support_tpl", support_tpl.clone())
-                .unwrap();
-
-            // use only url for now type is useless
-            let url = self.url.as_ref().unwrap();
-
-            let data: Value = json!({
-                "url": url ,
-                "support_img": paths::SUPPORT_GENERIC,
-            });
-
-            return Ok(handlebars.render("support_tpl", &data).unwrap());
         }
+
+        let support_tpl: String = fs::read_to_string(paths::SUPPORT).unwrap();
+        let mut handlebars = handlebars::Handlebars::new();
+        handlebars
+            .register_template_string("support_tpl", support_tpl.clone())
+            .unwrap();
+
+        // use only url for now type is useless
+        let url = self.url.as_ref().unwrap();
+
+        let template_url = match self.f_type {
+            FundingType::BITCOIN => "https://img.shields.io/badge/PayPal-00457C?style=for-the-badge&logo=paypal&logoColor=white",
+            FundingType::BUY_ME_A_COFFEE => "https://img.shields.io/badge/BuyMeACoffee-F16061?style=for-the-badge&logo=buymeacoffee&logoColor=FFDD00",
+            FundingType::GITHUB => "https://img.shields.io/badge/GitHub-100000?style=for-the-badge&logo=github&logoColor=white",
+            FundingType::KOFI => "https://img.shields.io/badge/Ko--fi-F16061?style=for-the-badge&logo=ko-fi&logoColor=white",
+            FundingType::PATREON => "https://img.shields.io/badge/Patreon-F16061?style=for-the-badge&logo=patreon&logoColor=white",
+            FundingType::PAYPAL => "https://img.shields.io/badge/PayPal-00457C?style=for-the-badge&logo=paypal&logoColor=white",
+        };
+
+        let data: Value = json!({
+            "url": url ,
+            "template_url": template_url,
+        });
+
+        return Ok(handlebars.render("support_tpl", &data).unwrap());
     }
 }
 

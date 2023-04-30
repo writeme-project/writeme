@@ -1,9 +1,12 @@
+use std::str::FromStr;
+
 use serde_json::Value;
 
-use anyhow::{anyhow, Error, Ok};
+use anyhow::{anyhow, Error};
 
 use super::{
-    Component, Contributor, Contributors, ConverterOutput, Decorator, Dependency, Funding, Fundings,
+    Component, Contributor, Contributors, ConverterOutput, Decorator, Dependency, EnumIterator,
+    Funding, FundingType, Fundings,
 };
 
 /// The package.json parser
@@ -97,9 +100,12 @@ impl Component for PackageJson {
                     .collect()
             });
         } else if json["funding"].is_object() || json["funding"].is_string() {
-            output.funding = Some(Fundings(vec![self
-                .parse_funding(&json["funding"])
-                .unwrap()]));
+            match self.parse_funding(&json["funding"]) {
+                Ok(f) => {
+                    output.funding = Some(Fundings(vec![f]));
+                }
+                Err(_e) => (),
+            };
         }
 
         Ok(output)
@@ -131,23 +137,43 @@ impl Component for PackageJson {
         })
     }
 
-    fn parse_funding(&self, funding: &Value) -> Result<super::Funding, Error> {
+    fn parse_funding(&self, funding: &Value) -> Result<Funding, Error> {
+        let possible_values = FundingType::enum_iterator()
+            .map(|t| t.to_string())
+            .collect::<Vec<_>>();
+
+        let mut to_compare = vec![];
+
         if funding.is_string() {
-            return Ok(Funding {
-                url: Some(funding.as_str().unwrap().to_string()),
-                f_type: None,
-            });
+            to_compare.push(funding.to_string());
+        } else {
+            let f_type = funding["type"].to_string();
+            let url = funding["url"].to_string();
+
+            to_compare.push(url);
+            to_compare.push(f_type);
         }
 
-        if funding.is_object() {
-            let attrs = funding.as_object().unwrap();
+        for possible_value in possible_values.iter() {
+            let is_in: bool = to_compare.iter().any(|v| v.contains(possible_value));
 
-            return Ok(Funding {
-                url: attrs["url"].as_str().map(|s| s.to_string()),
-                f_type: attrs["type"].as_str().map(|s| s.to_string()),
-            });
+            if is_in {
+                let f_type = match FundingType::from_str(&possible_value) {
+                    Ok(t) => t,
+                    Err(_e) => {
+                        return Err(anyhow!("Unsupported funding type"));
+                    }
+                };
+
+                let funding = Funding {
+                    f_type,
+                    url: Some(to_compare[0].clone()),
+                };
+
+                return Ok(funding);
+            }
         }
 
-        Err(anyhow!("Could not parse funding! Value: {}", funding))
+        Err(anyhow!("Unsupported funding type"))
     }
 }
