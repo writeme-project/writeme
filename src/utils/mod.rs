@@ -12,8 +12,8 @@ pub mod outputs {
 
 /// Paths to significant files
 pub mod paths {
-    pub const CONFIGS: &str = "./src/configs.yml";
-    pub const TECHS: &str = "./src/techs.yml";
+    pub const CONFIGS: &str = "./configs.yml";
+    pub const TECHS: &str = "./techs.yml";
 
     // small pieces of markdown which require some data to be filled in
     pub const SHIELD: &str = "./assets/tpl/SHIELD.md";

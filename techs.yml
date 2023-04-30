@@ -269,6 +269,7 @@ composer:
 vite:
   config_files:
     - vite.config.js
+    - vite.config.ts
   dependency_names:
     - vite
   shield:
