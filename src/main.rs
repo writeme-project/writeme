@@ -52,6 +52,8 @@ fn writeme(project_location: &str) {
         outputs.push(output.unwrap());
     }
 
+    outputs.push(scanner::scan_git(project_location).unwrap());
+
     let merged = match merger.merge(outputs) {
         Ok(merged) => merged,
         Err(e) => {
