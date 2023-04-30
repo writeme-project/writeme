@@ -28,9 +28,6 @@ pub fn scan_configs(paths: &Vec<String>) -> Result<Vec<String>, Error> {
             configs_present.push(path_str.to_string());
         }
     }
-
-    println!("Questa è la lista dei config files {:?}", configs_present);
-
     Ok(configs_present)
 }
 
