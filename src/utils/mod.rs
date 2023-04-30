@@ -1,5 +1,6 @@
 use anyhow::Error;
 use handlebars::Handlebars;
+use rust_search::{FilterExt, SearchBuilder};
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
 use std::{collections::HashMap, fs};
@@ -94,4 +95,26 @@ pub fn shields(techs: Vec<String>) -> Result<String, Error> {
     }
 
     Ok(shields)
+}
+
+#[derive(Clone)]
+pub struct Project {
+    pub paths: Vec<String>,
+}
+
+fn blacklist_filter(entry: &rust_search::DirEntry) -> bool {
+    let blacklist = vec!["node_modules", "target", "dist", "build", "vendor", "bin"];
+    !blacklist.contains(&entry.file_name().to_str().unwrap())
+}
+
+impl Project {
+    pub fn load(project_location: &str) -> Result<Project, Error> {
+        let paths: Vec<String> = SearchBuilder::default()
+            .location(project_location)
+            .custom_filter(blacklist_filter)
+            .build()
+            .collect();
+
+        Ok(Project { paths })
+    }
 }
