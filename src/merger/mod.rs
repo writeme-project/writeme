@@ -63,11 +63,12 @@ impl Merger {
                 .collect(),
         );
 
-        output.contributors = self.merge_field(
-            "contributors",
+        // don't merge authors, contributors, dependencies, dev_dependencies, build_dependencies, funding
+        output.contributors = Some(
             converted_configs
                 .iter()
-                .map(|config| config.contributors.clone())
+                .flat_map(|config| config.contributors.clone())
+                .flatten()
                 .collect(),
         );
 
