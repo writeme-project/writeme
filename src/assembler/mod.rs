@@ -1,14 +1,15 @@
-use crate::scanner::scan_techs;
+use crate::{
+    converter::ConverterOutput,
+    scanner::{scan_dependencies, scan_techs},
+    utils::{paths, shields, GenMarkdown},
+};
 use anyhow::Error;
 
 use handlebars::Handlebars;
-use std::fs::{self, File};
-use std::io::Write;
-
-use crate::converter::ConverterOutput;
-use crate::utils::{paths, shields, GenMarkdown};
 use rand::seq::SliceRandom;
 use serde_json::json;
+use std::fs::{self, File};
+use std::io::Write;
 
 const EMOJI_LIST: [&str; 16] = [
     "🖋️", "📝", "📄", "📚", "📖", "📓", "📒", "📃", "📜", "📰", "📑", "🔖", "🔗", "📎", "📐", "📏",
@@ -34,10 +35,10 @@ impl<'a> Assembler<'a> {
         }
     }
 
-    fn assemble_header(&mut self, techs: Vec<String>) -> String {
+    fn assemble_header(&mut self, to_make_shields: Vec<String>) -> String {
         let header_tpl = fs::read_to_string(paths::HEADER).unwrap();
 
-        let shields = shields(techs).unwrap();
+        let shields = shields(to_make_shields).unwrap();
 
         let header = json!({
             "icon": Some(random_emoji()),
@@ -139,9 +140,13 @@ impl<'a> Assembler<'a> {
             }
         };
 
-        let techs = scan_techs(path).unwrap();
+        let techs: Vec<String> = scan_techs(path).unwrap();
+        let deps: Vec<String> =
+            scan_dependencies(self.converted_config.dependencies.clone().unwrap()).unwrap();
 
-        let header = self.assemble_header(techs);
+        let to_make_shields: Vec<String> = techs.iter().chain(deps.iter()).cloned().collect();
+
+        let header = self.assemble_header(to_make_shields);
         let toc = self.assemble_table_of_contents();
         let body = self.assemble_body();
         let footer = self.assemble_footer();

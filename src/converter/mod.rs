@@ -108,7 +108,7 @@ impl SupportedFile {
 /// Holds the information of a dependency in a config file
 pub struct Dependency {
     /// The name of the dependency
-    name: String,
+    pub name: String,
 
     /// The version of the dependency, it may be missing!
     version: Option<String>,
