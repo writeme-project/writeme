@@ -1,4 +1,7 @@
-use crate::utils::{paths, Tech};
+use crate::{
+    converter::Dependencies,
+    utils::{paths, Tech},
+};
 use anyhow::Error;
 use std::{
     collections::HashMap,
@@ -35,7 +38,7 @@ pub fn scan_configs(paths: &Vec<String>) -> Result<Vec<String>, Error> {
     Ok(configs_present)
 }
 
-// Returns the list of shield urls for the technologies found through the config files
+// Returns the list of techs present in the project found through the config files
 pub fn scan_techs(paths: &Vec<String>) -> Result<Vec<String>, Error> {
     let contents: String =
         fs::read_to_string(paths::TECHS).expect("Something went wrong reading the techs file");
@@ -64,4 +67,36 @@ pub fn scan_techs(paths: &Vec<String>) -> Result<Vec<String>, Error> {
         }
     }
     Ok(techs_present)
+}
+
+/// Returns the list of dependencies present in the project found through the dependencies field in the configs files
+pub fn scan_dependencies(dependencies: Dependencies) -> Result<Vec<String>, Error> {
+    let contents: String =
+        fs::read_to_string(paths::TECHS).expect("Something went wrong reading the techs file");
+    let all_techs: HashMap<String, Tech> = serde_yaml::from_str(&contents).unwrap();
+    let mut dependencies_present: Vec<String> = vec![];
+
+    let index = 0;
+    for (name, tech) in all_techs {
+        if index > 40 {
+            break;
+        }
+        let regex_set = regex::RegexSet::new(tech.dependency_names).unwrap();
+
+        for dependency in dependencies.clone() {
+            let matches: Vec<_> = regex_set
+                .matches(dependency.name.as_str())
+                .into_iter()
+                .collect();
+
+            if !matches.is_empty() {
+                dependencies_present.push(name);
+                break;
+            }
+        }
+    }
+
+    print!("{:?}", dependencies_present);
+
+    Ok(dependencies_present)
 }
