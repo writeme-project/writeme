@@ -34,10 +34,9 @@ impl<'a> Assembler<'a> {
         }
     }
 
-    fn assemble_header(&mut self) -> String {
+    fn assemble_header(&mut self, techs: Vec<String>) -> String {
         let header_tpl = fs::read_to_string(paths::HEADER).unwrap();
 
-        let techs = scan_techs().unwrap();
         let shields = shields(techs).unwrap();
 
         let header = json!({
@@ -132,7 +131,7 @@ impl<'a> Assembler<'a> {
         self.handlebars.render("footer_tpl", &footer).unwrap()
     }
 
-    pub fn assemble(&mut self, output_path: &str) -> Result<(), Error> {
+    pub fn assemble(&mut self, output_path: &str, path: &Vec<String>) -> Result<(), Error> {
         let mut readme_file = match File::create(output_path) {
             Ok(f) => f,
             Err(e) => {
@@ -140,7 +139,9 @@ impl<'a> Assembler<'a> {
             }
         };
 
-        let header = self.assemble_header();
+        let techs = scan_techs(path).unwrap();
+
+        let header = self.assemble_header(techs);
         let toc = self.assemble_table_of_contents();
         let body = self.assemble_body();
         let footer = self.assemble_footer();

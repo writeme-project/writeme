@@ -7,7 +7,7 @@ mod utils;
 
 use clap::Parser;
 use std::path::Path;
-use utils::outputs;
+use utils::{outputs, Project};
 
 /// Writeme helps you generate a fully fledged markdown files (README, CONTRIBUTING, etc.) for your project in a matter
 /// of seconds.
@@ -21,10 +21,25 @@ struct Args {
 
 /// Method used to Scan the project merges the data found and assembles it to create a README file
 fn writeme(project_location: &str) {
+    let project: Project = match Project::load(project_location) {
+        Ok(project) => project,
+        Err(e) => {
+            eprintln!("Error: Failed to load project: {}", e);
+            return;
+        }
+    };
+
     let converter = converter::Converter::new();
     let merger = merger::Merger::new();
 
-    let configs = scanner::scan_configs(project_location).unwrap();
+    let configs = match scanner::scan_configs(&project.paths) {
+        Ok(configs) => configs,
+        Err(e) => {
+            eprintln!("Error: Failed to scan configs: {}", e);
+            return;
+        }
+    };
+
     let mut outputs = vec![];
 
     for config in configs {
@@ -45,11 +60,10 @@ fn writeme(project_location: &str) {
         }
     };
 
-    match assembler::Assembler::new(merged).assemble(&format!(
-        "{}/{}",
-        project_location,
-        outputs::README
-    )) {
+    match assembler::Assembler::new(merged).assemble(
+        &format!("{}/{}", project_location, outputs::README),
+        &project.paths,
+    ) {
         Ok(_) => {}
         Err(e) => {
             eprintln!("Error: Failed to assemble: {}", e);
@@ -68,7 +82,6 @@ fn main() {
         eprintln!("Error: Invalid path: {}", args.path);
         return;
     }
-
     dialoguer::hello();
     writeme(path.to_str().unwrap());
     dialoguer::bye();
