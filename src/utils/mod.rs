@@ -98,8 +98,9 @@ pub fn shields(techs: Vec<String>) -> Result<String, Error> {
 }
 
 #[derive(Clone)]
-/// Structure used to represent the project, it contains the paths of all the files in the project
+/// Structure used to represent the project aka global stuff useful when scanning a project
 pub struct Project {
+    /// it contains the paths of all the files in the project
     pub paths: Vec<String>,
 }
 
