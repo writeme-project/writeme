@@ -5,7 +5,12 @@
 //! - https://refactoring.guru/design-patterns/decorator
 //! - https://github.com/lpxxn/rust-design-pattern/blob/master/structural/decorator.rs
 
-use std::{fmt::Display, fs, path::Path};
+use std::{
+    fmt::Display,
+    fs,
+    hash::{Hash, Hasher},
+    path::Path,
+};
 
 use crate::utils::{paths, trim, GenMarkdown};
 use anyhow::{anyhow, Error};
@@ -159,12 +164,26 @@ impl Iterator for Dependencies {
     }
 }
 
-#[derive(Debug, Clone, Serialize)]
+#[derive(Debug, Clone, Serialize, Eq)]
 /// A contributor to the project
 pub struct Contributor {
     pub name: Option<String>,
     pub email: Option<String>,
     pub url: Option<String>,
+}
+
+// two contributors are equal if they have the same email
+impl PartialEq for Contributor {
+    fn eq(&self, other: &Self) -> bool {
+        self.email == other.email
+    }
+}
+
+// Hash only by email
+impl Hash for Contributor {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        self.email.hash(state);
+    }
 }
 
 impl Display for Contributor {
