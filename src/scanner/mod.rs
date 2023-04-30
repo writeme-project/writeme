@@ -96,7 +96,5 @@ pub fn scan_dependencies(dependencies: Dependencies) -> Result<Vec<String>, Erro
         }
     }
 
-    print!("{:?}", dependencies_present);
-
     Ok(dependencies_present)
 }
