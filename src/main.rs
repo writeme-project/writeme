@@ -40,6 +40,9 @@ fn writeme(project_location: &str) {
         }
     };
 
+    println!("Found {} configs", configs.len());
+    println!("{:?}", configs);
+
     let mut outputs = vec![];
 
     for config in configs {

@@ -137,9 +137,18 @@ impl Component for CargoToml {
 
         let json: Value = toml::from_str(&file_contents.as_str()).unwrap();
 
-        output.name = Some(json["package"]["name"].to_string());
-        output.description = Some(json["package"]["description"].to_string());
-        output.version = Some(json["package"]["version"].to_string());
+        if !json["name"].is_null() && json["name"].as_str().is_some() {
+            output.name = Some(json["name"].to_string());
+        }
+
+        if !json["version"].is_null() && json["version"].as_str().is_some() {
+            output.version = Some(json["version"].to_string());
+        }
+
+        if !json["description"].is_null() && json["description"].as_str().is_some() {
+            output.description = Some(json["description"].to_string());
+        }
+
         output.contributors = json["package"]["authors"].as_array().map(|v| {
             v.iter()
                 .filter_map(|s| {

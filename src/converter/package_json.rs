@@ -29,9 +29,17 @@ impl Component for PackageJson {
 
         let json: Value = serde_json::from_str(&file_contents.as_str()).unwrap();
 
-        output.name = json["name"].as_str().map(|s| s.to_string());
-        output.description = json["description"].as_str().map(|s| s.to_string());
-        output.version = json["version"].as_str().map(|s| s.to_string());
+        if !json["name"].is_null() && json["name"].as_str().is_some() {
+            output.name = Some(json["name"].to_string());
+        }
+
+        if !json["version"].is_null() && json["version"].as_str().is_some() {
+            output.version = Some(json["version"].to_string());
+        }
+
+        if !json["description"].is_null() && json["description"].as_str().is_some() {
+            output.description = Some(json["description"].to_string());
+        }
 
         if json["author"].as_object().is_some() {
             let author = self.parse_contributor(&json["author"]);
@@ -53,7 +61,9 @@ impl Component for PackageJson {
             );
         }
 
-        output.license = json["license"].as_str().map(|s| s.to_string());
+        if !json["license"].is_null() && json["license"].as_str().is_some() {
+            output.license = Some(json["license"].to_string());
+        }
 
         output.keywords = json["keywords"]
             .as_array()
