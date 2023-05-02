@@ -24,7 +24,7 @@ fn writeme(project_location: &str) {
     let project: Project = match Project::load(project_location) {
         Ok(project) => project,
         Err(e) => {
-            eprintln!("Error: Failed to load project: {}", e);
+            dialoguer::error("Error: Failed to load project: {}", &e);
             return;
         }
     };
@@ -35,13 +35,10 @@ fn writeme(project_location: &str) {
     let configs = match scanner::scan_configs(&project.paths) {
         Ok(configs) => configs,
         Err(e) => {
-            eprintln!("Error: Failed to scan configs: {}", e);
+            dialoguer::error("Error: Failed to scan configs: {}", &e);
             return;
         }
     };
-
-    println!("Found {} configs", configs.len());
-    println!("{:?}", configs);
 
     let mut outputs = vec![];
 
@@ -55,12 +52,15 @@ fn writeme(project_location: &str) {
         outputs.push(output.unwrap());
     }
 
-    outputs.push(scanner::scan_git(project_location).unwrap());
+    match scanner::scan_git(project_location) {
+        Ok(scan_git) => outputs.push(scan_git),
+        Err(_) => {} //if unable to scan git do nothing
+    };
 
     let merged = match merger.merge(outputs) {
         Ok(merged) => merged,
         Err(e) => {
-            eprintln!("Error: Failed to merge: {}", e);
+            dialoguer::error("Error: Failed to merge: {}", &e);
             return;
         }
     };
@@ -71,7 +71,7 @@ fn writeme(project_location: &str) {
     ) {
         Ok(_) => {}
         Err(e) => {
-            eprintln!("Error: Failed to assemble: {}", e);
+            dialoguer::error("Error: Failed to assemble: {}", &e);
             return;
         }
     };
@@ -81,10 +81,9 @@ fn main() {
     let args = Args::parse();
 
     let path = Path::new(&args.path);
-
     // check if path is valid
     if !path.exists() || !path.is_dir() {
-        eprintln!("Error: Invalid path: {}", args.path);
+        dialoguer::error("Error: Invalid path: {}", &args.path);
         return;
     }
     dialoguer::hello();

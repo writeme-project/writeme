@@ -2,7 +2,7 @@ use crate::{
     converter::{Contributor, Contributors, ConverterOutput, Dependencies},
     utils::{paths, Tech},
 };
-use anyhow::Error;
+use anyhow::{anyhow, Error};
 use itertools::Itertools;
 use std::{
     collections::HashMap,
@@ -109,24 +109,32 @@ pub fn scan_git(project_location: &str) -> Result<ConverterOutput, Error> {
     // Open the repository
     let repo = match Repository::open(project_location) {
         Ok(repo) => repo,
-        Err(e) => panic!("Failed to open repository: {}", e),
+        Err(e) => {
+            return Err(anyhow!("Failed to open repository: {}", e));
+        }
     };
 
     // Get the head commit
     let head = match repo.head() {
         Ok(head) => head,
-        Err(e) => panic!("Failed to get head: {}", e),
+        Err(e) => {
+            return Err(anyhow!("Failed to get head: {}", e));
+        }
     };
 
     let head_commit = match head.peel_to_commit() {
         Ok(commit) => commit,
-        Err(e) => panic!("Failed to peel to commit: {}", e),
+        Err(e) => {
+            return Err(anyhow!("Failed to peel to commit: {}", e));
+        }
     };
 
     // Iterate over the commits in the repository
     let mut revwalk = match repo.revwalk() {
         Ok(revwalk) => revwalk,
-        Err(e) => panic!("Failed to create revwalk: {}", e),
+        Err(e) => {
+            return Err(anyhow!("Failed to get revwalk: {}", e));
+        }
     };
 
     revwalk.push(head_commit.id()).unwrap();
@@ -137,12 +145,16 @@ pub fn scan_git(project_location: &str) -> Result<ConverterOutput, Error> {
     for oid in revwalk {
         let oid = match oid {
             Ok(oid) => oid,
-            Err(e) => panic!("Failed to get oid: {}", e),
+            Err(e) => {
+                return Err(anyhow!("Failed to get oid: {}", e));
+            }
         };
 
         let commit = match repo.find_commit(oid) {
             Ok(commit) => commit,
-            Err(e) => panic!("Failed to find commit: {}", e),
+            Err(e) => {
+                return Err(anyhow!("Failed to find commit: {}", e));
+            }
         };
 
         let author = commit.author();
@@ -157,9 +169,6 @@ pub fn scan_git(project_location: &str) -> Result<ConverterOutput, Error> {
 
         let count = contributors.entry(contributor).or_insert(0);
         *count += 1;
-    }
-    for (contributor, count) in contributors.iter() {
-        println!("{}: {}", contributor, count);
     }
 
     // sort contributors by number of commits

@@ -124,3 +124,9 @@ pub fn bye() {
         "Your README is ready!".bright_green()
     );
 }
+
+pub fn error(msg: &str, arg: &dyn Display) {
+    let formatted = format!("{}", arg);
+    let result = msg.replace("{}", &formatted);
+    println!("{} {}", "🚨".bright_red(), result.bright_red());
+}

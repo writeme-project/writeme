@@ -91,7 +91,8 @@ impl<'a> Assembler<'a> {
                             authors.push_str(&md);
                             authors.push_str("\n");
                         }
-                        Err(e) => println!("{:?}", e),
+                        // if there is an error to generate markdown, just skip this contributor
+                        Err(_) => continue,
                     }
                 }
 
@@ -110,7 +111,8 @@ impl<'a> Assembler<'a> {
                             supports.push_str(&md);
                             supports.push_str(" ");
                         }
-                        Err(e) => println!("{:?}", e),
+                        // if there is an error to generate markdown, just skip this funding
+                        Err(_) => continue,
                     }
                 }
 

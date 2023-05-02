@@ -89,7 +89,8 @@ pub fn shields(techs: Vec<String>) -> Result<String, Error> {
         if techs.contains(&name) {
             match tech.shield.gen_md() {
                 Ok(md) => shields.push_str(&md),
-                Err(e) => println!("Error: {}", e),
+                // if there is an error to generate markdown, just skip this shield
+                Err(_) => continue,
             }
         }
     }
