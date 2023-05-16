@@ -175,7 +175,7 @@ pub fn scan_git(project_location: &str) -> Result<ConverterOutput, Error> {
     let contributors: Contributors = contributors
         .iter()
         .sorted_by(|a, b| b.1.cmp(a.1))
-        .map(|(contributor, count)| contributor.clone())
+        .map(|(contributor, _)| contributor.clone())
         .collect();
 
     git_converter.contributors = Option::from(contributors);

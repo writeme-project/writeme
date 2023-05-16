@@ -79,7 +79,7 @@ impl Component for ConcreteComponent {
     fn parse_funding(&self, funding: &Value) -> Result<Funding, Error> {
         let possible_values: [&str; 6] = [
             &FundingType::BITCOIN.to_string(),
-            &FundingType::BUY_ME_A_COFFEE.to_string(),
+            &FundingType::BuyMeACoffee.to_string(),
             &FundingType::GITHUB.to_string(),
             &FundingType::KOFI.to_string(),
             &FundingType::PATREON.to_string(),
@@ -302,7 +302,7 @@ enum FundingType {
     PAYPAL,
     PATREON,
     BITCOIN,
-    BUY_ME_A_COFFEE,
+    BuyMeACoffee,
     KOFI,
     GITHUB,
 }
@@ -311,7 +311,7 @@ impl FundingType {
     fn to_string(&self) -> &'static str {
         match self {
             FundingType::BITCOIN => "bitcoin",
-            FundingType::BUY_ME_A_COFFEE => "buymeacoffee",
+            FundingType::BuyMeACoffee => "buymeacoffee",
             FundingType::GITHUB => "github",
             FundingType::KOFI => "kofi",
             FundingType::PATREON => "patreon",
@@ -330,7 +330,7 @@ impl FromStr for FundingType {
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s {
             "bitcoin" => Ok(FundingType::BITCOIN),
-            "buymeacoffee" => Ok(FundingType::BUY_ME_A_COFFEE),
+            "buymeacoffee" => Ok(FundingType::BuyMeACoffee),
             "github" => Ok(FundingType::GITHUB),
             "kofi" => Ok(FundingType::KOFI),
             "patreon" => Ok(FundingType::PATREON),
@@ -352,7 +352,7 @@ impl EnumIterator for FundingType {
     fn enum_iterator() -> std::slice::Iter<'static, FundingType> {
         static VARIANTS: [FundingType; 6] = [
             FundingType::BITCOIN,
-            FundingType::BUY_ME_A_COFFEE,
+            FundingType::BuyMeACoffee,
             FundingType::GITHUB,
             FundingType::KOFI,
             FundingType::PATREON,
@@ -390,7 +390,7 @@ impl GenMarkdown for Funding {
 
         let template_url = match self.f_type {
             FundingType::BITCOIN => "https://img.shields.io/badge/PayPal-00457C?style=for-the-badge&logo=paypal&logoColor=white",
-            FundingType::BUY_ME_A_COFFEE => "https://img.shields.io/badge/BuyMeACoffee-F16061?style=for-the-badge&logo=buymeacoffee&logoColor=FFDD00",
+            FundingType::BuyMeACoffee => "https://img.shields.io/badge/BuyMeACoffee-F16061?style=for-the-badge&logo=buymeacoffee&logoColor=FFDD00",
             FundingType::GITHUB => "https://img.shields.io/badge/GitHub-100000?style=for-the-badge&logo=github&logoColor=white",
             FundingType::KOFI => "https://img.shields.io/badge/Ko--fi-F16061?style=for-the-badge&logo=ko-fi&logoColor=white",
             FundingType::PATREON => "https://img.shields.io/badge/Patreon-F16061?style=for-the-badge&logo=patreon&logoColor=white",

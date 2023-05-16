@@ -25,9 +25,6 @@ pub mod paths {
     pub const TOC: &str = "./assets/tpl/TABLE_OF_CONTENT.md";
     pub const BODY: &str = "./assets/tpl/BODY.md";
     pub const FOOTER: &str = "./assets/tpl/FOOTER.md";
-
-    // images assets
-    pub const SUPPORT_GENERIC: &str = "./assets/img/support_generic.png";
 }
 
 /// Used from entities that can be displayed as markdown
