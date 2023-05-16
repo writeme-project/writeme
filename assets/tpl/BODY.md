@@ -3,16 +3,27 @@
 These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. See deployment for notes on how to deploy the project on a live system.
 
 ## ⚙️ Configuration <a name="configuration"></a>
-{{configuration}}
+```bash
+software and dependencies to install before running the project
+```
+futher instructions...
+
 
 ## ⬇️ Installation <a name="installation"></a>
-{{installation}}
+```bash
+git clone {{repository_url}}
+```
+futher instructions...
 
 ## 🎈 Usage <a name="usage"></a>
-{{usage}}
+```bash
+command to run the project
+```
+futher instructions...
 
-## 🧰 Built Using <a name = "built-using"></a>
-{{dependencies}}
 
-## 📄 License <a name = "license"></a>
+# 🧰 Built Using <a name = "built-using"></a>
+{{{shields}}}
+
+# 📄 License <a name = "license"></a>
 {{license}}

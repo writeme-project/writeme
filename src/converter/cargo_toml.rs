@@ -149,6 +149,10 @@ impl Component for CargoToml {
             output.description = Some(json["description"].to_string());
         }
 
+        if !json["repository_url"].is_null() && json["repository_url"].as_str().is_some() {
+            output.repository_url = Some(json["repository_url"].to_string());
+        }
+
         output.contributors = json["package"]["authors"].as_array().map(|v| {
             v.iter()
                 .filter_map(|s| {

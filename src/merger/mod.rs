@@ -68,6 +68,16 @@ impl Merger {
                 .collect(),
         );
 
+        output.repository_url = self.merge_field(
+            "repository_url",
+            converted_configs
+                .iter()
+                .map(|config| config.repository_url.clone())
+                .filter(|item| item.is_some() && !item.as_ref().unwrap().is_empty())
+                .unique()
+                .collect(),
+        );
+
         // don't merge authors, contributors, dependencies, dev_dependencies, build_dependencies, funding
         // but apply a distinct on them, base on each unique property
         output.contributors = Some(

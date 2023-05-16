@@ -41,6 +41,10 @@ impl Component for PackageJson {
             output.description = Some(json["description"].to_string());
         }
 
+        if !json["repository_url"].is_null() && json["repository_url"].as_str().is_some() {
+            output.repository_url = Some(json["repository_url"].to_string());
+        }
+
         if json["author"].as_object().is_some() {
             let author = self.parse_contributor(&json["author"]);
 

@@ -1,7 +1,7 @@
 use crate::{
     converter::ConverterOutput,
     scanner::{scan_dependencies, scan_techs},
-    utils::{paths, shields, GenMarkdown},
+    utils::{paths, shields, Aligment, GenMarkdown},
 };
 use anyhow::Error;
 
@@ -38,7 +38,7 @@ impl<'a> Assembler<'a> {
     fn assemble_header(&mut self, to_make_shields: Vec<String>) -> String {
         let header_tpl = fs::read_to_string(paths::HEADER).unwrap();
 
-        let shields = shields(to_make_shields).unwrap();
+        let shields = shields(to_make_shields, Aligment::Row).unwrap();
 
         let header = json!({
             "icon": Some(random_emoji()),
@@ -61,11 +61,15 @@ impl<'a> Assembler<'a> {
         toc_tpl
     }
 
-    fn assemble_body(&mut self) -> String {
+    fn assemble_body(&mut self, to_make_shields: Vec<String>) -> String {
         let body_tpl = fs::read_to_string(paths::BODY).unwrap();
+
+        let shields = shields(to_make_shields, Aligment::Column).unwrap();
 
         let body = json!({
             "license": self.converted_config.license.clone(),
+            "shields": Some(shields),
+            "repository_url": self.converted_config.repository_url.clone(),
         });
 
         self.handlebars
@@ -148,9 +152,9 @@ impl<'a> Assembler<'a> {
 
         let to_make_shields: Vec<String> = techs.iter().chain(deps.iter()).cloned().collect();
 
-        let header = self.assemble_header(to_make_shields);
+        let header = self.assemble_header(to_make_shields.clone());
         let toc = self.assemble_table_of_contents();
-        let body = self.assemble_body();
+        let body = self.assemble_body(to_make_shields.clone());
         let footer = self.assemble_footer();
 
         readme_file.write_all(header.as_bytes())?;

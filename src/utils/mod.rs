@@ -76,8 +76,13 @@ pub fn trim(s: String) -> Result<String, Error> {
     Ok(s.trim().trim_matches('"').to_string())
 }
 
+pub enum Aligment {
+    Row,
+    Column,
+}
+
 /// Returns the markdown of shields related with the technologies in the project
-pub fn shields(techs: Vec<String>) -> Result<String, Error> {
+pub fn shields(techs: Vec<String>, aligment: Aligment) -> Result<String, Error> {
     let contents: String =
         fs::read_to_string(paths::TECHS).expect("Something went wrong reading the techs file");
     let all_techs: HashMap<String, Tech> = serde_yaml::from_str(&contents).unwrap();
@@ -85,7 +90,13 @@ pub fn shields(techs: Vec<String>) -> Result<String, Error> {
     for (name, tech) in all_techs {
         if techs.contains(&name) {
             match tech.shield.gen_md() {
-                Ok(md) => shields.push_str(&md),
+                Ok(md) => {
+                    shields.push_str(&md);
+                    match aligment {
+                        Aligment::Row => shields.push_str(" "),
+                        Aligment::Column => shields.push_str("</br>"),
+                    }
+                }
                 // if there is an error to generate markdown, just skip this shield
                 Err(_) => continue,
             }

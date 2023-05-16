@@ -41,6 +41,10 @@ impl Component for ComposerJson {
             output.description = Some(json["description"].to_string());
         }
 
+        if !json["repository_url"].is_null() && json["repository_url"].as_str().is_some() {
+            output.repository_url = Some(json["repository_url"].to_string());
+        }
+
         if json["authors"].as_array().is_some() {
             let contributors = json["authors"].as_array().unwrap();
 
