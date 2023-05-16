@@ -45,7 +45,7 @@ impl<'a> Assembler<'a> {
             "title": self.converted_config.name.clone(),
             "description": self.converted_config.description.clone(),
             "shields": Some(shields),
-            "about": Some("miao".to_string()),
+            "about": Some("".to_string()),
         });
 
         self.handlebars
