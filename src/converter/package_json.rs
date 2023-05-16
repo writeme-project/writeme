@@ -118,6 +118,7 @@ impl Component for PackageJson {
             };
         }
 
+        output.trim();
         Ok(output)
     }
 

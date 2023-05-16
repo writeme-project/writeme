@@ -101,6 +101,7 @@ impl Component for ComposerJson {
                 .collect()
         });
 
+        output.trim();
         Ok(output)
     }
 
