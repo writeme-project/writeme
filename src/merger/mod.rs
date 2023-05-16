@@ -3,6 +3,7 @@ use std::fmt::{Debug, Display};
 use crate::converter::ConverterOutput;
 use crate::dialoguer::conflict;
 use anyhow::{Error, Ok};
+use itertools::Itertools;
 
 /// Merges the information of multiple config files into a single object
 ///
@@ -33,6 +34,7 @@ impl Merger {
                 .iter()
                 .map(|config| config.name.clone())
                 .filter(|item| item.is_some() && !item.as_ref().unwrap().is_empty())
+                .unique()
                 .collect(),
         );
 
@@ -42,6 +44,7 @@ impl Merger {
                 .iter()
                 .map(|config| config.description.clone())
                 .filter(|item| item.is_some() && !item.as_ref().unwrap().is_empty())
+                .unique()
                 .collect(),
         );
 
@@ -51,6 +54,7 @@ impl Merger {
                 .iter()
                 .map(|config| config.version.clone())
                 .filter(|item| item.is_some() && !item.as_ref().unwrap().is_empty())
+                .unique()
                 .collect(),
         );
 
@@ -60,15 +64,18 @@ impl Merger {
                 .iter()
                 .map(|config| config.license.clone())
                 .filter(|item| item.is_some() && !item.as_ref().unwrap().is_empty())
+                .unique()
                 .collect(),
         );
 
         // don't merge authors, contributors, dependencies, dev_dependencies, build_dependencies, funding
+        // but apply a distinct on them, base on each unique property
         output.contributors = Some(
             converted_configs
                 .iter()
                 .flat_map(|config| config.contributors.clone())
                 .flatten()
+                .unique_by(|item| item.email.clone())
                 .collect(),
         );
 
@@ -77,6 +84,7 @@ impl Merger {
                 .iter()
                 .flat_map(|config| config.dependencies.clone())
                 .flatten()
+                .unique_by(|item| item.name.clone())
                 .collect(),
         );
 
@@ -85,6 +93,7 @@ impl Merger {
                 .iter()
                 .flat_map(|config| config.dev_dependencies.clone())
                 .flatten()
+                .unique_by(|item| item.name.clone())
                 .collect(),
         );
 
@@ -93,6 +102,7 @@ impl Merger {
                 .iter()
                 .flat_map(|config| config.build_dependencies.clone())
                 .flatten()
+                .unique_by(|item| item.name.clone())
                 .collect(),
         );
 
@@ -101,6 +111,7 @@ impl Merger {
                 .iter()
                 .flat_map(|config| config.funding.clone())
                 .flatten()
+                .unique_by(|item| item.url.clone())
                 .collect(),
         );
 

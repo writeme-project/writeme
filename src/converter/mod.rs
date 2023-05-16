@@ -293,7 +293,7 @@ impl Iterator for Contributors {
 /// How a project could be funded
 pub struct Funding {
     f_type: FundingType,
-    url: Option<String>,
+    pub url: Option<String>,
 }
 
 #[derive(Debug, Clone)]
