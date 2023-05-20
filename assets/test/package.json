@@ -9,7 +9,7 @@
         "dev": "vite",
         "build": "vite build"
     },
-    "funding": "https://github.com/sebastianbergmann",
+    "funding": "https://github.com/BabelDev0",
     "dependencies": {
         "express": "^4.16.4",
         "compression": "~1.7.4",
