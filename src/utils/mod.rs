@@ -12,19 +12,19 @@ pub mod outputs {
 
 /// Paths to significant files
 pub mod paths {
-    pub const CONFIGS: &str = "./configs.yml";
-    pub const TECHS: &str = "./techs.yml";
+    pub const CONFIGS: &str = "./conf/configs.yml";
+    pub const TECHS: &str = "./conf/techs.yml";
 
     // small pieces of markdown which require some data to be filled in
-    pub const SHIELD: &str = "./assets/tpl/SHIELD.md";
-    pub const AUTHOR: &str = "./assets/tpl/AUTHOR.md";
-    pub const SUPPORT: &str = "./assets/tpl/SUPPORT.md";
+    pub const SHIELD: &str = "./tpl/SHIELD.md";
+    pub const AUTHOR: &str = "./tpl/AUTHOR.md";
+    pub const SUPPORT: &str = "./tpl/SUPPORT.md";
 
     // large macro templates of the README file
-    pub const HEADER: &str = "./assets/tpl/HEADER.md";
-    pub const TOC: &str = "./assets/tpl/TABLE_OF_CONTENT.md";
-    pub const BODY: &str = "./assets/tpl/BODY.md";
-    pub const FOOTER: &str = "./assets/tpl/FOOTER.md";
+    pub const HEADER: &str = "./tpl/HEADER.md";
+    pub const TOC: &str = "./tpl/TABLE_OF_CONTENT.md";
+    pub const BODY: &str = "./tpl/BODY.md";
+    pub const FOOTER: &str = "./tpl/FOOTER.md";
 }
 
 /// Used from entities that can be displayed as markdown
