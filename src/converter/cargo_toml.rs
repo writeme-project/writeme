@@ -108,7 +108,7 @@ impl Component for CargoToml {
                 version: Some(value.to_string()),
             });
         } else if value.is_object() {
-            let version = value["version"].as_str();
+            let version = value["package"]["version"].as_str();
 
             // there must be a better way to do the below but my rust skills are 🥴
             // future us: improve this!
@@ -139,32 +139,32 @@ impl Component for CargoToml {
 
         let json: Value = toml::from_str(&file_contents.as_str()).unwrap();
 
-        if !json["name"].is_null()
-            && json["name"].as_str().is_some()
-            && json["name"].as_str().unwrap().len() > 0
+        if !json["package"]["name"].is_null()
+            && json["package"]["name"].as_str().is_some()
+            && json["package"]["name"].as_str().unwrap().len() > 0
         {
-            output.name = Some(json["name"].to_string());
+            output.name = Some(json["package"]["name"].to_string());
         }
 
-        if !json["version"].is_null()
-            && json["version"].as_str().is_some()
-            && json["version"].as_str().unwrap().len() > 0
+        if !json["package"]["version"].is_null()
+            && json["package"]["version"].as_str().is_some()
+            && json["package"]["version"].as_str().unwrap().len() > 0
         {
-            output.version = Some(json["version"].to_string());
+            output.version = Some(json["package"]["version"].to_string());
         }
 
-        if !json["description"].is_null()
-            && json["description"].as_str().is_some()
-            && json["description"].as_str().unwrap().len() > 0
+        if !json["package"]["description"].is_null()
+            && json["package"]["description"].as_str().is_some()
+            && json["package"]["description"].as_str().unwrap().len() > 0
         {
-            output.description = Some(json["description"].to_string());
+            output.description = Some(json["package"]["description"].to_string());
         }
 
-        if !json["repository_url"].is_null()
-            && json["repository_url"].as_str().is_some()
-            && json["repository_url"].as_str().unwrap().len() > 0
+        if !json["package"]["repository"].is_null()
+            && json["package"]["repository"].as_str().is_some()
+            && json["package"]["repository"].as_str().unwrap().len() > 0
         {
-            output.repository_url = Some(json["repository_url"].to_string());
+            output.repository_url = Some(json["package"]["repository"].to_string());
         }
 
         output.contributors = json["package"]["authors"].as_array().map(|v| {
@@ -189,7 +189,6 @@ impl Component for CargoToml {
             .as_array()
             .map(|v| v.iter().map(|s| s.to_string()).collect());
         output.homepage_url = Some(json["package"]["homepage"].to_string());
-        output.repository_url = Some(json["package"]["repository"].to_string());
 
         output.dependencies = json["dependencies"].as_object().map(|v| {
             v.iter()
