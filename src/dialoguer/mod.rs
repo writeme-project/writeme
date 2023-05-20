@@ -9,11 +9,13 @@ use crate::merger::MergeValue;
 // use log_update::LogUpdate;
 // use std::{io::stdout, thread::sleep, time::Duration};
 
+// say hi to the user
 pub fn hello() {
     wirtino();
     println!("{} {}\n", "WRITEME".cyan(), "v0.1.0".bright_green());
 }
 
+// our little mascot
 fn wirtino() {
     let eyes = vec!["•", "o", "•", "o"];
     let mouths = vec!["O", "•", "O", "•"];
@@ -73,6 +75,7 @@ fn wirtino() {
     // }
 }
 
+// show conflicts to the user and ask which value to keep
 pub fn conflict<T: Clone + Debug + Display>(
     field_name: &str,
     values: Vec<MergeValue<T>>,
@@ -122,6 +125,30 @@ pub fn conflict<T: Clone + Debug + Display>(
     with_value[selection].value.clone()
 }
 
+// show the list of processed files to the user
+pub fn processed_files(files: Vec<String>) {
+    let head = "Files processed";
+    // make a rectangle and put all the files in it
+    let max_len = files.iter().map(|f| f.len()).max().unwrap_or(0);
+    let mut rectangle = String::new();
+    rectangle.push_str(&format!(
+        "╭─{}{}╮\n",
+        head.cyan(),
+        "─".repeat(max_len + 1 - head.len())
+    ));
+    for file in files {
+        rectangle.push_str(&format!(
+            "│ {}{} │\n",
+            file,
+            " ".repeat(max_len - file.len())
+        ));
+    }
+    rectangle.push_str(&format!("╰{}╯\n", "─".repeat(max_len + 2)));
+
+    println!("{}", rectangle);
+}
+
+// say bye to the user
 pub fn bye() {
     println!(
         "{} {}",
@@ -130,6 +157,7 @@ pub fn bye() {
     );
 }
 
+// fuck, something went wrong
 pub fn error(msg: &str, arg: &dyn Display) {
     let formatted = format!("{}", arg);
     let result = msg.replace("{}", &formatted);

@@ -40,6 +40,8 @@ fn writeme(project_location: &str) {
         }
     };
 
+    dialoguer::processed_files(configs.clone());
+
     let mut outputs = vec![];
 
     for config in configs {

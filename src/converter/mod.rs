@@ -15,7 +15,6 @@ use std::{
 
 use crate::utils::{paths, trim, GenMarkdown};
 use anyhow::{anyhow, Error};
-use colored::Colorize;
 use serde::Serialize;
 use serde_json::{json, Value};
 
@@ -553,12 +552,6 @@ impl Converter {
             Some(Err(e)) => return Err(anyhow!(e)),
             None => return Err(anyhow!("File not found")),
         };
-
-        println!(
-            "{} {}",
-            "Processing config file:".cyan(),
-            path.bright_green()
-        );
 
         let output = match config_file {
             SupportedFile::PackageJson => package_json::PackageJson::new().convert(contents),
