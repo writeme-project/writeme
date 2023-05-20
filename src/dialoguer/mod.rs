@@ -130,6 +130,11 @@ pub fn processed_files(files: Vec<String>) {
     let head = "Files processed";
     // make a rectangle and put all the files in it
     let max_len = files.iter().map(|f| f.len()).max().unwrap_or(0);
+
+    if max_len == 0 {
+        return;
+    }
+
     let mut rectangle = String::new();
     rectangle.push_str(&format!(
         "╭─{}{}╮\n",
