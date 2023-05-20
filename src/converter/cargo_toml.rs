@@ -2,7 +2,7 @@ use serde_json::Value;
 
 use anyhow::{anyhow, Error, Ok};
 
-use super::{Component, Contributor, ConverterOutput, Decorator, Dependency};
+use super::{Component, Contributor, ConverterOutput, Decorator, Dependency, SupportedFile};
 
 /// The Cargo.toml file relevant contents
 ///
@@ -135,21 +135,35 @@ impl Component for CargoToml {
     fn convert(&self, file_contents: String) -> Result<ConverterOutput, Error> {
         let mut output = ConverterOutput::empty();
 
+        output.source_config_file = SupportedFile::CargoToml;
+
         let json: Value = toml::from_str(&file_contents.as_str()).unwrap();
 
-        if !json["name"].is_null() && json["name"].as_str().is_some() {
+        if !json["name"].is_null()
+            && json["name"].as_str().is_some()
+            && json["name"].as_str().unwrap().len() > 0
+        {
             output.name = Some(json["name"].to_string());
         }
 
-        if !json["version"].is_null() && json["version"].as_str().is_some() {
+        if !json["version"].is_null()
+            && json["version"].as_str().is_some()
+            && json["version"].as_str().unwrap().len() > 0
+        {
             output.version = Some(json["version"].to_string());
         }
 
-        if !json["description"].is_null() && json["description"].as_str().is_some() {
+        if !json["description"].is_null()
+            && json["description"].as_str().is_some()
+            && json["description"].as_str().unwrap().len() > 0
+        {
             output.description = Some(json["description"].to_string());
         }
 
-        if !json["repository_url"].is_null() && json["repository_url"].as_str().is_some() {
+        if !json["repository_url"].is_null()
+            && json["repository_url"].as_str().is_some()
+            && json["repository_url"].as_str().unwrap().len() > 0
+        {
             output.repository_url = Some(json["repository_url"].to_string());
         }
 

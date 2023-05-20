@@ -6,7 +6,7 @@ use anyhow::{anyhow, Error};
 
 use super::{
     Component, Contributor, Contributors, ConverterOutput, Decorator, Dependency, EnumIterator,
-    Funding, FundingType, Fundings,
+    Funding, FundingType, Fundings, SupportedFile,
 };
 
 /// The package.json parser
@@ -27,21 +27,35 @@ impl Component for PackageJson {
     fn convert(&self, file_contents: String) -> Result<ConverterOutput, Error> {
         let mut output = ConverterOutput::empty();
 
+        output.source_config_file = SupportedFile::PackageJson;
+
         let json: Value = serde_json::from_str(&file_contents.as_str()).unwrap();
 
-        if !json["name"].is_null() && json["name"].as_str().is_some() {
+        if !json["name"].is_null()
+            && json["name"].as_str().is_some()
+            && json["name"].as_str().unwrap().len() > 0
+        {
             output.name = Some(json["name"].to_string());
         }
 
-        if !json["version"].is_null() && json["version"].as_str().is_some() {
+        if !json["version"].is_null()
+            && json["version"].as_str().is_some()
+            && json["version"].as_str().unwrap().len() > 0
+        {
             output.version = Some(json["version"].to_string());
         }
 
-        if !json["description"].is_null() && json["description"].as_str().is_some() {
+        if !json["description"].is_null()
+            && json["description"].as_str().is_some()
+            && json["description"].as_str().unwrap().len() > 0
+        {
             output.description = Some(json["description"].to_string());
         }
 
-        if !json["repository_url"].is_null() && json["repository_url"].as_str().is_some() {
+        if !json["repository_url"].is_null()
+            && json["repository_url"].as_str().is_some()
+            && json["repository_url"].as_str().unwrap().len() > 0
+        {
             output.repository_url = Some(json["repository_url"].to_string());
         }
 
@@ -65,7 +79,10 @@ impl Component for PackageJson {
             );
         }
 
-        if !json["license"].is_null() && json["license"].as_str().is_some() {
+        if !json["license"].is_null()
+            && json["license"].as_str().is_some()
+            && json["license"].as_str().unwrap().len() > 0
+        {
             output.license = Some(json["license"].to_string());
         }
 
@@ -77,11 +94,14 @@ impl Component for PackageJson {
         if json["repository"].as_object().is_some() {
             let repo = json["repository"].as_object().unwrap();
 
-            if repo["url"].as_str().is_some() {
+            if !repo["url"].is_null() && repo["url"].as_str().is_some() {
                 output.repository_url = Some(repo["url"].to_string());
             }
-        } else if json["repository"].as_str().is_some() {
+        } else if json["repository"].as_str().is_some()
+            && json["repository"].as_str().unwrap().len() > 0
+        {
             output.repository_url = Some(json["repository"].to_string());
+            println!("{:?}", json["repository_url"]);
         }
 
         output.dependencies = json["dependencies"].as_object().map(|v| {

@@ -1,9 +1,25 @@
 use std::fmt::{Debug, Display};
 
-use crate::converter::ConverterOutput;
+use crate::converter::{ConverterOutput, SupportedFile};
 use crate::dialoguer::conflict;
 use anyhow::{Error, Ok};
 use itertools::Itertools;
+
+#[derive(Clone, Debug)]
+/// Identifies a value that needs to be merged. It contains the value itself and some metadata
+pub struct MergeValue<T> {
+    pub value: Option<T>,
+    pub source_config_file: SupportedFile,
+}
+
+impl<T: Display> Display for MergeValue<T> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match &self.value {
+            Some(value) => write!(f, "{} ({})", value, self.source_config_file),
+            None => write!(f, "None ({})", self.source_config_file),
+        }
+    }
+}
 
 /// Merges the information of multiple config files into a single object
 ///
@@ -19,9 +35,9 @@ impl Merger {
     fn merge_field<T: Clone + Debug + Display>(
         &self,
         field_name: &str,
-        values: Vec<Option<T>>,
+        values: Vec<MergeValue<T>>,
     ) -> Option<T> {
-        conflict(field_name, values.clone())
+        conflict(field_name, values)
     }
 
     /// Merges the vector fields of the provided configs into a single value by asking the user which one to keep
@@ -32,9 +48,12 @@ impl Merger {
             "name",
             converted_configs
                 .iter()
-                .map(|config| config.name.clone())
-                .filter(|item| item.is_some() && !item.as_ref().unwrap().is_empty())
-                .unique()
+                .filter(|config| config.name.is_some() && !config.name.as_ref().unwrap().is_empty())
+                .unique_by(|item| item.name.clone())
+                .map(|config| MergeValue {
+                    value: config.name.clone(),
+                    source_config_file: config.source_config_file,
+                })
                 .collect(),
         );
 
@@ -42,9 +61,14 @@ impl Merger {
             "description",
             converted_configs
                 .iter()
-                .map(|config| config.description.clone())
-                .filter(|item| item.is_some() && !item.as_ref().unwrap().is_empty())
-                .unique()
+                .filter(|config| {
+                    config.description.is_some() && !config.description.as_ref().unwrap().is_empty()
+                })
+                .unique_by(|item| item.description.clone())
+                .map(|config| MergeValue {
+                    value: config.description.clone(),
+                    source_config_file: config.source_config_file,
+                })
                 .collect(),
         );
 
@@ -52,9 +76,14 @@ impl Merger {
             "version",
             converted_configs
                 .iter()
-                .map(|config| config.version.clone())
-                .filter(|item| item.is_some() && !item.as_ref().unwrap().is_empty())
-                .unique()
+                .filter(|config| {
+                    config.version.is_some() && !config.version.as_ref().unwrap().is_empty()
+                })
+                .unique_by(|item| item.version.clone())
+                .map(|config| MergeValue {
+                    value: config.version.clone(),
+                    source_config_file: config.source_config_file,
+                })
                 .collect(),
         );
 
@@ -62,9 +91,14 @@ impl Merger {
             "license",
             converted_configs
                 .iter()
-                .map(|config| config.license.clone())
-                .filter(|item| item.is_some() && !item.as_ref().unwrap().is_empty())
-                .unique()
+                .filter(|config| {
+                    config.license.is_some() && !config.license.as_ref().unwrap().is_empty()
+                })
+                .unique_by(|item| item.license.clone())
+                .map(|config| MergeValue {
+                    value: config.license.clone(),
+                    source_config_file: config.source_config_file,
+                })
                 .collect(),
         );
 
@@ -72,9 +106,15 @@ impl Merger {
             "repository_url",
             converted_configs
                 .iter()
-                .map(|config| config.repository_url.clone())
-                .filter(|item| item.is_some() && !item.as_ref().unwrap().is_empty())
-                .unique()
+                .filter(|config| {
+                    config.repository_url.is_some()
+                        && !config.repository_url.as_ref().unwrap().is_empty()
+                })
+                .unique_by(|item| item.repository_url.clone())
+                .map(|config| MergeValue {
+                    value: config.repository_url.clone(),
+                    source_config_file: config.source_config_file,
+                })
                 .collect(),
         );
 

@@ -15,6 +15,7 @@ use std::{
 
 use crate::utils::{paths, trim, GenMarkdown};
 use anyhow::{anyhow, Error};
+use colored::Colorize;
 use serde::Serialize;
 use serde_json::{json, Value};
 
@@ -46,6 +47,7 @@ pub struct ConcreteComponent {}
 impl Component for ConcreteComponent {
     fn convert(&self, _file_contents: String) -> Result<ConverterOutput, Error> {
         Ok(ConverterOutput {
+            source_config_file: SupportedFile::NotSupported,
             name: None,
             description: None,
             version: None,
@@ -120,10 +122,13 @@ pub trait Decorator: Component {
     fn new(/* component: Rc<dyn Component> */) -> Self;
 }
 
-enum SupportedFile {
+#[derive(Debug, Clone, Copy)]
+pub enum SupportedFile {
     ComposerJson,
     PackageJson,
     CargoToml,
+    GitRepository,
+    NotSupported,
 }
 
 impl SupportedFile {
@@ -134,6 +139,20 @@ impl SupportedFile {
             "Cargo.toml" => Ok(SupportedFile::CargoToml),
             _ => Err(anyhow!("Unsupported file type")),
         }
+    }
+}
+
+impl Display for SupportedFile {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let file_type = match self {
+            SupportedFile::ComposerJson => "composer.json",
+            SupportedFile::PackageJson => "package.json",
+            SupportedFile::CargoToml => "Cargo.toml",
+            SupportedFile::GitRepository => "Git repository",
+            SupportedFile::NotSupported => "Not supported",
+        };
+
+        write!(f, "{}", file_type)
     }
 }
 
@@ -443,6 +462,8 @@ impl Iterator for Fundings {
 #[derive(Debug, Clone)]
 /// The output object that will be returned from each converter implementation regardless of the config file provided
 pub struct ConverterOutput {
+    pub source_config_file: SupportedFile,
+
     pub name: Option<String>,
     pub description: Option<String>,
     pub version: Option<String>,
@@ -469,6 +490,7 @@ impl ConverterOutput {
     /// Creates a new empty output object
     pub fn empty() -> Self {
         ConverterOutput {
+            source_config_file: SupportedFile::NotSupported,
             name: None,
             description: None,
             version: None,
@@ -532,11 +554,17 @@ impl Converter {
             None => return Err(anyhow!("File not found")),
         };
 
+        println!(
+            "{} {}",
+            "Processing config file:".cyan(),
+            path.bright_green()
+        );
+
         let output = match config_file {
             SupportedFile::PackageJson => package_json::PackageJson::new().convert(contents),
             SupportedFile::ComposerJson => composer_json::ComposerJson::new().convert(contents),
             SupportedFile::CargoToml => cargo_toml::CargoToml::new().convert(contents),
-            // _ => Err(anyhow!("File type not supported")),
+            _ => Err(anyhow!("File type not supported")),
         };
 
         output

@@ -1,5 +1,5 @@
 use crate::{
-    converter::{Contributor, Contributors, ConverterOutput, Dependencies},
+    converter::{Contributor, Contributors, ConverterOutput, Dependencies, SupportedFile},
     utils::{paths, Tech},
 };
 use anyhow::{anyhow, Error};
@@ -105,6 +105,8 @@ pub fn scan_dependencies(dependencies: Dependencies) -> Result<Vec<String>, Erro
 /// Returns a ConverterOutput struct with the data found in the .git folder
 pub fn scan_git(project_location: &str) -> Result<ConverterOutput, Error> {
     let mut git_converter = ConverterOutput::empty();
+
+    git_converter.source_config_file = SupportedFile::GitRepository;
 
     // Open the repository
     let repo = match Repository::open(project_location) {

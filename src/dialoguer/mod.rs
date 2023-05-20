@@ -4,6 +4,8 @@ use dialoguer::Select;
 use dialoguer::{console::style, theme::ColorfulTheme};
 use itertools::Itertools;
 use std::fmt::{Debug, Display};
+
+use crate::merger::MergeValue;
 // use log_update::LogUpdate;
 // use std::{io::stdout, thread::sleep, time::Duration};
 
@@ -71,7 +73,10 @@ fn wirtino() {
     // }
 }
 
-pub fn conflict<T: Clone + Debug + Display>(field_name: &str, values: Vec<Option<T>>) -> Option<T> {
+pub fn conflict<T: Clone + Debug + Display>(
+    field_name: &str,
+    values: Vec<MergeValue<T>>,
+) -> Option<T> {
     // put a space before and after the field name
     let field_name = format!(" {} ", field_name);
     let label = format!(
@@ -82,8 +87,8 @@ pub fn conflict<T: Clone + Debug + Display>(field_name: &str, values: Vec<Option
 
     let with_value = values
         .iter()
-        .filter(|s| s.is_some())
-        .map(|s| s.as_ref().unwrap())
+        .filter(|v| v.value.is_some())
+        // .map(|v| format!("{} - {}", v.value.as_ref().unwrap(), v.source_config_file))
         .collect_vec();
 
     // every value of the field is empty, return None
@@ -95,7 +100,7 @@ pub fn conflict<T: Clone + Debug + Display>(field_name: &str, values: Vec<Option
     let needs_merge = with_value.len() > 1;
 
     if !needs_merge {
-        return Some(with_value[0].clone());
+        return with_value[0].value.clone();
     }
 
     let theme: ColorfulTheme = ColorfulTheme {
@@ -114,7 +119,7 @@ pub fn conflict<T: Clone + Debug + Display>(field_name: &str, values: Vec<Option
 
     println!(" ");
 
-    Some(with_value[selection].clone())
+    with_value[selection].value.clone()
 }
 
 pub fn bye() {
