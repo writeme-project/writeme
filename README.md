@@ -1,6 +1,6 @@
 <p align="center">
     <h1 align="center">
-        📰 writeme
+        ✍️ writeme
     </h1>
     <p align="center">Cross-platform README generator for your project</p>
 </p>
