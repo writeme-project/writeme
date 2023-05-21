@@ -43,7 +43,7 @@
         "@vue/eslint-config-typescript": "^11.0.0",
         "autoprefixer": "^10.4.7",
         "axios": "^0.26.0",
-        "browser-sync": "^2.27.7",
+        "browser-sync": "^2.29.3",
         "browser-sync-webpack-plugin": "^2.3.0",
         "cypress": "^9.6.1",
         "eslint-config-prettier": "^8.5.0",
