@@ -23,7 +23,6 @@
       - [Scope](#scope)
       - [Subject](#subject)
 - [✍️ Authors ](#️-authors-)
-- [🎉 Acknowledgements ](#-acknowledgements-)
 # 🏁 Getting Started <a name = "getting-started"></a>
 
 These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. See deployment for notes on how to deploy the project on a live system.
@@ -54,10 +53,10 @@ Use `writeme --help` to see all the available options.
 
 
 # 📄 License <a name = "license"></a>
-MIT OR Apache-2.0
+GPLv3
 # 🔭 Contributing <a name = "contributing"></a>
 
-🎉 Thank you for being interested in contributing to  project! 🎉 
+🎉 Thank you for being interested in contributing to the project! 🎉 
 
 Feel welcome and read the following sections in order to know how to ask questions and how to work on something.
 
@@ -111,11 +110,13 @@ The subject contains a succinct description of the change:
 -   No dot (.) at the end
 
 # ✍️ Authors <a name = "authors"></a>
-- [BabelDev0](leonardo.straccali@gmail.com)
-- [Luca Corsetti](corsetti.luca28@gmail.com)
+- [BabelDev0](https://github.com/BabelDev0)
+- [Luca Corsetti](https://github.com/ilcors-dev)
 
-# 🎉 Acknowledgements <a name = "acknowledgement"></a>
-- Hat tip to anyone whose code was used
-- Inspiration
-- References
-
+<p align="center">
+<br>
+<a href="https://github.com/BabelDev0" target='_blank'>
+<img height='32' style='border:0px;height:32px;border-radius:.5rem' src='https://img.shields.io/badge/GitHub-100000?style&#x3D;for-the-badge&amp;logo&#x3D;github&amp;logoColor&#x3D;white' border='0' alt='Buy Me a Coffee' />
+ <a href="https://github.com/ilcors-dev" target='_blank'>
+<img height='32' style='border:0px;height:32px;border-radius:.5rem' src='https://img.shields.io/badge/GitHub-100000?style&#x3D;for-the-badge&amp;logo&#x3D;github&amp;logoColor&#x3D;white' border='0' alt='Buy Me a Coffee' />
+ 
