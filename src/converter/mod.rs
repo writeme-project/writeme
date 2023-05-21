@@ -252,8 +252,7 @@ impl GenMarkdown for Contributor {
 
         // build md string if at least name and one of the other fields are present
         if self.name.is_some() && (self.url.is_some() || self.email.is_some()) {
-            let author_tpl =
-                fs::read_to_string(paths::get_path_of(paths::UtilityPath::Author)).unwrap();
+            let author_tpl = paths::read_util_file_contents(paths::UtilityPath::Author);
             let mut handlebars = handlebars::Handlebars::new();
             handlebars
                 .register_template_string("author_tpl", author_tpl)
@@ -398,8 +397,7 @@ impl GenMarkdown for Funding {
             return Err(anyhow!("Funding url is missing"));
         }
 
-        let support_tpl: String =
-            fs::read_to_string(paths::get_path_of(paths::UtilityPath::Support)).unwrap();
+        let support_tpl: String = paths::read_util_file_contents(paths::UtilityPath::Support);
         let mut handlebars = handlebars::Handlebars::new();
         handlebars
             .register_template_string("support_tpl", support_tpl)

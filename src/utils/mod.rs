@@ -3,7 +3,7 @@ use handlebars::Handlebars;
 use rust_search::{FilterExt, SearchBuilder};
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
-use std::{collections::HashMap, fs};
+use std::collections::HashMap;
 
 /// Paths to output files saved to disk produced by the application
 pub mod outputs {
@@ -12,8 +12,6 @@ pub mod outputs {
 
 /// Paths to significant files
 pub mod paths {
-    use std::env;
-
     pub enum UtilityPath {
         Configs,
         Techs,
@@ -31,25 +29,20 @@ pub mod paths {
     }
 
     /// Returns the path of the given file for the given utility type
-    ///
-    /// Needed because the path of the files changes depending on the current working directory when the application
-    /// is distributed as a binary across different platforms
-    pub fn get_path_of(path: UtilityPath) -> String {
-        let cwd = env::current_dir().expect("Failed to get current working directory");
-
+    pub fn read_util_file_contents(path: UtilityPath) -> String {
         let target = match path {
-            UtilityPath::Configs => "conf/configs.yml",
-            UtilityPath::Techs => "conf/techs.yml",
-            UtilityPath::Shield => "conf/tpl/SHIELD.md",
-            UtilityPath::Author => "conf/tpl/AUTHOR.md",
-            UtilityPath::Support => "conf/tpl/SUPPORT.md",
-            UtilityPath::Header => "conf/tpl/HEADER.md",
-            UtilityPath::Toc => "conf/tpl/TABLE_OF_CONTENT.md",
-            UtilityPath::Body => "conf/tpl/BODY.md",
-            UtilityPath::Footer => "conf/tpl/FOOTER.md",
+            UtilityPath::Configs => include_str!("../../conf/configs.yml"),
+            UtilityPath::Techs => include_str!("../../conf/techs.yml"),
+            UtilityPath::Shield => include_str!("../../conf/tpl/SHIELD.md"),
+            UtilityPath::Author => include_str!("../../conf/tpl/AUTHOR.md"),
+            UtilityPath::Support => include_str!("../../conf/tpl/SUPPORT.md"),
+            UtilityPath::Header => include_str!("../../conf/tpl/HEADER.md"),
+            UtilityPath::Toc => include_str!("../../conf/tpl/TABLE_OF_CONTENT.md"),
+            UtilityPath::Body => include_str!("../../conf/tpl/BODY.md"),
+            UtilityPath::Footer => include_str!("../../conf/tpl/FOOTER.md"),
         };
 
-        cwd.join(target).to_str().unwrap().to_string()
+        target.to_string()
     }
 }
 
@@ -84,8 +77,7 @@ pub struct Tech {
 
 impl GenMarkdown for Shield {
     fn gen_md(&self) -> Result<String, Error> {
-        let shield_tpl =
-            fs::read_to_string(paths::get_path_of(paths::UtilityPath::Shield)).unwrap();
+        let shield_tpl = paths::read_util_file_contents(paths::UtilityPath::Shield);
         let mut handlebars = Handlebars::new();
         handlebars
             .register_template_string("shield_tpl", shield_tpl)
@@ -110,8 +102,7 @@ pub enum Aligment {
 
 /// Returns the markdown of shields related with the technologies in the project
 pub fn shields(techs: Vec<String>, aligment: Aligment) -> Result<String, Error> {
-    let contents: String = fs::read_to_string(paths::get_path_of(paths::UtilityPath::Techs))
-        .expect("Something went wrong reading the techs file");
+    let contents: String = paths::read_util_file_contents(paths::UtilityPath::Techs);
     let all_techs: HashMap<String, Tech> = serde_yaml::from_str(&contents).unwrap();
     let mut shields: String = String::new();
     for (name, tech) in all_techs {

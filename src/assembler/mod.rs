@@ -8,7 +8,7 @@ use anyhow::Error;
 use handlebars::Handlebars;
 use rand::seq::SliceRandom;
 use serde_json::json;
-use std::fs::{self, File};
+use std::fs::{File};
 use std::io::Write;
 
 const EMOJI_LIST: [&str; 16] = [
@@ -36,8 +36,7 @@ impl<'a> Assembler<'a> {
     }
 
     fn assemble_header(&mut self, to_make_shields: Vec<String>) -> String {
-        let header_tpl =
-            fs::read_to_string(paths::get_path_of(paths::UtilityPath::Header)).unwrap();
+        let header_tpl = paths::read_util_file_contents(paths::UtilityPath::Header);
 
         let shields = shields(to_make_shields, Aligment::Row).unwrap();
 
@@ -57,11 +56,11 @@ impl<'a> Assembler<'a> {
     }
 
     fn assemble_table_of_contents(&self) -> String {
-        fs::read_to_string(paths::get_path_of(paths::UtilityPath::Toc)).unwrap()
+        paths::read_util_file_contents(paths::UtilityPath::Toc)
     }
 
     fn assemble_body(&mut self, to_make_shields: Vec<String>) -> String {
-        let body_tpl = fs::read_to_string(paths::get_path_of(paths::UtilityPath::Body)).unwrap();
+        let body_tpl = paths::read_util_file_contents(paths::UtilityPath::Body);
 
         let shields = shields(to_make_shields, Aligment::Column).unwrap();
 
@@ -79,8 +78,7 @@ impl<'a> Assembler<'a> {
     }
 
     fn assemble_footer(&mut self) -> String {
-        let footer_tpl =
-            fs::read_to_string(paths::get_path_of(paths::UtilityPath::Footer)).unwrap();
+        let footer_tpl = paths::read_util_file_contents(paths::UtilityPath::Footer);
 
         let authors: Option<String> = match self.converted_config.contributors.clone() {
             Some(contributors) => {

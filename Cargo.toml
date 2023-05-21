@@ -1,6 +1,6 @@
 [package]
 name = "writeme"
-version = "0.1.2"
+version = "0.1.5"
 edition = "2021"
 authors = ["Leonardo Straccali", "Luca Corsetti"]
 license = "MIT OR Apache-2.0"
