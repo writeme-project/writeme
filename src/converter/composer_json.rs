@@ -29,32 +29,32 @@ impl Component for ComposerJson {
 
         output.source_config_file = SupportedFile::ComposerJson;
 
-        let json: Value = serde_json::from_str(&file_contents.as_str()).unwrap();
+        let json: Value = serde_json::from_str(file_contents.as_str()).unwrap();
 
         if !json["name"].is_null()
             && json["name"].as_str().is_some()
-            && json["name"].as_str().unwrap().len() > 0
+            && !json["name"].as_str().unwrap().is_empty()
         {
             output.name = Some(json["name"].to_string());
         }
 
         if !json["version"].is_null()
             && json["version"].as_str().is_some()
-            && json["version"].as_str().unwrap().len() > 0
+            && !json["version"].as_str().unwrap().is_empty()
         {
             output.version = Some(json["version"].to_string());
         }
 
         if !json["description"].is_null()
             && json["description"].as_str().is_some()
-            && json["description"].as_str().unwrap().len() > 0
+            && !json["description"].as_str().unwrap().is_empty()
         {
             output.description = Some(json["description"].to_string());
         }
 
         if !json["repository_url"].is_null()
             && json["repository_url"].as_str().is_some()
-            && json["repository_url"].as_str().unwrap().len() > 0
+            && !json["repository_url"].as_str().unwrap().is_empty()
         {
             output.repository_url = Some(json["repository_url"].to_string());
         }
@@ -83,11 +83,11 @@ impl Component for ComposerJson {
         if json["repository"].as_object().is_some() {
             let repo = json["repository"].as_object().unwrap();
 
-            if repo["url"].as_str().is_some() && json["url"].as_str().unwrap().len() > 0 {
+            if repo["url"].as_str().is_some() && !json["url"].as_str().unwrap().is_empty() {
                 output.repository_url = Some(repo["url"].to_string());
             }
         } else if json["repository"].as_str().is_some()
-            && json["repository"].as_str().unwrap().len() > 0
+            && !json["repository"].as_str().unwrap().is_empty()
         {
             output.repository_url = Some(json["repository"].to_string());
         }
@@ -163,7 +163,7 @@ impl Component for ComposerJson {
 
         for possible_value in possible_values.iter() {
             if f_type.contains(possible_value) || url.contains(possible_value) {
-                let f_type = match FundingType::from_str(&possible_value) {
+                let f_type = match FundingType::from_str(possible_value) {
                     Ok(t) => t,
                     Err(_e) => {
                         return Err(anyhow!("Unsupported funding type"));

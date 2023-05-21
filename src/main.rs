@@ -74,9 +74,8 @@ fn writeme(project_location: &str) {
         Ok(_) => {}
         Err(e) => {
             dialoguer::error("Error: Failed to assemble: {}", &e);
-            return;
         }
-    };
+    }
 }
 
 fn main() {

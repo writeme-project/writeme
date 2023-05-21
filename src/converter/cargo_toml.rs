@@ -90,7 +90,7 @@ impl Component for CargoToml {
             ));
         }
 
-        let attrs: Vec<String> = as_str.unwrap().split(" ").map(|s| s.to_string()).collect();
+        let attrs: Vec<String> = as_str.unwrap().split(' ').map(|s| s.to_string()).collect();
 
         let name = attrs.get(0).map(|s| s.to_string());
 
@@ -137,32 +137,32 @@ impl Component for CargoToml {
 
         output.source_config_file = SupportedFile::CargoToml;
 
-        let json: Value = toml::from_str(&file_contents.as_str()).unwrap();
+        let json: Value = toml::from_str(file_contents.as_str()).unwrap();
 
         if !json["package"]["name"].is_null()
             && json["package"]["name"].as_str().is_some()
-            && json["package"]["name"].as_str().unwrap().len() > 0
+            && !json["package"]["name"].as_str().unwrap().is_empty()
         {
             output.name = Some(json["package"]["name"].to_string());
         }
 
         if !json["package"]["version"].is_null()
             && json["package"]["version"].as_str().is_some()
-            && json["package"]["version"].as_str().unwrap().len() > 0
+            && !json["package"]["version"].as_str().unwrap().is_empty()
         {
             output.version = Some(json["package"]["version"].to_string());
         }
 
         if !json["package"]["description"].is_null()
             && json["package"]["description"].as_str().is_some()
-            && json["package"]["description"].as_str().unwrap().len() > 0
+            && !json["package"]["description"].as_str().unwrap().is_empty()
         {
             output.description = Some(json["package"]["description"].to_string());
         }
 
         if !json["package"]["repository"].is_null()
             && json["package"]["repository"].as_str().is_some()
-            && json["package"]["repository"].as_str().unwrap().len() > 0
+            && !json["package"]["repository"].as_str().unwrap().is_empty()
         {
             output.repository_url = Some(json["package"]["repository"].to_string());
         }

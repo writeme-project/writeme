@@ -24,15 +24,14 @@ fn wirtino() {
 
     println!("{}{}{}", corners[0], walls[0], corners[1]);
     println!(
-        "{}{}{}\t{}",
+        "{} {}\t{}",
         eyes[0].cyan().italic(),
-        " ",
         eyes[0].cyan().italic(),
         "HI! I AM WRITINO:".cyan()
     );
     println!(
-        "{}{}{}\t{}",
-        walls[1], " ", walls[1], "Let's write your README!"
+        "{} {}\tLet's write your README!",
+        walls[1], walls[1]
     );
     println!(
         "{}{}{}\n",
@@ -114,7 +113,7 @@ pub fn conflict<T: Clone + Debug + Display>(
 
     // ask the user which value to keep
     let selection = Select::with_theme(&theme)
-        .with_prompt(label.to_string())
+        .with_prompt(label)
         .items(&with_value)
         .default(0)
         .interact()

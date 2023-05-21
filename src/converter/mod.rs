@@ -79,12 +79,12 @@ impl Component for ConcreteComponent {
 
     fn parse_funding(&self, funding: &Value) -> Result<Funding, Error> {
         let possible_values: [&str; 6] = [
-            &FundingType::BITCOIN.to_string(),
-            &FundingType::BuyMeACoffee.to_string(),
-            &FundingType::GITHUB.to_string(),
-            &FundingType::KOFI.to_string(),
-            &FundingType::PATREON.to_string(),
-            &FundingType::GITHUB.to_string(),
+            (FundingType::BITCOIN.to_string()),
+            (FundingType::BuyMeACoffee.to_string()),
+            (FundingType::GITHUB.to_string()),
+            (FundingType::KOFI.to_string()),
+            (FundingType::PATREON.to_string()),
+            (FundingType::GITHUB.to_string()),
         ];
 
         let f_type = funding["type"].to_string();
@@ -92,7 +92,7 @@ impl Component for ConcreteComponent {
 
         for possible_value in possible_values.iter() {
             if possible_value.contains(&f_type) || possible_value.contains(&url) {
-                let f_type = match FundingType::from_str(&possible_value) {
+                let f_type = match FundingType::from_str(possible_value) {
                     Ok(t) => t,
                     Err(_e) => {
                         return Err(anyhow!("Unsupported funding type"));
@@ -255,7 +255,7 @@ impl GenMarkdown for Contributor {
             let author_tpl = fs::read_to_string(paths::AUTHOR).unwrap();
             let mut handlebars = handlebars::Handlebars::new();
             handlebars
-                .register_template_string("author_tpl", author_tpl.clone())
+                .register_template_string("author_tpl", author_tpl)
                 .unwrap();
 
             // extract the url field from the url or email field, at least one of them is present if we are here
@@ -269,7 +269,7 @@ impl GenMarkdown for Contributor {
             return Ok(handlebars.render("author_tpl", &data).unwrap());
         }
 
-        Ok(self.name.clone().unwrap().to_string())
+        Ok(self.name.clone().unwrap())
     }
 }
 
@@ -400,7 +400,7 @@ impl GenMarkdown for Funding {
         let support_tpl: String = fs::read_to_string(paths::SUPPORT).unwrap();
         let mut handlebars = handlebars::Handlebars::new();
         handlebars
-            .register_template_string("support_tpl", support_tpl.clone())
+            .register_template_string("support_tpl", support_tpl)
             .unwrap();
 
         // use only url for now type is useless
@@ -420,7 +420,7 @@ impl GenMarkdown for Funding {
             "template_url": template_url,
         });
 
-        return Ok(handlebars.render("support_tpl", &data).unwrap());
+        Ok(handlebars.render("support_tpl", &data).unwrap())
     }
 }
 
@@ -545,21 +545,20 @@ impl Converter {
         let contents =
             fs::read_to_string(path).expect("Should have been able to read the template file");
 
-        let config_file = match Converter::get_filename(path)
-            .and_then(|filename| Some(SupportedFile::from_str(filename)))
+        let config_file = match Converter::get_filename(path).map(SupportedFile::from_str)
         {
             Some(Ok(f)) => f,
             Some(Err(e)) => return Err(anyhow!(e)),
             None => return Err(anyhow!("File not found")),
         };
 
-        let output = match config_file {
+        
+
+        match config_file {
             SupportedFile::PackageJson => package_json::PackageJson::new().convert(contents),
             SupportedFile::ComposerJson => composer_json::ComposerJson::new().convert(contents),
             SupportedFile::CargoToml => cargo_toml::CargoToml::new().convert(contents),
             _ => Err(anyhow!("File type not supported")),
-        };
-
-        output
+        }
     }
 }

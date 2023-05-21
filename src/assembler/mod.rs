@@ -18,7 +18,7 @@ const EMOJI_LIST: [&str; 16] = [
 fn random_emoji() -> String {
     let mut rng = rand::thread_rng();
     let random_emoji = *EMOJI_LIST.choose(&mut rng).unwrap();
-    return random_emoji.to_string();
+    random_emoji.to_string()
 }
 
 #[derive(Debug)]
@@ -49,16 +49,16 @@ impl<'a> Assembler<'a> {
         });
 
         self.handlebars
-            .register_template_string("header_tpl", header_tpl.clone())
+            .register_template_string("header_tpl", header_tpl)
             .unwrap();
 
         self.handlebars.render("header_tpl", &header).unwrap()
     }
 
     fn assemble_table_of_contents(&self) -> String {
-        let toc_tpl = fs::read_to_string(paths::TOC).unwrap();
+        
 
-        toc_tpl
+        fs::read_to_string(paths::TOC).unwrap()
     }
 
     fn assemble_body(&mut self, to_make_shields: Vec<String>) -> String {
@@ -73,7 +73,7 @@ impl<'a> Assembler<'a> {
         });
 
         self.handlebars
-            .register_template_string("body_tpl", body_tpl.clone())
+            .register_template_string("body_tpl", body_tpl)
             .unwrap();
 
         self.handlebars.render("body_tpl", &body).unwrap()
@@ -93,7 +93,7 @@ impl<'a> Assembler<'a> {
                         Ok(md) => {
                             authors.push_str(&author);
                             authors.push_str(&md);
-                            authors.push_str("\n");
+                            authors.push('\n');
                         }
                         // if there is an error to generate markdown, just skip this contributor
                         Err(_) => continue,
@@ -113,7 +113,7 @@ impl<'a> Assembler<'a> {
                     match f.gen_md() {
                         Ok(md) => {
                             supports.push_str(&md);
-                            supports.push_str(" ");
+                            supports.push(' ');
                         }
                         // if there is an error to generate markdown, just skip this funding
                         Err(_) => continue,
@@ -132,7 +132,7 @@ impl<'a> Assembler<'a> {
         });
 
         self.handlebars
-            .register_template_string("footer_tpl", footer_tpl.clone())
+            .register_template_string("footer_tpl", footer_tpl)
             .unwrap();
 
         self.handlebars.render("footer_tpl", &footer).unwrap()
@@ -154,7 +154,7 @@ impl<'a> Assembler<'a> {
 
         let header = self.assemble_header(to_make_shields.clone());
         let toc = self.assemble_table_of_contents();
-        let body = self.assemble_body(to_make_shields.clone());
+        let body = self.assemble_body(to_make_shields);
         let footer = self.assemble_footer();
 
         readme_file.write_all(header.as_bytes())?;

@@ -61,12 +61,12 @@ impl GenMarkdown for Shield {
         let shield_tpl = fs::read_to_string(paths::SHIELD).unwrap();
         let mut handlebars = Handlebars::new();
         handlebars
-            .register_template_string("shield_tpl", shield_tpl.clone())
+            .register_template_string("shield_tpl", shield_tpl)
             .unwrap();
 
         let data: Value = json!(self);
 
-        return Ok(handlebars.render("shield_tpl", &data).unwrap());
+        Ok(handlebars.render("shield_tpl", &data).unwrap())
     }
 }
 
@@ -93,7 +93,7 @@ pub fn shields(techs: Vec<String>, aligment: Aligment) -> Result<String, Error> 
                 Ok(md) => {
                     shields.push_str(&md);
                     match aligment {
-                        Aligment::Row => shields.push_str(" "),
+                        Aligment::Row => shields.push(' '),
                         Aligment::Column => shields.push_str("</br>"),
                     }
                 }
