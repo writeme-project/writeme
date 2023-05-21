@@ -2,7 +2,14 @@
 name = "writeme"
 version = "0.1.0"
 edition = "2021"
+authors = ["Leonardo Straccali", "Luca Corsetti"]
 license = "MIT OR Apache-2.0"
+description = "Cross-platform README generator for your project"
+readme = "README.md"
+homepage = "https://github.com/BabelDev0/writeme"
+repository = "https://github.com/BabelDev0/writeme"
+keywords = ["readme", "generator", "cross-platform", "rust", "cli", "markdown"]
+categories = ["development-tools", "command-line-utilities"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
