@@ -14,8 +14,8 @@ use git2::Repository;
 
 // Returns list of config files present in the project
 pub fn scan_configs(paths: &Vec<String>) -> Result<Vec<String>, Error> {
-    let contents: String =
-        fs::read_to_string(paths::CONFIGS).expect("Something went wrong reading the config file");
+    let contents: String = fs::read_to_string(paths::get_path_of(paths::UtilityPath::Configs))
+        .expect("Something went wrong reading the config file");
     let all_configs: HashMap<String, Vec<String>> = serde_yaml::from_str(&contents).unwrap();
 
     // list configs as they are always at the end of the path
@@ -43,8 +43,8 @@ pub fn scan_configs(paths: &Vec<String>) -> Result<Vec<String>, Error> {
 
 // Returns the list of techs present in the project found through the config files
 pub fn scan_techs(paths: &Vec<String>) -> Result<Vec<String>, Error> {
-    let contents: String =
-        fs::read_to_string(paths::TECHS).expect("Something went wrong reading the techs file");
+    let contents: String = fs::read_to_string(paths::get_path_of(paths::UtilityPath::Techs))
+        .expect("Something went wrong reading the techs file");
     let all_techs: HashMap<String, Tech> = serde_yaml::from_str(&contents).unwrap();
 
     let mut techs_present: Vec<String> = vec![];
@@ -74,8 +74,8 @@ pub fn scan_techs(paths: &Vec<String>) -> Result<Vec<String>, Error> {
 
 /// Returns the list of dependencies present in the project found through the dependencies field in the configs files
 pub fn scan_dependencies(dependencies: Dependencies) -> Result<Vec<String>, Error> {
-    let contents: String =
-        fs::read_to_string(paths::TECHS).expect("Something went wrong reading the techs file");
+    let contents: String = fs::read_to_string(paths::get_path_of(paths::UtilityPath::Techs))
+        .expect("Something went wrong reading the techs file");
     let all_techs: HashMap<String, Tech> = serde_yaml::from_str(&contents).unwrap();
     let mut dependencies_present: Vec<String> = vec![];
 

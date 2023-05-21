@@ -252,7 +252,8 @@ impl GenMarkdown for Contributor {
 
         // build md string if at least name and one of the other fields are present
         if self.name.is_some() && (self.url.is_some() || self.email.is_some()) {
-            let author_tpl = fs::read_to_string(paths::AUTHOR).unwrap();
+            let author_tpl =
+                fs::read_to_string(paths::get_path_of(paths::UtilityPath::Author)).unwrap();
             let mut handlebars = handlebars::Handlebars::new();
             handlebars
                 .register_template_string("author_tpl", author_tpl)
@@ -397,7 +398,8 @@ impl GenMarkdown for Funding {
             return Err(anyhow!("Funding url is missing"));
         }
 
-        let support_tpl: String = fs::read_to_string(paths::SUPPORT).unwrap();
+        let support_tpl: String =
+            fs::read_to_string(paths::get_path_of(paths::UtilityPath::Support)).unwrap();
         let mut handlebars = handlebars::Handlebars::new();
         handlebars
             .register_template_string("support_tpl", support_tpl)
@@ -545,14 +547,11 @@ impl Converter {
         let contents =
             fs::read_to_string(path).expect("Should have been able to read the template file");
 
-        let config_file = match Converter::get_filename(path).map(SupportedFile::from_str)
-        {
+        let config_file = match Converter::get_filename(path).map(SupportedFile::from_str) {
             Some(Ok(f)) => f,
             Some(Err(e)) => return Err(anyhow!(e)),
             None => return Err(anyhow!("File not found")),
         };
-
-        
 
         match config_file {
             SupportedFile::PackageJson => package_json::PackageJson::new().convert(contents),
