@@ -12,7 +12,8 @@ use crate::merger::MergeValue;
 // say hi to the user
 pub fn hello() {
     wirtino();
-    println!("{} {}\n", "WRITEME".cyan(), "v0.1.0".bright_green());
+    const VERSION: &str = env!("CARGO_PKG_VERSION");
+    println!("{} {}\n", "WRITEME".cyan(), VERSION.bright_green());
 }
 
 // our little mascot
@@ -29,10 +30,7 @@ fn wirtino() {
         eyes[0].cyan().italic(),
         "HI! I AM WRITINO:".cyan()
     );
-    println!(
-        "{} {}\tLet's write your README!",
-        walls[1], walls[1]
-    );
+    println!("{} {}\tLet's write your README!", walls[1], walls[1]);
     println!(
         "{}{}{}\n",
         corners[2],
@@ -128,10 +126,12 @@ pub fn conflict<T: Clone + Debug + Display>(
 pub fn processed_files(files: Vec<String>) {
     let head = "Files processed";
     // make a rectangle and put all the files in it
-    let max_len = files.iter().map(|f| f.len()).max().unwrap_or(0);
+    let mut max_len = files.iter().map(|f| f.len()).max().unwrap_or(0);
 
     if max_len == 0 {
         return;
+    } else if max_len < head.len() {
+        max_len = head.len();
     }
 
     let mut rectangle = String::new();
