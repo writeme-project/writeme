@@ -1,13 +1,10 @@
 use crate::{
-    converter::{Contributor, Contributors, ConverterOutput, Dependencies, SupportedFile},
+    converter::{Contributor, Contributors, ConverterOutput, Dependencies},
     utils::{paths, Tech},
 };
 use anyhow::{anyhow, Error};
 use itertools::Itertools;
-use std::{
-    collections::HashMap,
-    vec,
-};
+use std::{collections::HashMap, vec};
 
 use git2::Repository;
 
@@ -102,7 +99,7 @@ pub fn scan_dependencies(dependencies: Dependencies) -> Result<Vec<String>, Erro
 pub fn scan_git(project_location: &str) -> Result<ConverterOutput, Error> {
     let mut git_converter = ConverterOutput::empty();
 
-    git_converter.source_config_file = SupportedFile::GitRepository;
+    git_converter.source_config_file_path = project_location.to_string();
 
     // Open the repository
     let repo = match Repository::open(project_location) {

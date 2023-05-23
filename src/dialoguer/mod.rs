@@ -1,4 +1,4 @@
-use anyhow::Context;
+
 use colored::Colorize;
 use dialoguer::console::Style;
 use dialoguer::Select;

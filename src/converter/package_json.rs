@@ -6,7 +6,7 @@ use anyhow::{anyhow, Error};
 
 use super::{
     Component, Contributor, Contributors, ConverterOutput, Decorator, Dependency, EnumIterator,
-    Funding, FundingType, Fundings, SupportedFile,
+    Funding, FundingType, Fundings,
 };
 
 /// The package.json parser
@@ -24,10 +24,10 @@ impl Decorator for PackageJson {
 }
 
 impl Component for PackageJson {
-    fn convert(&self, file_contents: String) -> Result<ConverterOutput, Error> {
+    fn convert(&self, file_path: String, file_contents: String) -> Result<ConverterOutput, Error> {
         let mut output = ConverterOutput::empty();
 
-        output.source_config_file = SupportedFile::PackageJson;
+        output.source_config_file_path = file_path;
 
         let json: Value = serde_json::from_str(file_contents.as_str()).unwrap();
 

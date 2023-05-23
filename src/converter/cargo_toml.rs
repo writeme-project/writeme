@@ -2,7 +2,7 @@ use serde_json::Value;
 
 use anyhow::{anyhow, Error, Ok};
 
-use super::{Component, Contributor, ConverterOutput, Decorator, Dependency, SupportedFile};
+use super::{Component, Contributor, ConverterOutput, Decorator, Dependency};
 
 /// The Cargo.toml file relevant contents
 ///
@@ -132,10 +132,10 @@ impl Component for CargoToml {
         ))
     }
 
-    fn convert(&self, file_contents: String) -> Result<ConverterOutput, Error> {
+    fn convert(&self, file_path: String, file_contents: String) -> Result<ConverterOutput, Error> {
         let mut output = ConverterOutput::empty();
 
-        output.source_config_file = SupportedFile::CargoToml;
+        output.source_config_file_path = file_path;
 
         let json: Value = toml::from_str(file_contents.as_str()).unwrap();
 

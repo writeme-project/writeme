@@ -1,6 +1,6 @@
 use std::fmt::{Debug, Display};
 
-use crate::converter::{ConverterOutput, SupportedFile};
+use crate::converter::{ConverterOutput};
 use crate::dialoguer::conflict;
 use anyhow::{Error, Ok};
 use itertools::Itertools;
@@ -9,14 +9,14 @@ use itertools::Itertools;
 /// Identifies a value that needs to be merged. It contains the value itself and some metadata
 pub struct MergeValue<T> {
     pub value: Option<T>,
-    pub source_config_file: SupportedFile,
+    pub source_config_file_path: String,
 }
 
 impl<T: Display> Display for MergeValue<T> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match &self.value {
-            Some(value) => write!(f, "{} ({})", value, self.source_config_file),
-            None => write!(f, "None ({})", self.source_config_file),
+            Some(value) => write!(f, "{} ({})", value, self.source_config_file_path),
+            None => write!(f, "None ({})", self.source_config_file_path),
         }
     }
 }
@@ -52,7 +52,7 @@ impl Merger {
                 .unique_by(|item| item.name.clone())
                 .map(|config| MergeValue {
                     value: config.name.clone(),
-                    source_config_file: config.source_config_file,
+                    source_config_file_path: config.source_config_file_path.clone(),
                 })
                 .collect(),
         );
@@ -67,7 +67,7 @@ impl Merger {
                 .unique_by(|item| item.description.clone())
                 .map(|config| MergeValue {
                     value: config.description.clone(),
-                    source_config_file: config.source_config_file,
+                    source_config_file_path: config.source_config_file_path.clone(),
                 })
                 .collect(),
         );
@@ -82,7 +82,7 @@ impl Merger {
                 .unique_by(|item| item.version.clone())
                 .map(|config| MergeValue {
                     value: config.version.clone(),
-                    source_config_file: config.source_config_file,
+                    source_config_file_path: config.source_config_file_path.clone(),
                 })
                 .collect(),
         );
@@ -97,7 +97,7 @@ impl Merger {
                 .unique_by(|item| item.license.clone())
                 .map(|config| MergeValue {
                     value: config.license.clone(),
-                    source_config_file: config.source_config_file,
+                    source_config_file_path: config.source_config_file_path.clone(),
                 })
                 .collect(),
         );
@@ -113,7 +113,7 @@ impl Merger {
                 .unique_by(|item| item.repository_url.clone())
                 .map(|config| MergeValue {
                     value: config.repository_url.clone(),
-                    source_config_file: config.source_config_file,
+                    source_config_file_path: config.source_config_file_path.clone(),
                 })
                 .collect(),
         );
