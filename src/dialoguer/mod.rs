@@ -1,3 +1,4 @@
+use anyhow::Context;
 use colored::Colorize;
 use dialoguer::console::Style;
 use dialoguer::Select;
@@ -85,11 +86,7 @@ pub fn conflict<T: Clone + Debug + Display>(
         "Which of these do you want in your awesome README?"
     );
 
-    let with_value = values
-        .iter()
-        .filter(|v| v.value.is_some())
-        // .map(|v| format!("{} - {}", v.value.as_ref().unwrap(), v.source_config_file))
-        .collect_vec();
+    let with_value = values.iter().filter(|v| v.value.is_some()).collect_vec();
 
     // every value of the field is empty, return None
     if with_value.is_empty() {
@@ -114,6 +111,7 @@ pub fn conflict<T: Clone + Debug + Display>(
         .with_prompt(label)
         .items(&with_value)
         .default(0)
+        .max_length(10)
         .interact()
         .unwrap_or(0);
 
