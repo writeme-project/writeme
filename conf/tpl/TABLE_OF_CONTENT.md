@@ -4,7 +4,6 @@
   - [⚙️ Configuration ](#configuration)
   - [⬇️ Installation ](#️installation)
   - [🎈 Usage ](#usage)
-- [🧰 Built Using ](#built-using)
 - [📄 License](#license)
 - [🔭 Contributing ](#contributing)
   - [🐛 Issues ](#issues)

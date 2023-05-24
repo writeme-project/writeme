@@ -22,8 +22,5 @@ command to run the project
 futher instructions...
 
 
-# 🧰 Built Using <a name = "built-using"></a>
-{{{shields}}}
-
 # 📄 License <a name = "license"></a>
 {{license}}

@@ -97,7 +97,7 @@ pub fn trim(s: String) -> Result<String, Error> {
 
 pub enum Aligment {
     Row,
-    Column,
+    // Column,
 }
 
 /// Returns the markdown of shields related with the technologies in the project
@@ -112,7 +112,7 @@ pub fn shields(techs: Vec<String>, aligment: Aligment) -> Result<String, Error> 
                     shields.push_str(&md);
                     match aligment {
                         Aligment::Row => shields.push(' '),
-                        Aligment::Column => shields.push_str("</br>"),
+                        // Aligment::Column => shields.push_str("</br>"),
                     }
                 }
                 // if there is an error to generate markdown, just skip this shield
