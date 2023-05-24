@@ -44,7 +44,11 @@ pub trait Component {
 pub struct ConcreteComponent {}
 
 impl Component for ConcreteComponent {
-    fn convert(&self, _file_path: String, _file_contents: String) -> Result<ConverterOutput, Error> {
+    fn convert(
+        &self,
+        _file_path: String,
+        _file_contents: String,
+    ) -> Result<ConverterOutput, Error> {
         Ok(ConverterOutput {
             source_config_file_path: String::new(),
             name: None,
@@ -126,8 +130,6 @@ pub enum SupportedFile {
     ComposerJson,
     PackageJson,
     CargoToml,
-    GitRepository,
-    NotSupported,
 }
 
 impl SupportedFile {
@@ -147,8 +149,6 @@ impl Display for SupportedFile {
             SupportedFile::ComposerJson => "composer.json",
             SupportedFile::PackageJson => "package.json",
             SupportedFile::CargoToml => "Cargo.toml",
-            SupportedFile::GitRepository => "Git repository",
-            SupportedFile::NotSupported => "Not supported",
         };
 
         write!(f, "{}", file_type)
@@ -561,7 +561,6 @@ impl Converter {
             SupportedFile::CargoToml => {
                 cargo_toml::CargoToml::new().convert(path.to_string(), contents)
             }
-            _ => Err(anyhow!("File type not supported")),
         }
     }
 }
