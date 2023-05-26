@@ -5,8 +5,8 @@
     <p align="center"> Cross-platform Auto-generate README.md for dev projects</p>
 </p>
 
-**writeme** is an project designed to simplify the process of creating a comprehensive **README.md** file for software development projects.
-Primary purpose of writeme is to automatically extract relevant information from your project and generate for you a well-formatted README.md file that includes important details such as project name, description, repository name, usage and configuration steps, funding details, and collaborators.
+**writeme** is a project designed to simplify the process of creating a comprehensive **README.md** file for software development projects.
+The primary purpose of writeme is to automatically extract relevant information from your project and generate for you a well-formatted README.md file that includes important details such as project name, description, repository name, usage and configuration steps, funding details, and collaborators.
 
 writeme primarily extracts information from the project's configuration file. The specific type of configuration file depends on the project, but popular examples include **Cargo.toml**, **package.json**, **composer.json**, and others. To get the best from writeme, take a look at your configuration files
 
