@@ -29,9 +29,15 @@ impl<'a> Assembler<'a> {
 
         let shields = shields(to_make_shields, Aligment::Row).unwrap();
 
-        let header = json!({
+        // if name is none or empty, set it to default "Project Name"
+        if self.converted_config.name.is_none()
+            || self.converted_config.name.as_ref().unwrap().is_empty()
+        {
+            self.converted_config.name = Some("Project Name".to_string());
+        }
 
-            "title": self.converted_config.name.clone(),
+        let header = json!({
+            "title": self.converted_config.name,
             "description": self.converted_config.description.clone(),
             "shields": Some(shields),
             "fantasy_description": Some(fantasy_description()),
