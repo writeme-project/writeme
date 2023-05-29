@@ -6,7 +6,7 @@ use anyhow::{anyhow, Error};
 
 use super::{
     Component, Contributor, ConverterOutput, Decorator, Dependency, EnumIterator, Funding,
-    FundingType, SupportedFile,
+    FundingType,
 };
 
 /// The composer.json parser
@@ -24,10 +24,10 @@ impl Decorator for ComposerJson {
 }
 
 impl Component for ComposerJson {
-    fn convert(&self, file_contents: String) -> Result<ConverterOutput, Error> {
+    fn convert(&self, file_path: String, file_contents: String) -> Result<ConverterOutput, Error> {
         let mut output = ConverterOutput::empty();
 
-        output.source_config_file = SupportedFile::ComposerJson;
+        output.source_config_file_path = file_path;
 
         let json: Value = serde_json::from_str(file_contents.as_str()).unwrap();
 

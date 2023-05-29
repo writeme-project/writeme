@@ -85,11 +85,7 @@ pub fn conflict<T: Clone + Debug + Display>(
         "Which of these do you want in your awesome README?"
     );
 
-    let with_value = values
-        .iter()
-        .filter(|v| v.value.is_some())
-        // .map(|v| format!("{} - {}", v.value.as_ref().unwrap(), v.source_config_file))
-        .collect_vec();
+    let with_value = values.iter().filter(|v| v.value.is_some()).collect_vec();
 
     // every value of the field is empty, return None
     if with_value.is_empty() {
@@ -114,6 +110,7 @@ pub fn conflict<T: Clone + Debug + Display>(
         .with_prompt(label)
         .items(&with_value)
         .default(0)
+        .max_length(10)
         .interact()
         .unwrap_or(0);
 
@@ -124,32 +121,74 @@ pub fn conflict<T: Clone + Debug + Display>(
 
 // show the list of processed files to the user
 pub fn processed_files(files: Vec<String>) {
-    let head = "Files processed";
-    // make a rectangle and put all the files in it
-    let mut max_len = files.iter().map(|f| f.len()).max().unwrap_or(0);
+    let mut processed_files = String::new();
+    let head_str = "Files processed";
+    let no_files_str = "0 files to process";
 
+    let to_show_threshold = 10;
+
+    // max lenght of the files names to show
+    let mut max_len = files
+        .iter()
+        .take(to_show_threshold)
+        .map(|f| f.len())
+        .max()
+        .unwrap_or(0);
+    let remanent = files.len() as i16 - to_show_threshold as i16;
+    let remanents_str = format!("Others {} files processed", remanent);
+
+    // if the max_len is 0, we need to set the max_len to the length of the no_files_str string
+
+    // if there is more that {to_show_threshold} files, but the max_len is less than 27,
+    // we need to set it to remanents_str.len() to avoid the "Others n files processed" string to be cut
+
+    // if there isn't more than {to_show_threshold} files but the max_len is less than no_files_str.len()
+    // we need to set it to no_files_str.len() to avoid the "0 files to process" string to be cut
     if max_len == 0 {
-        return;
-    } else if max_len < head.len() {
-        max_len = head.len();
+        max_len = no_files_str.len();
+    } else if max_len < remanents_str.len() && remanent > 0 {
+        max_len = remanents_str.len();
+    } else if max_len < head_str.len() {
+        max_len = head_str.len();
     }
 
-    let mut rectangle = String::new();
-    rectangle.push_str(&format!(
+    // head_strer, push ╭─Files processed───────╮
+    processed_files.push_str(&format!(
         "╭─{}{}╮\n",
-        head.cyan(),
-        "─".repeat(max_len + 1 - head.len())
+        head_str.cyan(),
+        "─".repeat(max_len + 1 - head_str.len())
     ));
-    for file in files {
-        rectangle.push_str(&format!(
+
+    // if there are no files, push | 0 files to process |
+    if files.len() == 0 {
+        processed_files.push_str(&format!(
+            "│ {}{} │\n",
+            no_files_str,
+            " ".repeat(max_len - no_files_str.len())
+        ));
+    }
+
+    // for each file, push | file_name |
+    for file in files.iter().take(to_show_threshold) {
+        processed_files.push_str(&format!(
             "│ {}{} │\n",
             file,
             " ".repeat(max_len - file.len())
         ));
     }
-    rectangle.push_str(&format!("╰{}╯\n", "─".repeat(max_len + 2)));
 
-    println!("{}", rectangle);
+    if remanent > 0 {
+        processed_files.push_str(&format!(
+            "│ {}{} │\n",
+            remanents_str,
+            " ".repeat(max_len - remanents_str.len())
+        ));
+    }
+
+    // footer, push ╰──────────────────────╯
+    processed_files.push_str(&format!("╰{}╯\n", "─".repeat(max_len + 2)));
+
+    println!("{}", processed_files);
 }
 
 // say bye to the user

@@ -26,7 +26,7 @@ pub mod package_json;
 // decorators.
 pub trait Component {
     /// Convert the config file to the common ConverterOutput object
-    fn convert(&self, file_contents: String) -> Result<ConverterOutput, Error>;
+    fn convert(&self, file_path: String, file_contents: String) -> Result<ConverterOutput, Error>;
 
     /// Parses a contributor from the config file since they are not always in the same format depending on the
     /// config file type
@@ -44,9 +44,13 @@ pub trait Component {
 pub struct ConcreteComponent {}
 
 impl Component for ConcreteComponent {
-    fn convert(&self, _file_contents: String) -> Result<ConverterOutput, Error> {
+    fn convert(
+        &self,
+        _file_path: String,
+        _file_contents: String,
+    ) -> Result<ConverterOutput, Error> {
         Ok(ConverterOutput {
-            source_config_file: SupportedFile::NotSupported,
+            source_config_file_path: String::new(),
             name: None,
             description: None,
             version: None,
@@ -126,8 +130,6 @@ pub enum SupportedFile {
     ComposerJson,
     PackageJson,
     CargoToml,
-    GitRepository,
-    NotSupported,
 }
 
 impl SupportedFile {
@@ -147,8 +149,6 @@ impl Display for SupportedFile {
             SupportedFile::ComposerJson => "composer.json",
             SupportedFile::PackageJson => "package.json",
             SupportedFile::CargoToml => "Cargo.toml",
-            SupportedFile::GitRepository => "Git repository",
-            SupportedFile::NotSupported => "Not supported",
         };
 
         write!(f, "{}", file_type)
@@ -461,7 +461,7 @@ impl Iterator for Fundings {
 #[derive(Debug, Clone)]
 /// The output object that will be returned from each converter implementation regardless of the config file provided
 pub struct ConverterOutput {
-    pub source_config_file: SupportedFile,
+    pub source_config_file_path: String,
 
     pub name: Option<String>,
     pub description: Option<String>,
@@ -489,7 +489,7 @@ impl ConverterOutput {
     /// Creates a new empty output object
     pub fn empty() -> Self {
         ConverterOutput {
-            source_config_file: SupportedFile::NotSupported,
+            source_config_file_path: String::new(),
             name: None,
             description: None,
             version: None,
@@ -552,10 +552,15 @@ impl Converter {
         };
 
         match config_file {
-            SupportedFile::PackageJson => package_json::PackageJson::new().convert(contents),
-            SupportedFile::ComposerJson => composer_json::ComposerJson::new().convert(contents),
-            SupportedFile::CargoToml => cargo_toml::CargoToml::new().convert(contents),
-            _ => Err(anyhow!("File type not supported")),
+            SupportedFile::PackageJson => {
+                package_json::PackageJson::new().convert(path.to_string(), contents)
+            }
+            SupportedFile::ComposerJson => {
+                composer_json::ComposerJson::new().convert(path.to_string(), contents)
+            }
+            SupportedFile::CargoToml => {
+                cargo_toml::CargoToml::new().convert(path.to_string(), contents)
+            }
         }
     }
 }

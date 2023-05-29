@@ -1,25 +1,14 @@
 use crate::{
     converter::ConverterOutput,
     scanner::{scan_dependencies, scan_techs},
-    utils::{paths, shields, Aligment, GenMarkdown},
+    utils::{fantasy_description, paths, shields, Aligment, GenMarkdown},
 };
 use anyhow::Error;
 
 use handlebars::Handlebars;
-use rand::seq::SliceRandom;
 use serde_json::json;
-use std::fs::{File};
+use std::fs::File;
 use std::io::Write;
-
-const EMOJI_LIST: [&str; 16] = [
-    "🖋️", "📝", "📄", "📚", "📖", "📓", "📒", "📃", "📜", "📰", "📑", "🔖", "🔗", "📎", "📐", "📏",
-];
-
-fn random_emoji() -> String {
-    let mut rng = rand::thread_rng();
-    let random_emoji = *EMOJI_LIST.choose(&mut rng).unwrap();
-    random_emoji.to_string()
-}
 
 #[derive(Debug)]
 pub struct Assembler<'a> {
@@ -41,11 +30,11 @@ impl<'a> Assembler<'a> {
         let shields = shields(to_make_shields, Aligment::Row).unwrap();
 
         let header = json!({
-            "icon": Some(random_emoji()),
+
             "title": self.converted_config.name.clone(),
             "description": self.converted_config.description.clone(),
             "shields": Some(shields),
-            "about": Some("".to_string()),
+            "fantasy_description": Some(fantasy_description()),
         });
 
         self.handlebars
@@ -59,14 +48,11 @@ impl<'a> Assembler<'a> {
         paths::read_util_file_contents(paths::UtilityPath::Toc)
     }
 
-    fn assemble_body(&mut self, to_make_shields: Vec<String>) -> String {
+    fn assemble_body(&mut self) -> String {
         let body_tpl = paths::read_util_file_contents(paths::UtilityPath::Body);
-
-        let shields = shields(to_make_shields, Aligment::Column).unwrap();
 
         let body = json!({
             "license": self.converted_config.license.clone(),
-            "shields": Some(shields),
             "repository_url": self.converted_config.repository_url.clone(),
         });
 
@@ -152,7 +138,7 @@ impl<'a> Assembler<'a> {
 
         let header = self.assemble_header(to_make_shields.clone());
         let toc = self.assemble_table_of_contents();
-        let body = self.assemble_body(to_make_shields);
+        let body = self.assemble_body();
         let footer = self.assemble_footer();
 
         readme_file.write_all(header.as_bytes())?;
