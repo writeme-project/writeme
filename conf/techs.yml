@@ -368,3 +368,21 @@ express:
     logo_width: 20
     alt_text: Framework express
     target: https://expressjs.com/
+  
+astro:
+  config_files:
+    - astro.config.mjs
+  dependency_names:
+    - astro
+    - astrojs
+  shield:
+    label: ''
+    message: Astro
+    color: FF5D01
+    logo: Astro
+    label_color: ''
+    logo_color: white
+    style: flat-square
+    logo_width: 20
+    alt_text: Astro framework
+    target: https://astro.build/
