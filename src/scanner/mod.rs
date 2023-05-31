@@ -1,5 +1,6 @@
 use crate::{
     converter::{Contributor, Contributors, ConverterOutput, Dependencies},
+    dialoguer,
     utils::{paths, Tech},
 };
 use anyhow::{anyhow, Error};
@@ -99,7 +100,7 @@ pub fn scan_dependencies(dependencies: Dependencies) -> Result<Vec<String>, Erro
 pub fn scan_git(project_location: &str) -> Result<ConverterOutput, Error> {
     let mut git_converter = ConverterOutput::empty();
 
-    git_converter.source_config_file_path = project_location.to_string();
+    git_converter.source_config_file_path = format!("{}.git", project_location);
 
     // Open the repository
     let repo = match Repository::open(project_location) {
@@ -113,14 +114,16 @@ pub fn scan_git(project_location: &str) -> Result<ConverterOutput, Error> {
     let head = match repo.head() {
         Ok(head) => head,
         Err(e) => {
-            return Err(anyhow!("Failed to get head: {}", e));
+            dialoguer::error("Failed to get repository head: {}", &e);
+            return Ok(git_converter);
         }
     };
 
     let head_commit = match head.peel_to_commit() {
         Ok(commit) => commit,
         Err(e) => {
-            return Err(anyhow!("Failed to peel to commit: {}", e));
+            dialoguer::error("Failed to peel to commit of the repository: {}", &e);
+            return Ok(git_converter);
         }
     };
 
@@ -128,7 +131,8 @@ pub fn scan_git(project_location: &str) -> Result<ConverterOutput, Error> {
     let mut revwalk = match repo.revwalk() {
         Ok(revwalk) => revwalk,
         Err(e) => {
-            return Err(anyhow!("Failed to get revwalk: {}", e));
+            dialoguer::error("Failed to get revwalk of the repository: {}", &e);
+            return Ok(git_converter);
         }
     };
 
@@ -141,14 +145,16 @@ pub fn scan_git(project_location: &str) -> Result<ConverterOutput, Error> {
         let oid = match oid {
             Ok(oid) => oid,
             Err(e) => {
-                return Err(anyhow!("Failed to get oid: {}", e));
+                dialoguer::error("Failed to get oid of the repository: {}", &e);
+                return Ok(git_converter);
             }
         };
 
         let commit = match repo.find_commit(oid) {
             Ok(commit) => commit,
             Err(e) => {
-                return Err(anyhow!("Failed to find commit: {}", e));
+                dialoguer::error("Failed to find commit: {}", &e);
+                return Ok(git_converter);
             }
         };
 
@@ -172,8 +178,6 @@ pub fn scan_git(project_location: &str) -> Result<ConverterOutput, Error> {
         .sorted_by(|a, b| b.1.cmp(a.1))
         .map(|(contributor, _)| contributor.clone())
         .collect();
-
-    git_converter.source_config_file_path = ".git".to_string();
 
     git_converter.contributors = Option::from(contributors);
 
