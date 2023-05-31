@@ -173,15 +173,25 @@ pub fn scan_git(project_location: &str) -> Result<ConverterOutput, Error> {
         .map(|(contributor, _)| contributor.clone())
         .collect();
 
+    git_converter.source_config_file_path = ".git".to_string();
+
     git_converter.contributors = Option::from(contributors);
 
-    git_converter.repository_url = Option::from(
-        repo.find_remote("origin")
-            .unwrap()
-            .url()
-            .unwrap()
-            .to_string(),
-    );
+    let url = repo
+        .find_remote("origin")
+        .unwrap()
+        .url()
+        .unwrap()
+        .to_string();
+
+    git_converter.repository_url = Option::from(url.clone());
+
+    // get project name from url
+    // the url is always in the form https://platform.com/username/project_name.git
+
+    let url = url.split("/").collect::<Vec<&str>>();
+    git_converter.name =
+        Option::from(url[url.len() - 1].split(".").collect::<Vec<&str>>()[0].to_string());
 
     Ok(git_converter)
 }
