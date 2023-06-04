@@ -7,6 +7,12 @@
         "laravel"
     ],
     "license": "MIT",
+    "repositories": {
+        "laravel": {
+            "type": "composer",
+            "url": "https://laravel.satis.beyondco.de"
+        }
+    },
     "require": {
         "php": "^8.0",
         "fruitcake/laravel-cors": "^3.0",
