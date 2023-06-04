@@ -20,6 +20,7 @@ pub mod paths {
         // small pieces of markdown which require some data to be filled in
         Shield,
         Author,
+        ContribRocks,
         Support,
 
         // large macro templates of the README file
@@ -36,6 +37,7 @@ pub mod paths {
             UtilityPath::Techs => include_str!("../../conf/techs.yml"),
             UtilityPath::Shield => include_str!("../../conf/tpl/SHIELD.md"),
             UtilityPath::Author => include_str!("../../conf/tpl/AUTHOR.md"),
+            UtilityPath::ContribRocks => include_str!("../../conf/tpl/CONTRIB_ROCKS.md"),
             UtilityPath::Support => include_str!("../../conf/tpl/SUPPORT.md"),
             UtilityPath::Header => include_str!("../../conf/tpl/HEADER.md"),
             UtilityPath::Toc => include_str!("../../conf/tpl/TABLE_OF_CONTENT.md"),
@@ -91,7 +93,9 @@ impl GenMarkdown for Shield {
 }
 
 /// Used to trim string removing quotes and spaces from the extremities
-/// This is used only in cargo_toml.rs for now
+/// Returns a string slice with leading and trailing annoyingChars removed.
+
+/// 'annoyingChars' are whitespace and double quote.
 pub fn trim(s: String) -> Result<String, Error> {
     Ok(s.trim().trim_matches('"').to_string())
 }
