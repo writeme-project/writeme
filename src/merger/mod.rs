@@ -1,6 +1,6 @@
 use std::fmt::{Debug, Display};
 
-use crate::converter::{ConverterOutput};
+use crate::converter::{ConverterOutput, Repository};
 use crate::dialoguer::conflict;
 use anyhow::{Error, Ok};
 use itertools::Itertools;
@@ -102,21 +102,22 @@ impl Merger {
                 .collect(),
         );
 
-        output.repository_url = self.merge_field(
-            "repository_url",
+        let repository_url = self.merge_field(
+            "repository",
             converted_configs
                 .iter()
                 .filter(|config| {
-                    config.repository_url.is_some()
-                        && !config.repository_url.as_ref().unwrap().is_empty()
+                    config.repository.is_some()
+                        && !config.repository.as_ref().unwrap().url.is_empty()
                 })
-                .unique_by(|item| item.repository_url.clone())
+                .unique_by(|item| item.repository.as_ref().unwrap().url.clone())
                 .map(|config| MergeValue {
-                    value: config.repository_url.clone(),
+                    value: Option::from(config.repository.as_ref().unwrap().url.clone()),
                     source_config_file_path: config.source_config_file_path.clone(),
                 })
                 .collect(),
         );
+        output.repository = Option::from(Repository::new(repository_url.unwrap_or("".to_string())));
 
         // don't merge authors, contributors, dependencies, dev_dependencies, build_dependencies, funding
         // but apply a distinct on them, base on each unique property
