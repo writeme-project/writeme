@@ -1,9 +1,11 @@
 use crate::{
-    converter::{Contributor, Contributors, ConverterOutput, Dependencies},
+    converter::{
+        self, Contributor, Contributors, ConverterOutput, Dependencies, RepositoryPlatform,
+    },
     dialoguer,
     utils::{paths, Tech},
 };
-use anyhow::{anyhow, Error};
+use anyhow::Error;
 use itertools::Itertools;
 use std::{collections::HashMap, vec};
 
@@ -103,12 +105,31 @@ pub fn scan_git(project_location: &str) -> Result<ConverterOutput, Error> {
     git_converter.source_config_file_path = format!("{}.git", project_location);
 
     // Open the repository
-    let repo = match Repository::open(project_location) {
+    let repo: Repository = match Repository::open(project_location) {
         Ok(repo) => repo,
         Err(e) => {
-            return Err(anyhow!("Failed to open repository: {}", e));
+            dialoguer::error("Failed to open repository: {}", &e);
+            return Ok(git_converter);
         }
     };
+
+    let url: String = repo
+        .find_remote("origin")
+        .unwrap()
+        .url()
+        .unwrap()
+        .to_string();
+
+    let project_repository = converter::Repository::new(url.clone());
+    git_converter.repository = Option::from(project_repository.clone());
+
+    git_converter.name = project_repository.name.clone();
+
+    // check if the repo is a github repo
+    // if so not need to continue
+    if project_repository.platform == RepositoryPlatform::Github {
+        return Ok(git_converter);
+    }
 
     // Get the head commit
     let head = match repo.head() {
@@ -180,22 +201,6 @@ pub fn scan_git(project_location: &str) -> Result<ConverterOutput, Error> {
         .collect();
 
     git_converter.contributors = Option::from(contributors);
-
-    let url = repo
-        .find_remote("origin")
-        .unwrap()
-        .url()
-        .unwrap()
-        .to_string();
-
-    git_converter.repository_url = Option::from(url.clone());
-
-    // get project name from url
-    // the url is always in the form https://platform.com/username/project_name.git
-
-    let url = url.split("/").collect::<Vec<&str>>();
-    git_converter.name =
-        Option::from(url[url.len() - 1].split(".").collect::<Vec<&str>>()[0].to_string());
 
     Ok(git_converter)
 }
