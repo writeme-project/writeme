@@ -1,12 +1,12 @@
 use std::str::FromStr;
 
-use serde_json::Value;
-
 use anyhow::{anyhow, Error};
+use serde_json::Value;
+use strum::IntoEnumIterator;
 
 use super::{
-    Component, Contributor, Contributors, ConverterOutput, Decorator, Dependency, EnumIterator,
-    Funding, FundingType, Fundings,
+    Component, Contributor, Contributors, ConverterOutput, Decorator, Dependency, Funding,
+    FundingType, Fundings, Repository,
 };
 
 /// The package.json parser
@@ -52,13 +52,6 @@ impl Component for PackageJson {
             output.description = Some(json["description"].to_string());
         }
 
-        if !json["repository_url"].is_null()
-            && json["repository_url"].as_str().is_some()
-            && !json["repository_url"].as_str().unwrap().is_empty()
-        {
-            output.repository_url = Some(json["repository_url"].to_string());
-        }
-
         if json["author"].as_object().is_some() {
             let author = self.parse_contributor(&json["author"]);
 
@@ -95,13 +88,12 @@ impl Component for PackageJson {
             let repo = json["repository"].as_object().unwrap();
 
             if !repo["url"].is_null() && repo["url"].as_str().is_some() {
-                output.repository_url = Some(repo["url"].to_string());
+                output.repository = Some(Repository::new(repo["url"].to_string()));
             }
         } else if json["repository"].as_str().is_some()
             && !json["repository"].as_str().unwrap().is_empty()
         {
-            output.repository_url = Some(json["repository"].to_string());
-            println!("{:?}", json["repository_url"]);
+            output.repository = Some(Repository::new(json["repository"].to_string()));
         }
 
         output.dependencies = json["dependencies"].as_object().map(|v| {
@@ -141,7 +133,6 @@ impl Component for PackageJson {
                 Err(_e) => (),
             };
         }
-
         output.trim();
         Ok(output)
     }
@@ -173,7 +164,7 @@ impl Component for PackageJson {
     }
 
     fn parse_funding(&self, funding: &Value) -> Result<Funding, Error> {
-        let possible_values = FundingType::enum_iterator()
+        let possible_values = FundingType::iter()
             .map(|t| t.to_string())
             .collect::<Vec<_>>();
 

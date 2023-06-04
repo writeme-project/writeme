@@ -15,8 +15,9 @@ use std::{
 
 use crate::utils::{paths, trim, GenMarkdown};
 use anyhow::{anyhow, Error};
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
+use strum::{EnumIter, IntoEnumIterator};
 
 pub mod cargo_toml;
 pub mod composer_json;
@@ -57,7 +58,7 @@ impl Component for ConcreteComponent {
             contributors: None,
             license: None,
             keywords: None,
-            repository_url: None,
+            repository: None,
             homepage_url: None,
             dependencies: None,
             dev_dependencies: None,
@@ -82,14 +83,9 @@ impl Component for ConcreteComponent {
     }
 
     fn parse_funding(&self, funding: &Value) -> Result<Funding, Error> {
-        let possible_values: [&str; 6] = [
-            (FundingType::BITCOIN.to_string()),
-            (FundingType::BuyMeACoffee.to_string()),
-            (FundingType::GITHUB.to_string()),
-            (FundingType::KOFI.to_string()),
-            (FundingType::PATREON.to_string()),
-            (FundingType::GITHUB.to_string()),
-        ];
+        let possible_values = FundingType::iter()
+            .map(|t| t.to_string())
+            .collect::<Vec<_>>();
 
         let f_type = funding["type"].to_string();
         let url = funding["url"].to_string();
@@ -314,7 +310,7 @@ pub struct Funding {
     pub url: Option<String>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, EnumIter)]
 /// The possible funding types
 enum FundingType {
     PAYPAL,
@@ -355,28 +351,6 @@ impl FromStr for FundingType {
             "paypal" => Ok(FundingType::PAYPAL),
             _ => Err(FundingError::FundingNotSupported),
         }
-    }
-}
-
-trait EnumIterator {
-    type Item;
-
-    fn enum_iterator() -> std::slice::Iter<'static, Self::Item>;
-}
-
-impl EnumIterator for FundingType {
-    type Item = FundingType;
-
-    fn enum_iterator() -> std::slice::Iter<'static, FundingType> {
-        static VARIANTS: [FundingType; 6] = [
-            FundingType::BITCOIN,
-            FundingType::BuyMeACoffee,
-            FundingType::GITHUB,
-            FundingType::KOFI,
-            FundingType::PATREON,
-            FundingType::PAYPAL,
-        ];
-        VARIANTS.iter()
     }
 }
 
@@ -458,6 +432,117 @@ impl Iterator for Fundings {
     }
 }
 
+// repository of the project
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct Repository {
+    pub url: String,
+    pub name: Option<String>,
+    pub sign: Option<String>,
+    pub platform: RepositoryPlatform,
+}
+
+impl Repository {
+    pub fn new(url: String) -> Self {
+        let url = trim(url).unwrap();
+        // check that the url is in the https|http://platform/user/name form
+        let regex = regex::Regex::new(r"^https?://[^/]+/[^/]+/[^/]+").unwrap();
+        if !regex.is_match(&url) {
+            return Self {
+                url: url,
+                name: None,
+                sign: None,
+                platform: RepositoryPlatform::Unknown,
+            };
+        }
+
+        let url_split = url.split("/").collect::<Vec<&str>>();
+        let sign = url_split[3..]
+            .join("/")
+            .split(".git")
+            .collect::<Vec<&str>>()[0]
+            .to_string();
+        let name = sign
+            .split("/")
+            .collect::<Vec<&str>>()
+            .last()
+            .unwrap()
+            .to_string();
+
+        let platform_str = url_split[2];
+        let platform = RepositoryPlatform::from_str(platform_str).unwrap();
+        Self {
+            url,
+            sign: Some(sign),
+            name: Some(name),
+            platform: platform,
+        }
+    }
+}
+
+impl GenMarkdown for Repository {
+    fn gen_md(&self) -> Result<String, Error> {
+        let contrib_rocks_tpl = paths::read_util_file_contents(paths::UtilityPath::ContribRocks);
+        let mut handlebars = handlebars::Handlebars::new();
+        handlebars
+            .register_template_string("contrib_rocks_tpl", contrib_rocks_tpl)
+            .unwrap();
+
+        let repo_url = self.url.clone();
+        let repo_contrib_url = format!(
+            "{}/graphs/contributors",
+            repo_url.split(".git").collect::<Vec<&str>>()[0].to_string()
+        );
+
+        let data: Value = json!({
+            "repository_contrib_url": repo_contrib_url,
+            "repository_sign": self.sign.clone().unwrap(),
+        });
+
+        Ok(handlebars.render("contrib_rocks_tpl", &data).unwrap())
+    }
+}
+
+// possible repository platforms
+#[derive(Debug, Clone, EnumIter, PartialEq, Eq, Serialize, Deserialize)]
+pub enum RepositoryPlatform {
+    Github,
+    Gitlab,
+    Bitbucket,
+    SelfHosted,
+    Unknown,
+}
+
+impl RepositoryPlatform {
+    fn to_string(&self) -> &'static str {
+        match self {
+            RepositoryPlatform::Github => "github",
+            RepositoryPlatform::Gitlab => "gitlab",
+            RepositoryPlatform::Bitbucket => "bitbucket",
+            RepositoryPlatform::SelfHosted => "self-hosted",
+            RepositoryPlatform::Unknown => "unknown",
+        }
+    }
+}
+
+impl PartialEq<str> for RepositoryPlatform {
+    fn eq(&self, other: &str) -> bool {
+        self.to_string() == other
+    }
+}
+
+impl FromStr for RepositoryPlatform {
+    type Err = ();
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            s if s.contains("github") => Ok(RepositoryPlatform::Github),
+            s if s.contains("gitlab") => Ok(RepositoryPlatform::Gitlab),
+            s if s.contains("bitbucket") => Ok(RepositoryPlatform::Bitbucket),
+            _ => Ok(RepositoryPlatform::Unknown),
+        }
+    }
+}
+
 #[derive(Debug, Clone)]
 /// The output object that will be returned from each converter implementation regardless of the config file provided
 pub struct ConverterOutput {
@@ -469,8 +554,10 @@ pub struct ConverterOutput {
     pub contributors: Option<Contributors>,
     pub license: Option<String>,
     pub keywords: Option<Vec<String>>,
-    pub repository_url: Option<String>,
     pub homepage_url: Option<String>,
+
+    /// repository info
+    pub repository: Option<Repository>,
 
     /// dependencies of the project
     pub dependencies: Option<Dependencies>,
@@ -496,7 +583,7 @@ impl ConverterOutput {
             contributors: None,
             license: None,
             keywords: None,
-            repository_url: None,
+            repository: None,
             homepage_url: None,
             dependencies: None,
             dev_dependencies: None,
@@ -511,7 +598,6 @@ impl ConverterOutput {
         self.description = self.description.take().map(|s| trim(s).unwrap());
         self.version = self.version.take().map(|s| trim(s).unwrap());
         self.license = self.license.take().map(|s| trim(s).unwrap());
-        self.repository_url = self.repository_url.take().map(|s| trim(s).unwrap());
         self.homepage_url = self.homepage_url.take().map(|s| trim(s).unwrap());
     }
 }

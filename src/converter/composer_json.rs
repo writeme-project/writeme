@@ -1,12 +1,12 @@
 use std::str::FromStr;
 
-use serde_json::Value;
-
 use anyhow::{anyhow, Error};
+use serde_json::Value;
+use strum::IntoEnumIterator;
 
 use super::{
-    Component, Contributor, ConverterOutput, Decorator, Dependency, EnumIterator, Funding,
-    FundingType,
+    Component, Contributor, ConverterOutput, Decorator, Dependency, Funding, FundingType,
+    Repository,
 };
 
 /// The composer.json parser
@@ -56,7 +56,7 @@ impl Component for ComposerJson {
             && json["repository_url"].as_str().is_some()
             && !json["repository_url"].as_str().unwrap().is_empty()
         {
-            output.repository_url = Some(json["repository_url"].to_string());
+            output.repository = Some(Repository::new(json["repository_url"].to_string()));
         }
 
         if json["authors"].as_array().is_some() {
@@ -84,12 +84,12 @@ impl Component for ComposerJson {
             let repo = json["repository"].as_object().unwrap();
 
             if repo["url"].as_str().is_some() && !json["url"].as_str().unwrap().is_empty() {
-                output.repository_url = Some(repo["url"].to_string());
+                output.repository = Some(Repository::new(repo["url"].to_string()));
             }
         } else if json["repository"].as_str().is_some()
             && !json["repository"].as_str().unwrap().is_empty()
         {
-            output.repository_url = Some(json["repository"].to_string());
+            output.repository = Some(Repository::new(json["repository"].to_string()));
         }
 
         output.dependencies = json["require"].as_object().map(|v| {
@@ -154,7 +154,7 @@ impl Component for ComposerJson {
     }
 
     fn parse_funding(&self, funding: &Value) -> Result<Funding, Error> {
-        let possible_values = FundingType::enum_iterator()
+        let possible_values = FundingType::iter()
             .map(|t| t.to_string())
             .collect::<Vec<_>>();
 

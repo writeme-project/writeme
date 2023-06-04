@@ -2,7 +2,7 @@ use serde_json::Value;
 
 use anyhow::{anyhow, Error, Ok};
 
-use super::{Component, Contributor, ConverterOutput, Decorator, Dependency};
+use super::{Component, Contributor, ConverterOutput, Decorator, Dependency, Repository};
 
 /// The Cargo.toml file relevant contents
 ///
@@ -164,7 +164,7 @@ impl Component for CargoToml {
             && json["package"]["repository"].as_str().is_some()
             && !json["package"]["repository"].as_str().unwrap().is_empty()
         {
-            output.repository_url = Some(json["package"]["repository"].to_string());
+            output.repository = Some(Repository::new(json["package"]["repository"].to_string()));
         }
 
         output.contributors = json["package"]["authors"].as_array().map(|v| {
