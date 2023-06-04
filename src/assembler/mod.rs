@@ -1,5 +1,5 @@
 use crate::{
-    converter::ConverterOutput,
+    converter::{ConverterOutput, RepositoryPlatform},
     scanner::{scan_dependencies, scan_techs},
     utils::{fantasy_description, paths, shields, Aligment, GenMarkdown},
 };
@@ -59,7 +59,7 @@ impl<'a> Assembler<'a> {
 
         let body = json!({
             "license": self.converted_config.license.clone(),
-            "repository_url": self.converted_config.repository_url.clone(),
+            "repository_url": self.converted_config.repository.as_ref().unwrap().url.clone(),
         });
 
         self.handlebars
@@ -72,28 +72,34 @@ impl<'a> Assembler<'a> {
     fn assemble_footer(&mut self) -> String {
         let footer_tpl = paths::read_util_file_contents(paths::UtilityPath::Footer);
 
-        let authors: Option<String> = match self.converted_config.contributors.clone() {
-            Some(contributors) => {
-                let mut authors = String::new();
+        let contrib_section;
+        let repository = self.converted_config.repository.as_ref().unwrap();
+        if repository.platform == RepositoryPlatform::Github {
+            contrib_section = Some(repository.gen_md().unwrap());
+        } else {
+            contrib_section = match self.converted_config.contributors.clone() {
+                Some(contributors) => {
+                    let mut authors = String::new();
 
-                for c in contributors {
-                    let author = "- ".to_string();
+                    for c in contributors {
+                        let author = "- ".to_string();
 
-                    match c.gen_md() {
-                        Ok(md) => {
-                            authors.push_str(&author);
-                            authors.push_str(&md);
-                            authors.push('\n');
+                        match c.gen_md() {
+                            Ok(md) => {
+                                authors.push_str(&author);
+                                authors.push_str(&md);
+                                authors.push('\n');
+                            }
+                            // if there is an error to generate markdown, just skip this contributor
+                            Err(_) => continue,
                         }
-                        // if there is an error to generate markdown, just skip this contributor
-                        Err(_) => continue,
                     }
-                }
 
-                Some(authors)
-            }
-            None => None,
-        };
+                    Some(authors)
+                }
+                None => None,
+            };
+        }
 
         let funding: Option<String> = match self.converted_config.funding.clone() {
             Some(funding) => {
@@ -117,7 +123,7 @@ impl<'a> Assembler<'a> {
 
         let footer = json!({
             "name": self.converted_config.name.clone(),
-            "authors": authors,
+            "authors": contrib_section.unwrap_or("".to_string()),
             "funding": funding,
         });
 
