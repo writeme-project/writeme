@@ -54,7 +54,7 @@ The subject contains a succinct description of the change:
 -   No dot (.) at the end
 
 # ✍️ Authors <a name = "authors"></a>
-{{authors}}
+{{{authors}}}
 
 # 🎉 Acknowledgements <a name = "acknowledgement"></a>
 - Hat tip to anyone whose code was used
