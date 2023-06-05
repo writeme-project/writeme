@@ -18,58 +18,20 @@ pub fn hello() {
 
 // our little mascot
 fn wirtino() {
-    let eyes = vec!["•", "o", "•", "o"];
-    let mouths = vec!["O", "•", "O", "•"];
+    let eye = "•";
+    let mouth = "O";
     let walls = vec!["─", "|"];
     let corners = vec!["╭", "╮", "╰", "╯"];
 
     println!("{}{}{}", corners[0], walls[0], corners[1]);
     println!(
         "{} {}\t{}",
-        eyes[0].cyan().italic(),
-        eyes[0].cyan().italic(),
+        eye.cyan().italic(),
+        eye.cyan().italic(),
         "HI! I AM WRITINO:".cyan()
     );
     println!("{} {}\tLet's write your README!", walls[1], walls[1]);
-    println!(
-        "{}{}{}\n",
-        corners[2],
-        mouths[0].cyan().italic(),
-        corners[3]
-    );
-
-    // let mut log_update = LogUpdate::new(stdout()).unwrap();
-    // let loading = vec![".", " ", " ", " "];
-    // for i in 0..5 {
-    //     let ind = i % 4;
-    //     log_update
-    //         .render(&format!(
-    //             "{}{}{}\n{}{}{}\t{}\n{}{}{}\t{}\n{}{}{}\n{}\t{}{}{}{}{}\n",
-    //             corners[0],
-    //             walls[0],
-    //             corners[1],
-    //             eyes[ind].cyan().italic(),
-    //             " ",
-    //             eyes[ind].cyan().italic(),
-    //             app_name,
-    //             walls[1],
-    //             " ",
-    //             walls[1],
-    //             catch_phrase,
-    //             corners[2],
-    //             mouths[ind].cyan().italic(),
-    //             corners[3],
-    //             "v0.1.0".bright_green(),
-    //             "I'm reading your stuff",
-    //             loading[(ind) % 4],
-    //             loading[(ind + 3) % 4],
-    //             loading[(ind + 2) % 4],
-    //             loading[(ind + 1) % 4],
-    //         ))
-    //         .unwrap();
-
-    //     sleep(Duration::from_millis(300));
-    // }
+    println!("{}{}{}\n", corners[2], mouth.cyan().italic(), corners[3]);
 }
 
 // show conflicts to the user and ask which value to keep
