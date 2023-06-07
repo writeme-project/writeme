@@ -1,6 +1,6 @@
 use crate::{
     converter::{ConverterOutput, RepositoryPlatform},
-    scanner::{scan_dependencies, scan_techs},
+    scanner::{self, scan_dependencies, scan_techs},
     utils::{fantasy_description, paths, shields, Aligment, GenMarkdown},
 };
 use anyhow::Error;
@@ -54,11 +54,33 @@ impl<'a> Assembler<'a> {
         paths::read_util_file_contents(paths::UtilityPath::Toc)
     }
 
-    fn assemble_body(&mut self) -> String {
+    fn assemble_body(&mut self, paths: &Vec<String>) -> String {
         let body_tpl = paths::read_util_file_contents(paths::UtilityPath::Body);
 
+        let license = match scanner::find_license_file(&paths) {
+            Ok(license_path) => {
+                let license_tpl = paths::read_util_file_contents(paths::UtilityPath::License);
+
+                self.handlebars
+                    .register_template_string("license_tpl", license_tpl)
+                    .unwrap();
+
+                let license = json!({
+                    "name": license_path.split('/').last().unwrap(),
+                    "target": license_path,
+                });
+
+                self.handlebars.render("license_tpl", &license).unwrap()
+            }
+            Err(_) => self
+                .converted_config
+                .license
+                .clone()
+                .unwrap_or("Not found".to_string()),
+        };
+
         let body = json!({
-            "license": self.converted_config.license.clone(),
+            "license": license.clone(),
             "repository_url": self.converted_config.repository.as_ref().unwrap().url.clone(),
         });
 
@@ -150,7 +172,7 @@ impl<'a> Assembler<'a> {
 
         let header = self.assemble_header(to_make_shields.clone());
         let toc = self.assemble_table_of_contents();
-        let body = self.assemble_body();
+        let body = self.assemble_body(path);
         let footer = self.assemble_footer();
 
         readme_file.write_all(header.as_bytes())?;

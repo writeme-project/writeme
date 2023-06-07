@@ -5,7 +5,7 @@ use crate::{
     dialoguer,
     utils::{paths, Tech},
 };
-use anyhow::Error;
+use anyhow::{anyhow, Error};
 use itertools::Itertools;
 use std::{collections::HashMap, vec};
 
@@ -203,4 +203,34 @@ pub fn scan_git(project_location: &str) -> Result<ConverterOutput, Error> {
     git_converter.contributors = Option::from(contributors);
 
     Ok(git_converter)
+}
+
+/// Scans the project folder for a license file returning its path
+pub fn find_license_file(paths: &Vec<String>) -> Result<String, Error> {
+    // list configs as they are always at the end of the path
+    let look_for: [&str; 7] = [
+        "license",
+        "license.txt",
+        "license.md",
+        "license.html",
+        "license.yml",
+        "license.yaml",
+        "license.json",
+    ];
+
+    let regex_set: regex::RegexSet = regex::RegexSet::new(look_for).unwrap();
+
+    // for each file in the project check if it matches any of the license names
+    // if it does return it
+    for path in paths {
+        let path_str = path.as_str();
+
+        let matches: Vec<_> = regex_set.matches(path_str).into_iter().collect();
+
+        if !matches.is_empty() {
+            return Ok(path_str.to_string());
+        }
+    }
+
+    Err(anyhow!("No license file found"))
 }

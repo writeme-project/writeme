@@ -22,6 +22,7 @@ pub mod paths {
         Author,
         ContribRocks,
         Support,
+        License,
 
         // large macro templates of the README file
         Header,
@@ -43,6 +44,7 @@ pub mod paths {
             UtilityPath::Toc => include_str!("../../conf/tpl/TABLE_OF_CONTENT.md"),
             UtilityPath::Body => include_str!("../../conf/tpl/BODY.md"),
             UtilityPath::Footer => include_str!("../../conf/tpl/FOOTER.md"),
+            UtilityPath::License => include_str!("../../conf/tpl/FOOTER.md"),
         };
 
         target.to_string()
@@ -129,7 +131,7 @@ pub fn shields(techs: Vec<String>, aligment: Aligment) -> Result<String, Error> 
     Ok(shields)
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 /// Structure used to represent the project aka global stuff useful when scanning a project
 pub struct Project {
     /// it contains the paths of all the files in the project
