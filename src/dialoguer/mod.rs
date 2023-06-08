@@ -122,7 +122,7 @@ pub fn processed_files(files: Vec<String>) {
     ));
 
     // if there are no files, push | 0 files to process |
-    if files.len() == 0 {
+    if files.is_empty() {
         processed_files.push_str(&format!(
             "│ {}{} │\n",
             no_files_str,

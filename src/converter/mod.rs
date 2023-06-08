@@ -448,21 +448,21 @@ impl Repository {
         let regex = regex::Regex::new(r"^https?://[^/]+/[^/]+/[^/]+").unwrap();
         if !regex.is_match(&url) {
             return Self {
-                url: url,
+                url,
                 name: None,
                 sign: None,
                 platform: RepositoryPlatform::Unknown,
             };
         }
 
-        let url_split = url.split("/").collect::<Vec<&str>>();
+        let url_split = url.split('/').collect::<Vec<&str>>();
         let sign = url_split[3..]
             .join("/")
             .split(".git")
             .collect::<Vec<&str>>()[0]
             .to_string();
         let name = sign
-            .split("/")
+            .split('/')
             .collect::<Vec<&str>>()
             .last()
             .unwrap()
@@ -474,7 +474,7 @@ impl Repository {
             url,
             sign: Some(sign),
             name: Some(name),
-            platform: platform,
+            platform,
         }
     }
 }
@@ -490,7 +490,7 @@ impl GenMarkdown for Repository {
         let repo_url = self.url.clone();
         let repo_contrib_url = format!(
             "{}/graphs/contributors",
-            repo_url.split(".git").collect::<Vec<&str>>()[0].to_string()
+            repo_url.split(".git").collect::<Vec<&str>>()[0]
         );
 
         let data: Value = json!({

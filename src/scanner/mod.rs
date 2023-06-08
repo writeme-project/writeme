@@ -120,7 +120,7 @@ pub fn scan_git(project_location: &str) -> Result<ConverterOutput, Error> {
         .unwrap()
         .to_string();
 
-    let project_repository = converter::Repository::new(url.clone());
+    let project_repository = converter::Repository::new(url);
     git_converter.repository = Option::from(project_repository.clone());
 
     git_converter.name = project_repository.name.clone();

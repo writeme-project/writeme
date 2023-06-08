@@ -57,7 +57,7 @@ impl<'a> Assembler<'a> {
     fn assemble_body(&mut self, paths: &Vec<String>) -> String {
         let body_tpl = paths::read_util_file_contents(paths::UtilityPath::Body);
 
-        let license = match scanner::find_license_file(&paths) {
+        let license = match scanner::find_license_file(paths) {
             Ok(license_path) => {
                 let license_tpl = paths::read_util_file_contents(paths::UtilityPath::License);
 
@@ -80,7 +80,7 @@ impl<'a> Assembler<'a> {
         };
 
         let body = json!({
-            "license": license.clone(),
+            "license": license,
             "repository_url": self.converted_config.repository.as_ref().unwrap().url.clone(),
         });
 
@@ -170,7 +170,7 @@ impl<'a> Assembler<'a> {
 
         let to_make_shields: Vec<String> = techs.iter().chain(deps.iter()).cloned().collect();
 
-        let header = self.assemble_header(to_make_shields.clone());
+        let header = self.assemble_header(to_make_shields);
         let toc = self.assemble_table_of_contents();
         let body = self.assemble_body(path);
         let footer = self.assemble_footer();
