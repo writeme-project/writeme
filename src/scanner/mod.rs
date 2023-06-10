@@ -6,10 +6,10 @@ use crate::{
     utils::{paths, Tech},
 };
 use anyhow::{anyhow, Error};
-use itertools::Itertools;
-use std::{collections::HashMap, vec};
-
 use git2::Repository;
+use itertools::Itertools;
+
+use std::{collections::HashMap, vec};
 
 // Returns list of config files present in the project
 pub fn scan_configs(paths: &Vec<String>) -> Result<Vec<String>, Error> {
@@ -208,7 +208,7 @@ pub fn scan_git(project_location: &str) -> Result<ConverterOutput, Error> {
 /// Scans the project folder for a license file returning its path
 pub fn find_license_file(paths: &Vec<String>) -> Result<String, Error> {
     // list configs as they are always at the end of the path
-    let look_for: [&str; 7] = [
+    let look_for: [&str; 21] = [
         "license",
         "license.txt",
         "license.md",
@@ -216,19 +216,29 @@ pub fn find_license_file(paths: &Vec<String>) -> Result<String, Error> {
         "license.yml",
         "license.yaml",
         "license.json",
+        "copying",
+        "copying.txt",
+        "copying.md",
+        "copying.html",
+        "copying.yml",
+        "copying.yaml",
+        "copying.json",
+        "notice",
+        "notice.txt",
+        "notice.md",
+        "notice.html",
+        "notice.yml",
+        "notice.yaml",
+        "notice.json",
     ];
 
-    let regex_set: regex::RegexSet = regex::RegexSet::new(look_for).unwrap();
-
-    // for each file in the project check if it matches any of the license names
-    // if it does return it
     for path in paths {
-        let path_str = path.as_str();
+        let found = look_for
+            .iter()
+            .find(|file| path.to_lowercase().ends_with(file.to_lowercase().as_str()));
 
-        let matches: Vec<_> = regex_set.matches(path_str).into_iter().collect();
-
-        if !matches.is_empty() {
-            return Ok(path_str.to_string());
+        if found.is_some() {
+            return Ok(path.to_string());
         }
     }
 

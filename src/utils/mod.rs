@@ -44,7 +44,7 @@ pub mod paths {
             UtilityPath::Toc => include_str!("../../conf/tpl/TABLE_OF_CONTENT.md"),
             UtilityPath::Body => include_str!("../../conf/tpl/BODY.md"),
             UtilityPath::Footer => include_str!("../../conf/tpl/FOOTER.md"),
-            UtilityPath::License => include_str!("../../conf/tpl/FOOTER.md"),
+            UtilityPath::License => include_str!("../../conf/tpl/LICENSE.md"),
         };
 
         target.to_string()

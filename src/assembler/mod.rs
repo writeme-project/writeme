@@ -1,12 +1,12 @@
 use crate::{
-    converter::{ConverterOutput, RepositoryPlatform},
+    converter::{ConverterOutput, Repository, RepositoryPlatform},
     scanner::{self, scan_dependencies, scan_techs},
     utils::{fantasy_description, paths, shields, Aligment, GenMarkdown},
 };
 use anyhow::Error;
 
 use handlebars::Handlebars;
-use serde_json::json;
+use serde_json::{json, Value};
 use std::fs::File;
 use std::io::Write;
 
@@ -54,9 +54,11 @@ impl<'a> Assembler<'a> {
         paths::read_util_file_contents(paths::UtilityPath::Toc)
     }
 
-    fn assemble_body(&mut self, paths: &Vec<String>) -> String {
-        let body_tpl = paths::read_util_file_contents(paths::UtilityPath::Body);
-
+    /// Assembles license section, it goes through the following steps:
+    /// - looks for a license file in the project
+    /// - license set in config files but not found in the project
+    /// - no license file nor license set in config files, ask the user which license to use
+    fn assemble_license(&mut self, paths: &Vec<String>) -> String {
         let license = match scanner::find_license_file(paths) {
             Ok(license_path) => {
                 let license_tpl = paths::read_util_file_contents(paths::UtilityPath::License);
@@ -65,10 +67,31 @@ impl<'a> Assembler<'a> {
                     .register_template_string("license_tpl", license_tpl)
                     .unwrap();
 
-                let license = json!({
-                    "name": license_path.split('/').last().unwrap(),
-                    "target": license_path,
-                });
+                let license: Value;
+
+                if self.converted_config.repository.is_some()
+                    && self.converted_config.repository.as_ref().unwrap().platform
+                        == RepositoryPlatform::Github
+                {
+                    let repository = self.converted_config.repository.as_ref().unwrap();
+
+                    let without_project_path = license_path.replace(&paths[0], "");
+
+                    let without_project_path = if without_project_path.starts_with('/') {
+                        without_project_path[1..].to_string()
+                    } else {
+                        without_project_path
+                    };
+
+                    license = json!({
+                        "name": "see here for more details",
+                        "target": repository.url.clone() + "/blob/master/" + without_project_path.as_str(),
+                    });
+                } else {
+                    license = json!({
+                        "name": license_path.split('/').last().unwrap(),
+                    });
+                };
 
                 self.handlebars.render("license_tpl", &license).unwrap()
             }
@@ -78,6 +101,14 @@ impl<'a> Assembler<'a> {
                 .clone()
                 .unwrap_or("Not found".to_string()),
         };
+
+        license
+    }
+
+    fn assemble_body(&mut self, paths: &Vec<String>) -> String {
+        let body_tpl = paths::read_util_file_contents(paths::UtilityPath::Body);
+
+        let license = self.assemble_license(paths);
 
         let body = json!({
             "license": license,

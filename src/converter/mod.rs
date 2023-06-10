@@ -436,7 +436,13 @@ impl Iterator for Fundings {
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Repository {
     pub url: String,
+    /// Represents the name of the repository
+    ///
+    /// e.g. https://github.com/writeme-project/writeme.git -> **writeme**
     pub name: Option<String>,
+    /// Represents the user+repo name in the form user/repo
+    ///
+    /// e.g. https://github.com/writeme-project/writeme.git -> **writeme-project/writeme**
     pub sign: Option<String>,
     pub platform: RepositoryPlatform,
 }
@@ -445,7 +451,9 @@ impl Repository {
     pub fn new(url: String) -> Self {
         let url = trim(url).unwrap();
         // check that the url is in the https|http://platform/user/name form
-        let regex = regex::Regex::new(r"^https?://[^/]+/[^/]+/[^/]+").unwrap();
+        let regex =
+            regex::Regex::new(r"^(git@[^:/]+:[^/]+/[^.]+\.git|https?://[^/]+/[^/]+/[^/]+)$")
+                .unwrap();
         if !regex.is_match(&url) {
             return Self {
                 url,
@@ -455,27 +463,54 @@ impl Repository {
             };
         }
 
-        let url_split = url.split('/').collect::<Vec<&str>>();
-        let sign = url_split[3..]
-            .join("/")
-            .split(".git")
-            .collect::<Vec<&str>>()[0]
-            .to_string();
-        let name = sign
-            .split('/')
-            .collect::<Vec<&str>>()
-            .last()
-            .unwrap()
-            .to_string();
+        if url.starts_with("git") {
+            let url_split = url.split(':').collect::<Vec<&str>>();
+            let sign = url_split[1..]
+                .join("/")
+                .split(".git")
+                .collect::<Vec<&str>>()[0]
+                .to_string();
 
-        let platform_str = url_split[2];
-        let platform = RepositoryPlatform::from_str(platform_str).unwrap();
-        Self {
-            url,
-            sign: Some(sign),
-            name: Some(name),
-            platform,
-        }
+            let name = sign
+                .split('/')
+                .collect::<Vec<&str>>()
+                .last()
+                .unwrap()
+                .to_string();
+
+            let platform_str = url_split[0].split('@').collect::<Vec<&str>>()[1];
+            let platform = RepositoryPlatform::from_str(platform_str).unwrap();
+
+            return Self {
+                url: format!("https://{}.com/{}", platform.to_string(), sign),
+                sign: Some(sign),
+                name: Some(name),
+                platform,
+            };
+        } else {
+            let url_split = url.split('/').collect::<Vec<&str>>();
+            let sign = url_split[3..]
+                .join("/")
+                .split(".git")
+                .collect::<Vec<&str>>()[0]
+                .to_string();
+            let name = sign
+                .split('/')
+                .collect::<Vec<&str>>()
+                .last()
+                .unwrap()
+                .to_string();
+
+            let platform_str = url_split[2];
+            let platform = RepositoryPlatform::from_str(platform_str).unwrap();
+
+            return Self {
+                url,
+                sign: Some(sign),
+                name: Some(name),
+                platform,
+            };
+        };
     }
 }
 
@@ -539,6 +574,18 @@ impl FromStr for RepositoryPlatform {
             s if s.contains("gitlab") => Ok(RepositoryPlatform::Gitlab),
             s if s.contains("bitbucket") => Ok(RepositoryPlatform::Bitbucket),
             _ => Ok(RepositoryPlatform::Unknown),
+        }
+    }
+}
+
+impl ToString for RepositoryPlatform {
+    fn to_string(&self) -> String {
+        match self {
+            RepositoryPlatform::Github => "github".to_string(),
+            RepositoryPlatform::Gitlab => "gitlab".to_string(),
+            RepositoryPlatform::Bitbucket => "bitbucket".to_string(),
+            RepositoryPlatform::SelfHosted => "self-hosted".to_string(),
+            RepositoryPlatform::Unknown => "unknown".to_string(),
         }
     }
 }

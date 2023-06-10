@@ -23,5 +23,5 @@ futher instructions...
 {{usage}}
 
 
-# 📄 License <a name = "license"></a>
+# 📄 License <a name="license"></a>
 {{{license}}}
