@@ -34,11 +34,20 @@ create_release() {
     repo="writeme"
     tag="v$version"
 
+    # Get the previous release version
+    previous_tag=$(git describe --abbrev=0 --tags)
+    
+    # Generate the changelog URL
+    changelog_url="https://github.com/$user/$repo/compare/$previous_tag...$tag"
+    
+    # Create the release body with the changelog URL
+    body="**Full Changelog**: $changelog_url"
+
     command="curl -s -o release.json -w '%{http_code}' \
         --request POST \
         --header 'authorization: Bearer ${token}' \
         --header 'content-type: application/json' \
-        --data '{\"tag_name\": \"${tag}\"}' \
+        --data '{\"tag_name\": \"${tag}\", \"body\": \"$body\"}' \
         https://api.github.com/repos/$user/$repo/releases"
     http_code=`eval $command`
     if [ $http_code == "201" ]; then
