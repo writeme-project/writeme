@@ -22,7 +22,7 @@ jobs:
 
           # The Personal Access Token (saved as a repo secret) that has `repo` permissions for the repo running the action AND Homebrew tap you want to release to.
           # Required - string
-          github_token: ${{ secrets.HOMEBREW_WRITME_RELEASE_SECRECT }}
+          github_token: ${{ secrets.HOMEBREW_WRITEME_RELEASE_SECRECT }}
 
           # Git author info used to commit to the homebrew tap.
           # Defaults are shown - strings
