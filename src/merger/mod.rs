@@ -1,25 +1,9 @@
 use std::fmt::{Debug, Display};
 
 use crate::converter::{ConverterOutput, Repository};
-use crate::dialoguer::conflict;
+use crate::dialoguer::{select_option, SelectOption};
 use anyhow::{Error, Ok};
 use itertools::Itertools;
-
-#[derive(Clone, Debug)]
-/// Identifies a value that needs to be merged. It contains the value itself and some metadata
-pub struct MergeValue<T> {
-    pub value: Option<T>,
-    pub source_config_file_path: String,
-}
-
-impl<T: Display> Display for MergeValue<T> {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match &self.value {
-            Some(value) => write!(f, "{} ({})", value, self.source_config_file_path),
-            None => write!(f, "None ({})", self.source_config_file_path),
-        }
-    }
-}
 
 /// Merges the information of multiple config files into a single object
 ///
@@ -35,9 +19,17 @@ impl Merger {
     fn merge_field<T: Clone + Debug + Display>(
         &self,
         field_name: &str,
-        values: Vec<MergeValue<T>>,
+        values: Vec<SelectOption<T>>,
     ) -> Option<T> {
-        conflict(field_name, values)
+        let options = values
+            .iter()
+            .map(|value| SelectOption {
+                name: format!("{}", value),
+                value: value.value.clone(),
+            })
+            .collect();
+
+        select_option(field_name, options, None)
     }
 
     /// Merges the vector fields of the provided configs into a single value by asking the user which one to keep
@@ -50,9 +42,9 @@ impl Merger {
                 .iter()
                 .filter(|config| config.name.is_some() && !config.name.as_ref().unwrap().is_empty())
                 .unique_by(|item| item.name.clone())
-                .map(|config| MergeValue {
+                .map(|config| SelectOption {
                     value: config.name.clone(),
-                    source_config_file_path: config.source_config_file_path.clone(),
+                    name: config.source_config_file_path.clone(),
                 })
                 .collect(),
         );
@@ -65,9 +57,9 @@ impl Merger {
                     config.description.is_some() && !config.description.as_ref().unwrap().is_empty()
                 })
                 .unique_by(|item| item.description.clone())
-                .map(|config| MergeValue {
+                .map(|config| SelectOption {
                     value: config.description.clone(),
-                    source_config_file_path: config.source_config_file_path.clone(),
+                    name: config.source_config_file_path.clone(),
                 })
                 .collect(),
         );
@@ -80,9 +72,9 @@ impl Merger {
                     config.version.is_some() && !config.version.as_ref().unwrap().is_empty()
                 })
                 .unique_by(|item| item.version.clone())
-                .map(|config| MergeValue {
+                .map(|config| SelectOption {
                     value: config.version.clone(),
-                    source_config_file_path: config.source_config_file_path.clone(),
+                    name: config.source_config_file_path.clone(),
                 })
                 .collect(),
         );
@@ -95,9 +87,9 @@ impl Merger {
                     config.license.is_some() && !config.license.as_ref().unwrap().is_empty()
                 })
                 .unique_by(|item| item.license.clone())
-                .map(|config| MergeValue {
+                .map(|config| SelectOption {
                     value: config.license.clone(),
-                    source_config_file_path: config.source_config_file_path.clone(),
+                    name: config.source_config_file_path.clone(),
                 })
                 .collect(),
         );
@@ -111,9 +103,9 @@ impl Merger {
                         && !config.repository.as_ref().unwrap().url.is_empty()
                 })
                 .unique_by(|item| item.repository.as_ref().unwrap().url.clone())
-                .map(|config| MergeValue {
+                .map(|config| SelectOption {
                     value: Option::from(config.repository.as_ref().unwrap().url.clone()),
-                    source_config_file_path: config.source_config_file_path.clone(),
+                    name: config.source_config_file_path.clone(),
                 })
                 .collect(),
         );

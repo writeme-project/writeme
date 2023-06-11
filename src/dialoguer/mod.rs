@@ -5,9 +5,24 @@ use dialoguer::{console::style, theme::ColorfulTheme};
 use itertools::Itertools;
 use std::fmt::{Debug, Display};
 
-use crate::merger::MergeValue;
 // use log_update::LogUpdate;
 // use std::{io::stdout, thread::sleep, time::Duration};
+
+#[derive(Debug, Clone)]
+/// Represents a single option in a select menu
+pub struct SelectOption<T> {
+    pub name: String,
+    pub value: Option<T>,
+}
+
+impl<T: Display> Display for SelectOption<T> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match &self.value {
+            Some(value) => write!(f, "{} ({})", value, self.name),
+            None => write!(f, "None ({})", self.name),
+        }
+    }
+}
 
 // say hi to the user
 pub fn hello() {
@@ -34,17 +49,18 @@ fn wirtino() {
     println!("{}{}{}\n", corners[2], mouth.cyan().italic(), corners[3]);
 }
 
-// show conflicts to the user and ask which value to keep
-pub fn conflict<T: Clone + Debug + Display>(
+/// Asks the user to choose one of the provided values
+pub fn select_option<T: Clone + Debug + Display>(
     field_name: &str,
-    values: Vec<MergeValue<T>>,
+    values: Vec<SelectOption<T>>,
+    custom_label: Option<String>,
 ) -> Option<T> {
     // put a space before and after the field name
     let field_name = format!(" {} ", field_name);
     let label = format!(
         "{} {}",
         field_name.bright_white().on_truecolor(127, 0, 255),
-        "Which of these do you want in your awesome README?"
+        custom_label.unwrap_or("Which of these do you want in your awesome README?".to_string())
     );
 
     let with_value = values.iter().filter(|v| v.value.is_some()).collect_vec();
