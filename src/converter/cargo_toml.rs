@@ -179,11 +179,10 @@ impl Component for CargoToml {
 
         // Cargo.toml reference requires at least a license or license-file!
         // https://doc.rust-lang.org/cargo/reference/manifest.html#the-license-and-license-file-fields
-        output.license = Some(json["package"]["license"].to_string());
-
-        if output.license.is_none() {
-            output.license = Some(json["package"]["license-file"].to_string());
-        }
+        output.license = json["package"]["license"]
+            .as_str()
+            .map(String::from)
+            .or_else(|| json["package"]["license-file"].as_str().map(String::from));
 
         output.keywords = json["package"]["keywords"]
             .as_array()
