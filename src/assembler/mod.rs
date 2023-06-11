@@ -2,7 +2,7 @@ use crate::{
     converter::{ConverterOutput, Repository, RepositoryPlatform},
     dialoguer::{select_option, SelectOption},
     scanner::{self, scan_dependencies, scan_techs},
-    utils::{fantasy_description, paths, shields, Aligment, GenMarkdown},
+    utils::{fantasy_description, paths, shields, Alignment, GenMarkdown},
 };
 use anyhow::Error;
 
@@ -51,7 +51,7 @@ impl<'a> Assembler<'a> {
     fn assemble_header(&mut self, to_make_shields: Vec<String>) -> String {
         let header_tpl = paths::read_util_file_contents(paths::UtilityPath::Header);
 
-        let shields = shields(to_make_shields, Aligment::Row).unwrap();
+        let shields = shields(to_make_shields, Alignment::Row).unwrap();
 
         // if name is none or empty, set it to default "Project Name"
         if self.converted_config.name.is_none()
