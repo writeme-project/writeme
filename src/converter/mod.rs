@@ -481,12 +481,12 @@ impl Repository {
             let platform_str = url_split[0].split('@').collect::<Vec<&str>>()[1];
             let platform = RepositoryPlatform::from_str(platform_str).unwrap();
 
-            return Self {
+            Self {
                 url: format!("https://{}.com/{}", platform.to_string(), sign),
                 sign: Some(sign),
                 name: Some(name),
                 platform,
-            };
+            }
         } else {
             let url_split = url.split('/').collect::<Vec<&str>>();
             let sign = url_split[3..]
@@ -504,13 +504,13 @@ impl Repository {
             let platform_str = url_split[2];
             let platform = RepositoryPlatform::from_str(platform_str).unwrap();
 
-            return Self {
+            Self {
                 url,
                 sign: Some(sign),
                 name: Some(name),
                 platform,
-            };
-        };
+            }
+        }
     }
 }
 

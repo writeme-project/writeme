@@ -1,5 +1,5 @@
 use crate::{
-    converter::{ConverterOutput, Repository, RepositoryPlatform},
+    converter::{ConverterOutput, RepositoryPlatform},
     dialoguer::{select_option, SelectOption},
     scanner::{self, scan_dependencies, scan_techs},
     utils::{fantasy_description, paths, shields, Alignment, GenMarkdown},
