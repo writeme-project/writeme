@@ -1,29 +1,34 @@
 #!/bin/bash
 token=""
 
+app_name="writeme"
+
 # extract version from Cargo.toml
-version=$(grep -m 1 '^version' Cargo.toml | grep -Eo '[0-9]+\.[0-9]+\.[0-9]+')
+version=`grep -m1 "version" Cargo.toml | sed 's/version = //' | sed 's/"//g'`
 echo "Program version: $version"
 
 # Run cargo build with the --release flag
 cargo build --release
-cd target/release/
-
-app_name="writeme"
-
-# {REPO_NAME}-{VERSION}-{OPERATING_SYSTEM}-{ARCHITECTURE}.tar.gz
+path="target/release"
+cd $path
 target_darwin_arm64="$app_name-$version-darwin-arm64.tar.gz"
-file="$target_darwin_arm64"
-
-
-# Create the archive
 tar -czf "$target_darwin_arm64" "$app_name"
 echo "Created $target_darwin_arm64"
+cd ../..
+
+# {REPO_NAME}-{VERSION}-{OPERATING_SYSTEM}-{ARCHITECTURE}.tar.gz
+
+cargo build --release --target=x86_64-apple-darwin
+path_x86="target/x86_64-apple-darwin/release"
+cd $path_x86
+target_darwin_amd64="$app_name-$version-darwin-amd64.tar.gz"
+tar -czf "$target_darwin_amd64" "$app_name"
+echo "Created $target_darwin_amd64"
+cd ../../..
 
 # github release
 
 # requires curl and jq on PATH: https://stedolan.github.io/jq/
-
 # create a new release 
 # user: user's name 
 # repo: the repo's name
@@ -43,7 +48,7 @@ create_release() {
     # Create the release body with the changelog URL
     body="**Full Changelog**: $changelog_url"
 
-    command="curl -s -o release.json -w '%{http_code}' \
+    command="curl -s -w '%{http_code}' \
         --request POST \
         --header 'authorization: Bearer ${token}' \
         --header 'content-type: application/json' \
@@ -53,7 +58,11 @@ create_release() {
     if [ $http_code == "201" ]; then
         echo "created release:"
         cat release.json
-        upload_release_file
+        upload_release_file "$path/$target_darwin_arm64" "$target_darwin_arm64"
+        upload_release_file "$path_x86/$target_darwin_amd64" "$target_darwin_amd64"
+
+        rm "$path/$target_darwin_arm64"
+        rm "$path_x86/$target_darwin_amd64"
     else
         echo "create release failed with code '$http_code':"
         cat release.json
@@ -70,16 +79,16 @@ create_release() {
 # file: path to the asset file to upload 
 # name: name to use for the uploaded asset
 upload_release_file() {
-    
-    name=$target_darwin_arm64
+    file=$1
+    name=$2
 
     url=`jq -r .upload_url release.json | cut -d{ -f'1'`
     command="\
-    curl -s -o upload.json -w '%{http_code}' \
+    curl -s -w '%{http_code}' \
         --request POST \
         --header 'authorization: Bearer ${token}' \
         --header 'Content-Type: application/octet-stream' \
-        --data-binary @\"${file}\"
+        --data-binary '@$file' \
         ${url}?name=${name}"
     http_code=`eval $command`
     if [ $http_code == "201" ]; then
