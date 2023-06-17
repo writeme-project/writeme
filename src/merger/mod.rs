@@ -1,6 +1,6 @@
 use std::fmt::{Debug, Display};
 
-use crate::converter::{ConverterOutput, Repository};
+use crate::converter::{ConverterOutput, License, Repository, SupportedLicense};
 use crate::dialoguer::{select_option, SelectOption};
 use anyhow::{Error, Ok};
 use itertools::Itertools;
@@ -79,20 +79,46 @@ impl Merger {
                 .collect(),
         );
 
-        output.license = self.merge_field(
-            "license",
-            converted_configs
-                .iter()
-                .filter(|config| {
-                    config.license.is_some() && !config.license.as_ref().unwrap().is_empty()
-                })
-                .unique_by(|item| item.license.clone())
-                .map(|config| SelectOption {
-                    value: config.license.clone(),
-                    name: config.source_config_file_path.clone(),
-                })
-                .collect(),
-        );
+        if converted_configs.iter().all(|config| {
+            config.license.is_none()
+                || config.license.as_ref().unwrap().name == SupportedLicense::Unknown
+        }) {
+            let available = vec![
+                SupportedLicense::MIT.to_string(),
+                SupportedLicense::Apache2.to_string(),
+                SupportedLicense::GPL3.to_string(),
+                SupportedLicense::BSD3.to_string(),
+                SupportedLicense::Unlicense.to_string(),
+            ]
+            .iter()
+            .map(|license| SelectOption {
+                name: license.clone(),
+                value: Some(License::from_name(license.clone())),
+            })
+            .collect();
+
+            output.license = select_option(
+                "LICENSE",
+                available,
+                Some("I was unable to find a license in your project! Select one from the list below"
+                .to_string()),
+            );
+        } else {
+            output.license = self.merge_field(
+                "license",
+                converted_configs
+                    .iter()
+                    .filter(|config| {
+                        config.license.is_some()
+                            && config.license.as_ref().unwrap().name != SupportedLicense::Unknown
+                    })
+                    .map(|config| SelectOption {
+                        name: config.license.as_ref().unwrap().name.to_string(),
+                        value: None,
+                    })
+                    .collect(),
+            );
+        }
 
         let repository_url = self.merge_field(
             "repository",

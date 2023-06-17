@@ -1,6 +1,6 @@
 use crate::{
     converter::{
-        self, Contributor, Contributors, ConverterOutput, Dependencies, RepositoryPlatform,
+        self, Contributor, Contributors, ConverterOutput, Dependencies, License, RepositoryPlatform,
     },
     dialoguer,
     utils::{paths, Tech},
@@ -9,7 +9,7 @@ use anyhow::{anyhow, Error};
 use git2::Repository;
 use itertools::Itertools;
 
-use std::{collections::HashMap, vec};
+use std::{collections::HashMap, fs, vec};
 
 // Returns list of config files present in the project
 pub fn scan_configs(paths: &Vec<String>) -> Result<Vec<String>, Error> {
@@ -205,8 +205,8 @@ pub fn scan_git(project_location: &str) -> Result<ConverterOutput, Error> {
     Ok(git_converter)
 }
 
-/// Scans the project folder for a license file returning its path
-pub fn find_license_file(paths: &Vec<String>) -> Result<String, Error> {
+/// Scans the project folder for a license file
+pub fn scan_license_file(project_location: &str) -> Result<ConverterOutput, Error> {
     // list configs as they are always at the end of the path
     let look_for: [&str; 21] = [
         "license",
@@ -232,13 +232,29 @@ pub fn find_license_file(paths: &Vec<String>) -> Result<String, Error> {
         "notice.json",
     ];
 
+    // list the files in the project folder, do not go into subfolders
+    let paths = fs::read_dir(project_location)?
+        .filter_map(|entry| entry.ok())
+        .filter(|entry| entry.path().is_file())
+        .map(|entry| entry.path())
+        .collect::<Vec<_>>();
+
     for path in paths {
+        let p = match path.to_str() {
+            Some(p) => p.to_lowercase(),
+            None => continue,
+        };
+
         let found = look_for
             .iter()
-            .find(|file| path.to_lowercase().ends_with(file.to_lowercase().as_str()));
+            .find(|file| p.ends_with(file.to_lowercase().as_str()));
 
         if found.is_some() {
-            return Ok(path.to_string());
+            let mut converter = ConverterOutput::empty();
+
+            converter.license = Option::from(License::from_file(p, None));
+
+            return Ok(converter);
         }
     }
 

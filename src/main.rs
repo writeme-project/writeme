@@ -51,12 +51,18 @@ fn writeme(project_location: &str) {
         if output.is_err() {
             continue;
         }
+
         outputs.push(output.unwrap());
     }
 
     match scanner::scan_git(project_location) {
         Ok(scan_git) => outputs.push(scan_git),
-        Err(_) => {} //if unable to scan git do nothing
+        Err(_) => {} // if unable to scan git do nothing
+    };
+
+    match scanner::scan_license_file(project_location) {
+        Ok(scan_license_file) => outputs.push(scan_license_file),
+        Err(_) => {} // if unable to scan license file do nothing
     };
 
     let merged = match merger.merge(outputs) {

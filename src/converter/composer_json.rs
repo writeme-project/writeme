@@ -5,7 +5,7 @@ use serde_json::Value;
 use strum::IntoEnumIterator;
 
 use super::{
-    Component, Contributor, ConverterOutput, Decorator, Dependency, Funding, FundingType,
+    Component, Contributor, ConverterOutput, Decorator, Dependency, Funding, FundingType, License,
     Repository,
 };
 
@@ -71,8 +71,11 @@ impl Component for ComposerJson {
             );
         }
 
-        if !json["license"].is_null() && json["license"].as_str().is_some() {
-            output.license = Some(json["license"].to_string());
+        if !json["license"].is_null()
+            && json["license"].as_str().is_some()
+            && !json["license"].as_str().unwrap().is_empty()
+        {
+            output.license = Some(License::from_name(json["license"].to_string()));
         }
 
         output.keywords = json["keywords"]

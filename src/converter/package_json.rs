@@ -76,7 +76,7 @@ impl Component for PackageJson {
             && json["license"].as_str().is_some()
             && !json["license"].as_str().unwrap().is_empty()
         {
-            output.license = Some(json["license"].to_string());
+            output.license = Some(super::License::from_name(json["license"].to_string()));
         }
 
         output.keywords = json["keywords"]

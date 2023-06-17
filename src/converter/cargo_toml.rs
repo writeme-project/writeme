@@ -2,7 +2,7 @@ use serde_json::Value;
 
 use anyhow::{anyhow, Error, Ok};
 
-use super::{Component, Contributor, ConverterOutput, Decorator, Dependency, Repository};
+use super::{Component, Contributor, ConverterOutput, Decorator, Dependency, License, Repository};
 
 /// The Cargo.toml file relevant contents
 ///
@@ -179,10 +179,17 @@ impl Component for CargoToml {
 
         // Cargo.toml reference requires at least a license or license-file!
         // https://doc.rust-lang.org/cargo/reference/manifest.html#the-license-and-license-file-fields
-        output.license = json["package"]["license"]
-            .as_str()
-            .map(String::from)
-            .or_else(|| json["package"]["license-file"].as_str().map(String::from));
+        output.license = match (
+            json["package"]["license"].as_str(),
+            json["package"]["license-file"].as_str(),
+        ) {
+            (Some(license), _) => Some(License::from_name(license.to_string())),
+            (_, Some(license_file)) => Some(License::from_file(
+                license_file.to_owned(),
+                output.repository.clone(),
+            )),
+            _ => None,
+        };
 
         output.keywords = json["package"]["keywords"]
             .as_array()
