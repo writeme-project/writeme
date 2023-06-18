@@ -2,7 +2,9 @@ use serde_json::Value;
 
 use anyhow::{anyhow, Error, Ok};
 
-use super::{Component, Contributor, ConverterOutput, Decorator, Dependency, License, Repository};
+use crate::converter::{
+    Component, Contributor, ConverterOutput, Decorator, Dependency, Funding, License, Repository,
+};
 
 /// The Cargo.toml file relevant contents
 ///
@@ -233,7 +235,7 @@ impl Component for CargoToml {
         Ok(output)
     }
 
-    fn parse_funding(&self, _funding: &Value) -> Result<super::Funding, Error> {
+    fn parse_funding(&self, _funding: &Value) -> Result<Funding, Error> {
         Err(anyhow!("Funding is not supported for Cargo.toml!"))
     }
 }

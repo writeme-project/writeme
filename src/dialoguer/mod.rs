@@ -18,8 +18,14 @@ pub struct SelectOption<T> {
 impl<T: Display> Display for SelectOption<T> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match &self.value {
-            Some(value) => write!(f, "{} ({})", value, self.name),
-            None => write!(f, "None ({})", self.name),
+            Some(value) => {
+                if value.to_string() == self.name {
+                    return write!(f, "{}", value);
+                }
+
+                write!(f, "{} ({})", value, self.name)
+            }
+            None => write!(f, "{}", self.name),
         }
     }
 }

@@ -1,6 +1,7 @@
 use crate::{
     converter::{
-        self, Contributor, Contributors, ConverterOutput, Dependencies, License, RepositoryPlatform,
+        self, parts::license::License, Contributor, Contributors, ConverterOutput, Dependencies,
+        RepositoryPlatform,
     },
     dialoguer,
     utils::{paths, Tech},

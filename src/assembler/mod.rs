@@ -1,12 +1,12 @@
 use crate::{
-    converter::{ConverterOutput, RepositoryPlatform, SupportedLicense},
+    converter::{parts::license::SupportedLicense, ConverterOutput, RepositoryPlatform},
     scanner::{scan_dependencies, scan_techs},
     utils::{fantasy_description, paths, shields, Alignment, GenMarkdown},
 };
 use anyhow::Error;
 
 use handlebars::Handlebars;
-use serde_json::{json};
+use serde_json::json;
 use std::fs::File;
 use std::io::Write;
 

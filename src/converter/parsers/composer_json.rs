@@ -4,26 +4,26 @@ use anyhow::{anyhow, Error};
 use serde_json::Value;
 use strum::IntoEnumIterator;
 
-use super::{
-    Component, Contributor, Contributors, ConverterOutput, Decorator, Dependency, Funding,
-    FundingType, Fundings, Repository,
+use crate::converter::{
+    Component, Contributor, ConverterOutput, Decorator, Dependency, Funding, FundingType, License,
+    Repository,
 };
 
-/// The package.json parser
+/// The composer.json parser
 ///
-/// Reference: https://docs.npmjs.com/cli/v9/configuring-npm/package-json#dependencies
-pub struct PackageJson {
+/// Reference: https://getcomposer.org/doc/04-schema.md
+pub struct ComposerJson {
     // component: Rc<dyn Component>,
 }
 
-impl Decorator for PackageJson {
+impl Decorator for ComposerJson {
     fn new(/* component: Rc<dyn Component> */) -> Self {
-        // PackageJson { component }
-        PackageJson {}
+        // ComposerJson { component }
+        ComposerJson {}
     }
 }
 
-impl Component for PackageJson {
+impl Component for ComposerJson {
     fn convert(&self, file_path: String, file_contents: String) -> Result<ConverterOutput, Error> {
         let mut output = ConverterOutput::empty();
 
@@ -52,16 +52,15 @@ impl Component for PackageJson {
             output.description = Some(json["description"].to_string());
         }
 
-        if json["author"].as_object().is_some() {
-            let author = self.parse_contributor(&json["author"]);
-
-            if author.is_ok() {
-                output.contributors = Some(Contributors(vec![author.unwrap()]));
-            }
+        if !json["repository_url"].is_null()
+            && json["repository_url"].as_str().is_some()
+            && !json["repository_url"].as_str().unwrap().is_empty()
+        {
+            output.repository = Some(Repository::new(json["repository_url"].to_string()));
         }
 
-        if json["contributors"].as_array().is_some() {
-            let contributors = json["contributors"].as_array().unwrap();
+        if json["authors"].as_array().is_some() {
+            let contributors = json["authors"].as_array().unwrap();
 
             output.contributors = Some(
                 contributors
@@ -76,18 +75,18 @@ impl Component for PackageJson {
             && json["license"].as_str().is_some()
             && !json["license"].as_str().unwrap().is_empty()
         {
-            output.license = Some(super::License::from_name(json["license"].to_string()));
+            output.license = Some(License::from_name(json["license"].to_string()));
         }
 
         output.keywords = json["keywords"]
             .as_array()
             .map(|v| v.iter().map(|s| s.to_string()).collect());
-        output.homepage_url = Some(json["package"]["homepage"].to_string());
+        output.homepage_url = Some(json["homepage"].to_string());
 
         if json["repository"].as_object().is_some() {
             let repo = json["repository"].as_object().unwrap();
 
-            if !repo["url"].is_null() && repo["url"].as_str().is_some() {
+            if repo["url"].as_str().is_some() && !json["url"].as_str().unwrap().is_empty() {
                 output.repository = Some(Repository::new(repo["url"].to_string()));
             }
         } else if json["repository"].as_str().is_some()
@@ -96,7 +95,7 @@ impl Component for PackageJson {
             output.repository = Some(Repository::new(json["repository"].to_string()));
         }
 
-        output.dependencies = json["dependencies"].as_object().map(|v| {
+        output.dependencies = json["require"].as_object().map(|v| {
             v.iter()
                 // .map(|(k, v)| self.parse_dependency(k, v))
                 .filter_map(|(key, value)| {
@@ -107,7 +106,7 @@ impl Component for PackageJson {
                 .collect()
         });
 
-        output.dev_dependencies = json["devDependencies"].as_object().map(|v| {
+        output.dev_dependencies = json["require-dev"].as_object().map(|v| {
             v.iter()
                 // .map(|(k, v)| self.parse_dependency(k, v))
                 .filter_map(|(key, value)| {
@@ -118,21 +117,13 @@ impl Component for PackageJson {
                 .collect()
         });
 
-        if json["funding"].is_array() {
-            output.funding = json["funding"].as_array().map(|v| {
-                v.iter()
-                    .map(|f| self.parse_funding(f))
-                    .filter_map(|f| f.ok())
-                    .collect()
-            });
-        } else if json["funding"].is_object() || json["funding"].is_string() {
-            match self.parse_funding(&json["funding"]) {
-                Ok(f) => {
-                    output.funding = Some(Fundings(vec![f]));
-                }
-                Err(_e) => (),
-            };
-        }
+        output.funding = json["funding"].as_array().map(|v| {
+            v.iter()
+                .map(|f| self.parse_funding(f))
+                .filter_map(|f| f.ok())
+                .collect()
+        });
+
         output.trim();
         Ok(output)
     }
@@ -149,11 +140,13 @@ impl Component for PackageJson {
 
         let attrs = as_obj.unwrap();
 
-        Ok(super::Contributor {
-            name: attrs["name"].as_str().map(|s| s.to_string()),
-            email: attrs["email"].as_str().map(|s| s.to_string()),
-            url: attrs["url"].as_str().map(|s| s.to_string()),
-        })
+        let name = attrs.get("name").map(|s| s.to_string());
+
+        let email = attrs.get("email").map(|s| s.to_string());
+
+        let url = attrs.get("homepage").map(|s| s.to_string());
+
+        Ok(Contributor { name, email, url })
     }
 
     fn parse_dependency(&self, key: &String, value: &Value) -> Result<Dependency, Error> {
@@ -168,22 +161,11 @@ impl Component for PackageJson {
             .map(|t| t.to_string())
             .collect::<Vec<_>>();
 
-        let mut to_compare = vec![];
-
-        if funding.is_string() {
-            to_compare.push(funding.to_string());
-        } else {
-            let f_type = funding["type"].to_string();
-            let url = funding["url"].to_string();
-
-            to_compare.push(url);
-            to_compare.push(f_type);
-        }
+        let f_type = funding["type"].to_string();
+        let url = funding["url"].to_string();
 
         for possible_value in possible_values.iter() {
-            let is_in: bool = to_compare.iter().any(|v| v.contains(possible_value));
-
-            if is_in {
+            if f_type.contains(possible_value) || url.contains(possible_value) {
                 let f_type = match FundingType::from_str(possible_value) {
                     Ok(t) => t,
                     Err(_e) => {
@@ -193,7 +175,7 @@ impl Component for PackageJson {
 
                 let funding = Funding {
                     f_type,
-                    url: Some(to_compare[0].clone()),
+                    url: Some(url),
                 };
 
                 return Ok(funding);

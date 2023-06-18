@@ -6,7 +6,7 @@
 //! - https://github.com/lpxxn/rust-design-pattern/blob/master/structural/decorator.rs
 
 use std::{
-    fmt::{Display},
+    fmt::Display,
     fs,
     hash::{Hash, Hasher},
     path::Path,
@@ -19,9 +19,20 @@ use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
 use strum::{EnumIter, IntoEnumIterator};
 
-pub mod cargo_toml;
-pub mod composer_json;
-pub mod package_json;
+pub mod parsers {
+    pub mod cargo_toml;
+    pub mod composer_json;
+    pub mod package_json;
+}
+
+pub mod parts {
+    pub mod license;
+}
+
+use self::{
+    parsers::{cargo_toml, composer_json, package_json},
+    parts::license::License,
+};
 
 // The base Component trait defines operations that can be altered by
 // decorators.
@@ -587,177 +598,6 @@ impl ToString for RepositoryPlatform {
             RepositoryPlatform::SelfHosted => "self-hosted".to_string(),
             RepositoryPlatform::Unknown => "unknown".to_string(),
         }
-    }
-}
-
-#[derive(Debug, Clone, PartialEq)]
-/// The available licenses for a project which a user can choose from
-pub enum SupportedLicense {
-    MIT,
-    Apache2,
-    GPL3,
-    BSD3,
-    Unlicense,
-    Custom(String),
-    Unknown,
-}
-
-impl ToString for SupportedLicense {
-    fn to_string(&self) -> String {
-        match self {
-            SupportedLicense::MIT => "MIT".to_string(),
-            SupportedLicense::Apache2 => "Apache-2.0".to_string(),
-            SupportedLicense::GPL3 => "GPL-3.0".to_string(),
-            SupportedLicense::BSD3 => "BSD-3-Clause".to_string(),
-            SupportedLicense::Unlicense => "Unlicense".to_string(),
-            SupportedLicense::Custom(custom_license) => custom_license.clone(),
-            SupportedLicense::Unknown => "unknown".to_string(),
-        }
-    }
-}
-
-impl FromStr for SupportedLicense {
-    type Err = ();
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let mit = ["MIT", "mit", "mit license", "MIT License"];
-        let apache2 = [
-            "Apache-2.0",
-            "apache2",
-            "apache2 license",
-            "Apache2 License",
-        ];
-        let gpl3 = ["GPL-3.0", "gpl3", "gpl3 license", "GPL3 License"];
-        let bsd3 = ["BSD-3-Clause", "bsd3", "bsd3 license", "BSD3 License"];
-
-        match s {
-            s if mit.contains(&s) => Ok(SupportedLicense::MIT),
-            s if apache2.contains(&s) => Ok(SupportedLicense::Apache2),
-            s if gpl3.contains(&s) => Ok(SupportedLicense::GPL3),
-            s if bsd3.contains(&s) => Ok(SupportedLicense::BSD3),
-            s if s == "Unlicense" => Ok(SupportedLicense::Unlicense),
-            _ => Ok(SupportedLicense::Unknown),
-        }
-    }
-}
-
-#[derive(Debug, Clone)]
-/// The license object and related information
-pub struct License {
-    /// The license name
-    pub name: SupportedLicense,
-    /// The location in the project structure
-    pub path: Option<String>,
-    /// The location on the web (github repository for example)
-    pub url: Option<String>,
-}
-
-impl License {
-    pub fn from_name(name: String) -> Self {
-        let license = match SupportedLicense::from_str(&name) {
-            Ok(license) => license,
-            Err(_) => {
-                return Self {
-                    name: SupportedLicense::Custom(name),
-                    path: None,
-                    url: None,
-                }
-            }
-        };
-
-        Self {
-            name: license,
-            path: None,
-            url: None,
-        }
-    }
-
-    pub fn from_file(path: String, repository: Option<Repository>) -> Self {
-        let content = match fs::read_to_string(&path) {
-            Ok(license) => license,
-            Err(_) => {
-                return Self {
-                    name: SupportedLicense::Unknown,
-                    path: None,
-                    url: None,
-                }
-            }
-        };
-
-        let is_remote = repository.is_some()
-            && repository.as_ref().unwrap().platform == RepositoryPlatform::Github;
-
-        match SupportedLicense::from_str(&content) {
-            Ok(license) => {
-                if is_remote {
-                    let filename = path.split('/').last().unwrap();
-
-                    // repository.clone().unwrap().url.clone() + "/blob/master/" + filename,
-                    let url = format!(
-                        "{}/blob/master/{}",
-                        repository.as_ref().unwrap().url,
-                        filename
-                    );
-
-                    return Self {
-                        name: license,
-                        path: Some(path.clone()),
-                        url: Some(url),
-                    };
-                }
-
-                Self {
-                    name: license,
-                    path: Some(path),
-                    url: None,
-                }
-            }
-            Err(_) => {
-                Self {
-                    name: SupportedLicense::Unknown,
-                    path: Some(path),
-                    url: None,
-                }
-            }
-        }
-    }
-}
-
-impl GenMarkdown for License {
-    fn gen_md(&self) -> Result<String, Error> {
-        let license_tpl = paths::read_util_file_contents(paths::UtilityPath::License);
-        let mut handlebars = handlebars::Handlebars::new();
-        handlebars.register_template_string("license_tpl", license_tpl)?;
-
-        let data = if let Some(url) = &self.url {
-            json!({
-                "name": self.name.to_string(),
-                "target": url.clone()
-            })
-        } else {
-            json!({
-                "name": self.name.to_string()
-            })
-        };
-
-        Ok(handlebars.render("license_tpl", &data).unwrap())
-    }
-}
-
-impl Display for License {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let _license = String::new();
-
-        if self.path.is_some() {
-            return write!(
-                f,
-                "{} ({})",
-                self.name.to_string(),
-                self.path.clone().unwrap()
-            );
-        };
-
-        write!(f, "{}", self.name.to_string())
     }
 }
 

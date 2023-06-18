@@ -1,9 +1,11 @@
 use std::fmt::{Debug, Display};
 
-use crate::converter::{ConverterOutput, License, Repository, SupportedLicense};
+use crate::converter::parts::license::{License, SupportedLicense};
+use crate::converter::{ConverterOutput, Repository};
 use crate::dialoguer::{select_option, SelectOption};
 use anyhow::{Error, Ok};
 use itertools::Itertools;
+use strum::IntoEnumIterator;
 
 /// Merges the information of multiple config files into a single object
 ///
@@ -83,28 +85,30 @@ impl Merger {
             config.license.is_none()
                 || config.license.as_ref().unwrap().name == SupportedLicense::Unknown
         }) {
-            let available = vec![
-                SupportedLicense::MIT.to_string(),
-                SupportedLicense::Apache2.to_string(),
-                SupportedLicense::GPL3.to_string(),
-                SupportedLicense::BSD3.to_string(),
-                SupportedLicense::Unlicense.to_string(),
-            ]
-            .iter()
-            .map(|license| SelectOption {
-                name: license.clone(),
-                value: Some(License::from_name(license.clone())),
-            })
-            .collect();
+            let supported: Vec<String> = SupportedLicense::iter()
+                .map(|license| license.to_string())
+                .collect();
 
-            output.license = select_option(
+            let available = supported
+                .iter()
+                .map(|license| SelectOption {
+                    name: license.clone(),
+                    value: Some(license.clone()),
+                })
+                .collect();
+
+            let selected = select_option(
                 "LICENSE",
                 available,
                 Some("I was unable to find a license in your project! Select one from the list below"
                 .to_string()),
             );
+
+            if selected.is_some() {
+                output.license = Some(License::from_name(selected.unwrap()));
+            }
         } else {
-            output.license = self.merge_field(
+            let selected = self.merge_field(
                 "license",
                 converted_configs
                     .iter()
@@ -114,10 +118,14 @@ impl Merger {
                     })
                     .map(|config| SelectOption {
                         name: config.license.as_ref().unwrap().name.to_string(),
-                        value: None,
+                        value: Some(config.license.as_ref().unwrap()),
                     })
                     .collect(),
             );
+
+            if selected.is_some() {
+                output.license = Some(selected.unwrap().clone());
+            }
         }
 
         let repository_url = self.merge_field(
