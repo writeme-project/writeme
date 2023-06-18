@@ -116,9 +116,26 @@ impl Merger {
                         config.license.is_some()
                             && config.license.as_ref().unwrap().name != SupportedLicense::Unknown
                     })
-                    .map(|config| SelectOption {
-                        name: config.license.as_ref().unwrap().name.to_string(),
-                        value: Some(config.license.as_ref().unwrap()),
+                    .map(|config| {
+                        let license = config.license.as_ref().unwrap();
+
+                        if license.path.is_some() {
+                            return SelectOption {
+                                name: license.path.as_ref().unwrap().to_string(),
+                                value: Some(config.license.as_ref().unwrap()),
+                            };
+                        }
+
+                        SelectOption {
+                            name: config.license.as_ref().unwrap().name.to_string(),
+                            value: Some(config.license.as_ref().unwrap()),
+                        }
+                    })
+                    .unique_by(|item| {
+                        (
+                            item.value.as_ref().unwrap().name.clone(),
+                            item.value.as_ref().unwrap().path.clone(),
+                        )
                     })
                     .collect(),
             );
