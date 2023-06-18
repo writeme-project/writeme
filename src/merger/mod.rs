@@ -117,6 +117,9 @@ impl Merger {
                             && config.license.as_ref().unwrap().name != SupportedLicense::Unknown
                     })
                     .map(|config| {
+                        // ! to fix, since we pass the whole License object as value (which implements the Display trait)
+                        // ! the options showed to the user end up being recursive, like so (example of option)
+                        // ! MIT (./../bachelor-thesis/license) (MIT (./../bachelor-thesis/license) (./../bachelor-thesis/license))
                         let license = config.license.as_ref().unwrap();
 
                         if license.path.is_some() {

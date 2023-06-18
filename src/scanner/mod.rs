@@ -253,6 +253,7 @@ pub fn scan_license_file(project_location: &str) -> Result<ConverterOutput, Erro
         if found.is_some() {
             let mut converter = ConverterOutput::empty();
 
+            // ! to look: find a way to pass the repository to this function so that the license can create the url for the platform, if supported
             converter.license = Option::from(License::from_file(p, None));
 
             return Ok(converter);
