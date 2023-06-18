@@ -8,7 +8,7 @@ use crate::{
     utils::{paths, GenMarkdown},
 };
 
-#[derive(Debug, Clone, PartialEq, EnumIter, Copy)]
+#[derive(Debug, Clone, PartialEq, EnumIter, Copy, Eq, Hash)]
 /// The available licenses for a project which a user can choose from
 pub enum SupportedLicense {
     Unknown,
@@ -818,7 +818,8 @@ impl FromStr for SupportedLicense {
             vec![
                 SupportedLicense::CreativeCommonsAttributionShareAlike40International.to_string(),
                 "cc-by-4.0".to_string(),
-                "Attribution-ShareAlike 4.0".to_string(),
+                "Attribution ShareAlike 4.0".to_string(),
+                "ShareAlike 4.0".to_string(),
                 "ccby4.0".to_string(),
                 "ccby4".to_string(),
                 "ccby".to_string(),
@@ -827,13 +828,14 @@ impl FromStr for SupportedLicense {
         );
 
         // check if contains the license
-        if let Some((_, license)) = keywords.iter().find(|(keywords, _)| {
-            keywords
+        let found = keywords.iter().find(|option| {
+            option
+                .0
                 .iter()
-                .map(|s| s.to_lowercase())
-                .collect::<Vec<String>>()
-                .contains(&s.to_lowercase())
-        }) {
+                .any(|keyword| s.to_lowercase().contains(&keyword.to_lowercase()))
+        });
+
+        if let Some((_, license)) = found {
             Ok(*license)
         } else {
             Err(())
@@ -841,7 +843,7 @@ impl FromStr for SupportedLicense {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 /// The license object and related information
 pub struct License {
     /// The license name
