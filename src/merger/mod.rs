@@ -79,7 +79,7 @@ impl Merger {
             None,
         );
 
-        output.license = self.any_licenses(converted_configs.clone());
+        output.license = self.merge_licenses(converted_configs.clone());
 
         let repository_url = self.merge_field(
             "repository",
@@ -149,7 +149,7 @@ impl Merger {
         Ok(output)
     }
 
-    fn any_licenses(&self, converted_configs: Vec<ConverterOutput>) -> Option<License>{
+    fn merge_licenses(&self, converted_configs: Vec<ConverterOutput>) -> Option<License>{
         let selected:Option<License>;
 
         if converted_configs.iter().all(|config| {
