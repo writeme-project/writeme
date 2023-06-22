@@ -13,7 +13,6 @@ use std::{
     str::FromStr,
 };
 
-use crate::utils::{paths, trim, GenMarkdown};
 use anyhow::{anyhow, Error};
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
@@ -25,14 +24,12 @@ pub mod parsers {
     pub mod package_json;
 }
 
-pub mod parts {
-    pub mod license;
-}
-
-use self::{
-    parsers::{cargo_toml, composer_json, package_json},
-    parts::license::License,
+use crate::{
+    elements::license::License,
+    utils::{paths, trim, GenMarkdown},
 };
+
+use self::parsers::{cargo_toml, composer_json, package_json};
 
 // The base Component trait defines operations that can be altered by
 // decorators.

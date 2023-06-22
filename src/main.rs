@@ -1,6 +1,7 @@
 mod assembler;
 mod converter;
 mod dialoguer;
+mod elements;
 mod merger;
 mod scanner;
 mod utils;

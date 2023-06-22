@@ -1,8 +1,10 @@
 use std::fmt::{Debug, Display};
 
-use crate::converter::parts::license::{License, SupportedLicense};
-use crate::converter::{ConverterOutput, Repository};
-use crate::dialoguer::{select_option, SelectOption};
+use crate::{
+    converter::{ConverterOutput, Repository},
+    dialoguer::{select_option, SelectOption},
+    elements::license::{License, SupportedLicense},
+};
 use anyhow::{Error, Ok};
 use itertools::Itertools;
 use strum::IntoEnumIterator;

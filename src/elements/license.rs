@@ -1,7 +1,7 @@
 use std::{collections::HashMap, fmt::Display, fs, str::FromStr};
 
 use serde_json::json;
-use strum::{EnumIter, IntoEnumIterator};
+use strum::EnumIter;
 
 use crate::{
     converter::{Repository, RepositoryPlatform},

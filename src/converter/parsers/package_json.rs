@@ -4,9 +4,12 @@ use anyhow::{anyhow, Error};
 use serde_json::Value;
 use strum::IntoEnumIterator;
 
-use crate::converter::{
-    parts::license::License, Component, Contributor, Contributors, ConverterOutput, Decorator,
-    Dependency, Funding, FundingType, Fundings, Repository,
+use crate::{
+    converter::{
+        Component, Contributor, Contributors, ConverterOutput, Decorator, Dependency, Funding,
+        FundingType, Fundings, Repository,
+    },
+    elements::license::License,
 };
 
 /// The package.json parser

@@ -1,9 +1,9 @@
 use crate::{
     converter::{
-        self, parts::license::License, Contributor, Contributors, ConverterOutput, Dependencies,
-        RepositoryPlatform,
+        self, Contributor, Contributors, ConverterOutput, Dependencies, RepositoryPlatform,
     },
     dialoguer,
+    elements::license::License,
     utils::{paths, Tech},
 };
 use anyhow::{anyhow, Error};
