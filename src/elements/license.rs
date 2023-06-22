@@ -244,7 +244,7 @@ impl License {
 
         license_file.write_all(render.as_bytes())?;
 
-        return Ok(Option::from(output_path));
+        Ok(Option::from(output_path))
     }
 }
 

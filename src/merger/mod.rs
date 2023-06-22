@@ -180,7 +180,7 @@ impl Merger {
                     config.license.is_some()
                         && config.license.as_ref().unwrap().name != SupportedLicense::Unknown
                 })
-                .unique_by(|item| item.license.as_ref().unwrap().name.clone())
+                .unique_by(|item| item.license.as_ref().unwrap().name)
                 .map(|config| SelectOption {
                     name: config.source_config_file_path.clone(),
                     value: Some(config.license.clone().unwrap()),
@@ -189,6 +189,6 @@ impl Merger {
             None,
         );
 
-        return selected
+        selected
     }
 }
