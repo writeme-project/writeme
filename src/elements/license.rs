@@ -1,14 +1,18 @@
-use std::{collections::HashMap, fmt::Display, fs, str::FromStr};
+use std::{collections::HashMap, fmt::Display, fs, io::Write, str::FromStr};
 
 use anyhow::Error;
+use chrono::{self, Datelike};
+use handlebars::Handlebars;
 use serde_json::json;
 use std::fs::File;
-use std::io::Write;
 use strum::EnumIter;
 
 use crate::{
     converter::ConverterOutput,
-    utils::{paths, GenMarkdown},
+    utils::{
+        paths::{self, read_util_file_contents, UtilityPath},
+        GenMarkdown,
+    },
 };
 
 #[derive(Debug, Clone, PartialEq, EnumIter, Copy, Eq, Hash)]
@@ -186,12 +190,17 @@ impl License {
         Ok(converter_outputs)
     }
 
-    pub fn create(project_location: &str, license: &License) -> Result<Option<String>, Error> {
+    pub fn create(
+        project_location: &str,
+        license: &License,
+        project_name: Option<String>,
+    ) -> Result<Option<String>, Error> {
+        // if there is a path for the license or the license is unknown, dont create a license
         if license.path.is_some() || license.name == SupportedLicense::Unknown {
             return Ok(None);
         }
 
-        let output_path = format!("{}/LICENSE.md", project_location);
+        let output_path = format!("{}LICENSE", project_location);
         let mut license_file = match File::create(output_path.clone()) {
             Ok(f) => f,
             Err(e) => {
@@ -199,7 +208,33 @@ impl License {
             }
         };
 
-        license_file.write_all(b"\n")?;
+        let license_contents = match license.name {
+            SupportedLicense::Apache20 => read_util_file_contents(UtilityPath::Apache20),
+            SupportedLicense::MIT => read_util_file_contents(UtilityPath::MIT),
+            SupportedLicense::GNUGeneralPublicLicense => {
+                read_util_file_contents(UtilityPath::GNUGPL)
+            }
+            SupportedLicense::Unknown => {
+                return Ok(None);
+            }
+        };
+
+        let year = chrono::Utc::now().year().to_string();
+
+        let license_data = json!({
+            "year": year,
+            "project_name": project_name.unwrap_or("".to_string())
+        });
+
+        let mut handlebars = Handlebars::new();
+
+        handlebars
+            .register_template_string("license_tpl", license_contents)
+            .unwrap();
+
+        let render = handlebars.render("license_tpl", &license_data).unwrap();
+
+        license_file.write_all(render.as_bytes())?;
 
         return Ok(Option::from(output_path));
     }

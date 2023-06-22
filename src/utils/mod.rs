@@ -18,6 +18,11 @@ pub mod paths {
         Techs,
         Lincenses,
 
+        // license templates
+        Apache20,
+        MIT,
+        GNUGPL,
+
         // small pieces of markdown which require some data to be filled in
         Shield,
         Author,
@@ -38,6 +43,9 @@ pub mod paths {
             UtilityPath::Configs => include_str!("../../conf/configs.yml"),
             UtilityPath::Techs => include_str!("../../conf/techs.yml"),
             UtilityPath::Lincenses => include_str!("../../conf/licenses.yml"),
+            UtilityPath::Apache20 => include_str!("../../conf/lic/APACHE_20.md"),
+            UtilityPath::MIT => include_str!("../../conf/lic/MIT.md"),
+            UtilityPath::GNUGPL => include_str!("../../conf/lic/GNU_GPL.md"),
             UtilityPath::Shield => include_str!("../../conf/tpl/SHIELD.md"),
             UtilityPath::Author => include_str!("../../conf/tpl/AUTHOR.md"),
             UtilityPath::ContribRocks => include_str!("../../conf/tpl/CONTRIB_ROCKS.md"),
