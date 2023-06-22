@@ -39,6 +39,7 @@ impl ToString for SupportedLicense {
 impl FromStr for SupportedLicense {
     type Err = ();
 
+    /// Returns a License object from a string
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         let s = s.to_lowercase();
 
@@ -73,9 +74,8 @@ impl FromStr for SupportedLicense {
             SupportedLicense::GNUGeneralPublicLicense,
         );
 
-        // check if contains the license
         let found = keywords.iter().find(|option| {
-            // make all the options a regex and check if it matches
+            // regex is case insensitive and considers only whole words, example "mit" will not match emit
             let options: Vec<String> = option.0.iter().map(|c| format!(r"(?i)\b{}\b", c)).collect();
             let regex_set: regex::RegexSet = regex::RegexSet::new(options).unwrap();
 
@@ -102,7 +102,7 @@ pub struct License {
 }
 
 impl License {
-    /// Create a new license object from a name (string)
+    /// Create a new License object from a name (string) base on the SupportedLicense methods
     ///
     /// If the name of the license is not recognized, the license will be set to `SupportedLicense::Unknown`
     pub fn from_name(name: String) -> Self {
@@ -124,7 +124,7 @@ impl License {
         }
     }
 
-    /// Create a new license object from a file
+    /// Create a new License object from a file, the new License object will contain the license name and the path to the file
     ///
     /// If the license file is from a known platform (eg: github), the url will be set to the file location on the platform
     pub fn from_file(path: String) -> Self {
@@ -153,7 +153,8 @@ impl License {
         }
     }
 
-    /// Returns a vector of ConverterOutput containing the license information
+    /// Scan the project for a license file and return a list of converter output
+    /// each converter output will contain a License object with name and path set
     ///
     pub fn scan(paths: &Vec<String>) -> Result<Vec<ConverterOutput>, Error> {
         let contents: String = paths::read_util_file_contents(paths::UtilityPath::Lincenses);
@@ -162,6 +163,9 @@ impl License {
         let mut converter_outputs: Vec<ConverterOutput> = vec![];
         let mut license_present: Vec<String> = vec![];
 
+        // get all the possible license file names and create a regex set
+        // the regex set is case insensitive and always consider the name as the last
+        // part of the path
         let all_license_file: Vec<String> = all_licenses
             .values()
             .flatten()
@@ -190,6 +194,8 @@ impl License {
         Ok(converter_outputs)
     }
 
+    /// Create a license file in the project
+    ///
     pub fn create(
         project_location: &str,
         license: &License,
@@ -208,6 +214,7 @@ impl License {
             }
         };
 
+        // load the right license template based on the license name
         let license_contents = match license.name {
             SupportedLicense::Apache20 => read_util_file_contents(UtilityPath::Apache20),
             SupportedLicense::MIT => read_util_file_contents(UtilityPath::MIT),
@@ -221,6 +228,7 @@ impl License {
 
         let year = chrono::Utc::now().year().to_string();
 
+        // some license file require project info
         let license_data = json!({
             "year": year,
             "project_name": project_name.unwrap_or("".to_string())
@@ -261,8 +269,12 @@ impl GenMarkdown for License {
     }
 }
 
+/// Implement the Display trait for License
+/// This will allow to print the license name
 impl Display for License {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        // we dont want to print the path or the url
+        // to avoid duplicate information during merge process
         write!(f, "{}", self.name.to_string())
     }
 }
