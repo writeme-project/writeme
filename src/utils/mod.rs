@@ -16,6 +16,7 @@ pub mod paths {
     pub enum UtilityPath {
         Configs,
         Techs,
+        Lincenses,
 
         // small pieces of markdown which require some data to be filled in
         Shield,
@@ -36,6 +37,7 @@ pub mod paths {
         let target = match path {
             UtilityPath::Configs => include_str!("../../conf/configs.yml"),
             UtilityPath::Techs => include_str!("../../conf/techs.yml"),
+            UtilityPath::Lincenses => include_str!("../../conf/licenses.yml"),
             UtilityPath::Shield => include_str!("../../conf/tpl/SHIELD.md"),
             UtilityPath::Author => include_str!("../../conf/tpl/AUTHOR.md"),
             UtilityPath::ContribRocks => include_str!("../../conf/tpl/CONTRIB_ROCKS.md"),

@@ -7,6 +7,7 @@ mod scanner;
 mod utils;
 
 use clap::Parser;
+use elements::license::License;
 use std::path::Path;
 use utils::{outputs, Project};
 
@@ -61,8 +62,12 @@ fn writeme(project_location: &str) {
         Err(_) => {} // if unable to scan git do nothing
     };
 
-    match scanner::scan_license_file(project_location) {
-        Ok(scan_license_file) => outputs.push(scan_license_file),
+    match License::scan(&project.paths) {
+        Ok(licenses) => {
+            licenses
+                .iter()
+                .for_each(|license| outputs.push(license.clone()));
+        }
         Err(_) => {} // if unable to scan license file do nothing
     };
 

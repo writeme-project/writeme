@@ -3,14 +3,13 @@ use crate::{
         self, Contributor, Contributors, ConverterOutput, Dependencies, RepositoryPlatform,
     },
     dialoguer,
-    elements::license::License,
     utils::{paths, Tech},
 };
-use anyhow::{anyhow, Error};
+use anyhow::Error;
 use git2::Repository;
 use itertools::Itertools;
 
-use std::{collections::HashMap, fs, vec};
+use std::{collections::HashMap, vec};
 
 // Returns list of config files present in the project
 pub fn scan_configs(paths: &Vec<String>) -> Result<Vec<String>, Error> {
@@ -204,61 +203,4 @@ pub fn scan_git(project_location: &str) -> Result<ConverterOutput, Error> {
     git_converter.contributors = Option::from(contributors);
 
     Ok(git_converter)
-}
-
-/// Scans the project folder for a license file
-pub fn scan_license_file(project_location: &str) -> Result<ConverterOutput, Error> {
-    // list configs as they are always at the end of the path
-    let look_for: [&str; 21] = [
-        "license",
-        "license.txt",
-        "license.md",
-        "license.html",
-        "license.yml",
-        "license.yaml",
-        "license.json",
-        "copying",
-        "copying.txt",
-        "copying.md",
-        "copying.html",
-        "copying.yml",
-        "copying.yaml",
-        "copying.json",
-        "notice",
-        "notice.txt",
-        "notice.md",
-        "notice.html",
-        "notice.yml",
-        "notice.yaml",
-        "notice.json",
-    ];
-
-    // list the files in the project folder, do not go into subfolders
-    let paths = fs::read_dir(project_location)?
-        .filter_map(|entry| entry.ok())
-        .filter(|entry| entry.path().is_file())
-        .map(|entry| entry.path())
-        .collect::<Vec<_>>();
-
-    for path in paths {
-        let p = match path.to_str() {
-            Some(p) => p.to_lowercase(),
-            None => continue,
-        };
-
-        let found = look_for
-            .iter()
-            .find(|file| p.ends_with(file.to_lowercase().as_str()));
-
-        if found.is_some() {
-            let mut converter = ConverterOutput::empty();
-
-            // ! to look: find a way to pass the repository to this function so that the license can create the url for the platform, if supported
-            converter.license = Option::from(License::from_file(p, None));
-
-            return Ok(converter);
-        }
-    }
-
-    Err(anyhow!("No license file found"))
 }
