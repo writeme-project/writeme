@@ -59,7 +59,7 @@ impl<'a> Assembler<'a> {
         let body_tpl = paths::read_util_file_contents(paths::UtilityPath::Body);
 
         let license = match self.converted_config.license {
-            Some(ref mut license) => {
+            Some(ref mut license) if license.name != SupportedLicense::Unknown => {
                 let repository = self.converted_config.repository.as_ref().unwrap();
                 if repository.platform == RepositoryPlatform::Github {
                     // as file_name get the last part of file path without extension
@@ -82,7 +82,7 @@ impl<'a> Assembler<'a> {
                 }
                 license.gen_md().unwrap()
             }
-            None => SupportedLicense::Unknown.to_string(),
+            Some(_) | None => SupportedLicense::Unknown.to_string(),
         };
 
         let body = json!({
