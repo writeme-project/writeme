@@ -152,26 +152,32 @@ impl Merger {
     fn merge_licenses(&self, converted_configs: Vec<ConverterOutput>) -> Option<License>{
         let selected:Option<License>;
 
+        // check if thereisn't any license
         if converted_configs.iter().all(|config| {
             config.license.is_none()
                 || config.license.as_ref().unwrap().name == SupportedLicense::Unknown
         }) {
+            // make the user select one new license
+
+            // get all available licenses, name is license name, value is license itself
             let available = SupportedLicense::iter()
                 .map(|license| SelectOption {
                     name: license.to_string(),
                     value: Some(License::from_name(license.to_string())),
                 })
                 .collect();
-
+            
+            // make choese between them
             selected = self.merge_field(
                 "license", 
                 available, 
-                Some("I was unable to find a license in your project! Select one from the list below".to_string())
+                Some("Oops! It seems I couldn't find a license for your project. Choose one from the list:".to_string())
             );
 
             return selected;
         } 
-
+        // values are the actual licenses, so the value that we see in the merger
+        // are the Display trait of the license
         selected = self.merge_field(
             "license",
             converted_configs
