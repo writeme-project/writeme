@@ -181,7 +181,7 @@ impl License {
 
         license_present.iter().for_each(|p| {
             let mut converter = ConverterOutput::empty();
-
+            converter.source_config_file_path = p.to_string();
             converter.license = Option::from(License::from_file(p.to_string()));
 
             converter_outputs.push(converter);
@@ -263,17 +263,6 @@ impl GenMarkdown for License {
 
 impl Display for License {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let _license = String::new();
-
-        if self.path.is_some() {
-            return write!(
-                f,
-                "{} ({})",
-                self.name.to_string(),
-                self.path.clone().unwrap()
-            );
-        };
-
         write!(f, "{}", self.name.to_string())
     }
 }

@@ -79,10 +79,7 @@ impl Merger {
             None,
         );
 
-        output.license = match self.any_licenses(converted_configs.clone()) {
-            Some(license) => Some(License::from_name(license)),
-            None => None,
-        };
+        output.license = self.any_licenses(converted_configs.clone());
 
         let repository_url = self.merge_field(
             "repository",
@@ -152,8 +149,8 @@ impl Merger {
         Ok(output)
     }
 
-    fn any_licenses(&self, converted_configs: Vec<ConverterOutput>) -> Option<String>{
-        let selected:Option<String>;
+    fn any_licenses(&self, converted_configs: Vec<ConverterOutput>) -> Option<License>{
+        let selected:Option<License>;
 
         if converted_configs.iter().all(|config| {
             config.license.is_none()
@@ -162,7 +159,7 @@ impl Merger {
             let available = SupportedLicense::iter()
                 .map(|license| SelectOption {
                     name: license.to_string(),
-                    value: Some(license.to_string()),
+                    value: Some(License::from_name(license.to_string())),
                 })
                 .collect();
 
@@ -183,25 +180,10 @@ impl Merger {
                     config.license.is_some()
                         && config.license.as_ref().unwrap().name != SupportedLicense::Unknown
                 })
-                .unique_by(|item| {
-                    (
-                        item.license.as_ref().unwrap().name.to_string().clone(),
-                    )
-                })
-                .map(|config| {
-                    let license = config.license.as_ref().unwrap();
-
-                    if license.path.is_some() {
-                        return SelectOption {
-                            name: license.path.as_ref().unwrap().to_string(),
-                            value: Some(config.license.as_ref().unwrap().name.to_string()),
-                        };
-                    }
-
-                    SelectOption {
-                        name: config.license.as_ref().unwrap().name.to_string(),
-                        value: Some(config.license.as_ref().unwrap().name.to_string()),
-                    }
+                .unique_by(|item| item.license.as_ref().unwrap().name.clone())
+                .map(|config| SelectOption {
+                    name: config.source_config_file_path.clone(),
+                    value: Some(config.license.clone().unwrap()),
                 })
                 .collect(),
             None,

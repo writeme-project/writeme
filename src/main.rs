@@ -84,7 +84,11 @@ fn writeme(project_location: &str) {
         merged.license.as_ref().unwrap(),
         merged.name.clone(),
     ) {
-        Ok(output_path) => merged.license.as_mut().unwrap().path = output_path,
+        Ok(output_path) => {
+            if output_path.is_some() {
+                merged.license.as_mut().unwrap().path = output_path
+            }
+        }
         Err(e) => {
             dialoguer::error("Error: Failed to create license file: {}", &e);
         }
