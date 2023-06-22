@@ -20,6 +20,7 @@ include = ["conf/**"]
 
 [dependencies]
 anyhow = "1.0.70"
+chrono = "0.4.26"
 clap = { version = "4.2.4", features = ["derive"] }
 colored = "2.0.0"
 derive = "1.0.0"
