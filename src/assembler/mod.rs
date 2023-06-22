@@ -62,7 +62,7 @@ impl<'a> Assembler<'a> {
             Some(ref mut license) if license.name != SupportedLicense::Unknown => {
                 let repository = self.converted_config.repository.as_ref().unwrap();
                 if repository.platform == RepositoryPlatform::Github {
-                    // as file_name get the last part of file path without extension
+                    // get the file name
                     let file_name = license
                         .path
                         .as_ref()
