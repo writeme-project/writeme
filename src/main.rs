@@ -71,13 +71,20 @@ fn writeme(project_location: &str) {
         Err(_) => {} // if unable to scan license file do nothing
     };
 
-    let merged = match merger.merge(outputs) {
+    let mut merged = match merger.merge(outputs) {
         Ok(merged) => merged,
         Err(e) => {
             dialoguer::error("Error: Failed to merge: {}", &e);
             return;
         }
     };
+
+    match License::create(project_location, merged.license.as_ref().unwrap()) {
+        Ok(output_path) => merged.license.as_mut().unwrap().path = output_path,
+        Err(e) => {
+            dialoguer::error("Error: Failed to create license file: {}", &e);
+        }
+    }
 
     match assembler::Assembler::new(merged).assemble(
         &format!("{}/{}", project_location, outputs::README),

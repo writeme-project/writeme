@@ -24,16 +24,9 @@ impl Merger {
         &self,
         field_name: &str,
         values: Vec<SelectOption<T>>,
+        custom_label: Option<String>,
     ) -> Option<T> {
-        let options = values
-            .iter()
-            .map(|value| SelectOption {
-                name: format!("{}", value),
-                value: value.value.clone(),
-            })
-            .collect();
-
-        select_option(field_name, options, None)
+        select_option(field_name, values, custom_label)
     }
 
     /// Merges the vector fields of the provided configs into a single value by asking the user which one to keep
@@ -51,6 +44,7 @@ impl Merger {
                     name: config.source_config_file_path.clone(),
                 })
                 .collect(),
+            None,
         );
 
         output.description = self.merge_field(
@@ -66,6 +60,7 @@ impl Merger {
                     name: config.source_config_file_path.clone(),
                 })
                 .collect(),
+            None,
         );
 
         output.version = self.merge_field(
@@ -81,74 +76,13 @@ impl Merger {
                     name: config.source_config_file_path.clone(),
                 })
                 .collect(),
+            None,
         );
 
-        if converted_configs.iter().all(|config| {
-            config.license.is_none()
-                || config.license.as_ref().unwrap().name == SupportedLicense::Unknown
-        }) {
-            let supported: Vec<String> = SupportedLicense::iter()
-                .map(|license| license.to_string())
-                .collect();
-
-            let available = supported
-                .iter()
-                .map(|license| SelectOption {
-                    name: license.clone(),
-                    value: Some(license.clone()),
-                })
-                .collect();
-
-            let selected = select_option(
-                "LICENSE",
-                available,
-                Some("I was unable to find a license in your project! Select one from the list below"
-                .to_string()),
-            );
-
-            if selected.is_some() {
-                output.license = Some(License::from_name(selected.unwrap()));
-            }
-        } else {
-            let selected = self.merge_field(
-                "license",
-                converted_configs
-                    .iter()
-                    .filter(|config| {
-                        config.license.is_some()
-                            && config.license.as_ref().unwrap().name != SupportedLicense::Unknown
-                    })
-                    .map(|config| {
-                        // ! to fix, since we pass the whole License object as value (which implements the Display trait)
-                        // ! the options showed to the user end up being recursive, like so (example of option)
-                        // ! MIT (./../bachelor-thesis/license) (MIT (./../bachelor-thesis/license) (./../bachelor-thesis/license))
-                        let license = config.license.as_ref().unwrap();
-
-                        if license.path.is_some() {
-                            return SelectOption {
-                                name: license.path.as_ref().unwrap().to_string(),
-                                value: Some(config.license.as_ref().unwrap()),
-                            };
-                        }
-
-                        SelectOption {
-                            name: config.license.as_ref().unwrap().name.to_string(),
-                            value: Some(config.license.as_ref().unwrap()),
-                        }
-                    })
-                    .unique_by(|item| {
-                        (
-                            item.value.as_ref().unwrap().name.clone(),
-                            item.value.as_ref().unwrap().path.clone(),
-                        )
-                    })
-                    .collect(),
-            );
-
-            if selected.is_some() {
-                output.license = Some(selected.unwrap().clone());
-            }
-        }
+        output.license = match self.any_licenses(converted_configs.clone()) {
+            Some(license) => Some(License::from_name(license)),
+            None => None,
+        };
 
         let repository_url = self.merge_field(
             "repository",
@@ -164,6 +98,7 @@ impl Merger {
                     name: config.source_config_file_path.clone(),
                 })
                 .collect(),
+            None,
         );
         output.repository = Option::from(Repository::new(repository_url.unwrap_or("".to_string())));
 
@@ -215,5 +150,63 @@ impl Merger {
         );
 
         Ok(output)
+    }
+
+    fn any_licenses(&self, converted_configs: Vec<ConverterOutput>) -> Option<String>{
+        let selected:Option<String>;
+
+        if converted_configs.iter().all(|config| {
+            config.license.is_none()
+                || config.license.as_ref().unwrap().name == SupportedLicense::Unknown
+        }) {
+            let available = SupportedLicense::iter()
+                .map(|license| SelectOption {
+                    name: license.to_string(),
+                    value: Some(license.to_string()),
+                })
+                .collect();
+
+            selected = self.merge_field(
+                "license", 
+                available, 
+                Some("I was unable to find a license in your project! Select one from the list below".to_string())
+            );
+
+            return selected;
+        } 
+
+        selected = self.merge_field(
+            "license",
+            converted_configs
+                .iter()
+                .filter(|config| {
+                    config.license.is_some()
+                        && config.license.as_ref().unwrap().name != SupportedLicense::Unknown
+                })
+                .unique_by(|item| {
+                    (
+                        item.license.as_ref().unwrap().name.to_string().clone(),
+                    )
+                })
+                .map(|config| {
+                    let license = config.license.as_ref().unwrap();
+
+                    if license.path.is_some() {
+                        return SelectOption {
+                            name: license.path.as_ref().unwrap().to_string(),
+                            value: Some(config.license.as_ref().unwrap().name.to_string()),
+                        };
+                    }
+
+                    SelectOption {
+                        name: config.license.as_ref().unwrap().name.to_string(),
+                        value: Some(config.license.as_ref().unwrap().name.to_string()),
+                    }
+                })
+                .collect(),
+            None,
+        );
+
+        return selected
     }
 }

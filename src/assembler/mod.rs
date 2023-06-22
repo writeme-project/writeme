@@ -59,7 +59,29 @@ impl<'a> Assembler<'a> {
         let body_tpl = paths::read_util_file_contents(paths::UtilityPath::Body);
 
         let license = match self.converted_config.license {
-            Some(ref license) => license.gen_md().unwrap(),
+            Some(ref mut license) => {
+                let repository = self.converted_config.repository.as_ref().unwrap();
+                if repository.platform == RepositoryPlatform::Github {
+                    // as file_name get the last part of file path without extension
+                    let file_name = license
+                        .path
+                        .as_ref()
+                        .unwrap()
+                        .split('/')
+                        .last()
+                        .unwrap()
+                        .split('.')
+                        .next()
+                        .unwrap();
+
+                    license.url = Some(format!(
+                        "{}/blob/master/{}",
+                        repository.url.clone(),
+                        file_name
+                    ));
+                }
+                license.gen_md().unwrap()
+            }
             None => SupportedLicense::Unknown.to_string(),
         };
 

@@ -2,6 +2,8 @@ use std::{collections::HashMap, fmt::Display, fs, str::FromStr};
 
 use anyhow::Error;
 use serde_json::json;
+use std::fs::File;
+use std::io::Write;
 use strum::EnumIter;
 
 use crate::{
@@ -182,6 +184,24 @@ impl License {
         });
 
         Ok(converter_outputs)
+    }
+
+    pub fn create(project_location: &str, license: &License) -> Result<Option<String>, Error> {
+        if license.path.is_some() || license.name == SupportedLicense::Unknown {
+            return Ok(None);
+        }
+
+        let output_path = format!("{}/LICENSE.md", project_location);
+        let mut license_file = match File::create(output_path.clone()) {
+            Ok(f) => f,
+            Err(e) => {
+                return Err(Error::new(e));
+            }
+        };
+
+        license_file.write_all(b"\n")?;
+
+        return Ok(Option::from(output_path));
     }
 }
 
