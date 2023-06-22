@@ -7,7 +7,7 @@ mod scanner;
 mod utils;
 
 use clap::Parser;
-use elements::license::License;
+use elements::{license::License, repository::Repository};
 use std::path::Path;
 use utils::{outputs, Project};
 
@@ -57,7 +57,7 @@ fn writeme(project_location: &str) {
         outputs.push(output.unwrap());
     }
 
-    match scanner::scan_git(project_location) {
+    match Repository::scan(project_location) {
         Ok(scan_git) => outputs.push(scan_git),
         Err(_) => {} // if unable to scan git do nothing
     };

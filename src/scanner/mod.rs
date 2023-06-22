@@ -1,13 +1,8 @@
 use crate::{
-    converter::{
-        self, Contributor, Contributors, ConverterOutput, Dependencies, RepositoryPlatform,
-    },
-    dialoguer,
+    converter::Dependencies,
     utils::{paths, Tech},
 };
 use anyhow::Error;
-use git2::Repository;
-use itertools::Itertools;
 
 use std::{collections::HashMap, vec};
 
@@ -96,111 +91,4 @@ pub fn scan_dependencies(dependencies: Dependencies) -> Result<Vec<String>, Erro
     }
 
     Ok(dependencies_present)
-}
-
-/// Returns a ConverterOutput struct with the data found in the .git folder
-pub fn scan_git(project_location: &str) -> Result<ConverterOutput, Error> {
-    let mut git_converter = ConverterOutput::empty();
-
-    git_converter.source_config_file_path = format!("{}.git", project_location);
-
-    // Open the repository
-    let repo: Repository = match Repository::open(project_location) {
-        Ok(repo) => repo,
-        Err(e) => {
-            dialoguer::error("Failed to open repository: {}", &e);
-            return Ok(git_converter);
-        }
-    };
-
-    let url: String = repo
-        .find_remote("origin")
-        .unwrap()
-        .url()
-        .unwrap()
-        .to_string();
-
-    let project_repository = converter::Repository::new(url);
-    git_converter.repository = Option::from(project_repository.clone());
-
-    git_converter.name = project_repository.name.clone();
-
-    // check if the repo is a github repo
-    // if so not need to continue
-    if project_repository.platform == RepositoryPlatform::Github {
-        return Ok(git_converter);
-    }
-
-    // Get the head commit
-    let head = match repo.head() {
-        Ok(head) => head,
-        Err(e) => {
-            dialoguer::error("Failed to get repository head: {}", &e);
-            return Ok(git_converter);
-        }
-    };
-
-    let head_commit = match head.peel_to_commit() {
-        Ok(commit) => commit,
-        Err(e) => {
-            dialoguer::error("Failed to peel to commit of the repository: {}", &e);
-            return Ok(git_converter);
-        }
-    };
-
-    // Iterate over the commits in the repository
-    let mut revwalk = match repo.revwalk() {
-        Ok(revwalk) => revwalk,
-        Err(e) => {
-            dialoguer::error("Failed to get revwalk of the repository: {}", &e);
-            return Ok(git_converter);
-        }
-    };
-
-    revwalk.push(head_commit.id()).unwrap();
-
-    let mut contributors: HashMap<Contributor, i32> = std::collections::HashMap::new();
-
-    // fill contributors hashmap counting the number of commits for each contributor
-    for oid in revwalk {
-        let oid = match oid {
-            Ok(oid) => oid,
-            Err(e) => {
-                dialoguer::error("Failed to get oid of the repository: {}", &e);
-                return Ok(git_converter);
-            }
-        };
-
-        let commit = match repo.find_commit(oid) {
-            Ok(commit) => commit,
-            Err(e) => {
-                dialoguer::error("Failed to find commit: {}", &e);
-                return Ok(git_converter);
-            }
-        };
-
-        let author = commit.author();
-        let name = author.name().unwrap();
-        let email = author.email().unwrap();
-
-        let contributor = Contributor {
-            name: Some(name.to_string()),
-            email: Some(email.to_string()),
-            url: None,
-        };
-
-        let count = contributors.entry(contributor).or_insert(0);
-        *count += 1;
-    }
-
-    // sort contributors by number of commits
-    let contributors: Contributors = contributors
-        .iter()
-        .sorted_by(|a, b| b.1.cmp(a.1))
-        .map(|(contributor, _)| contributor.clone())
-        .collect();
-
-    git_converter.contributors = Option::from(contributors);
-
-    Ok(git_converter)
 }

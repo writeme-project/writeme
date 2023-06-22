@@ -1,6 +1,6 @@
 use crate::{
-    converter::{ConverterOutput, RepositoryPlatform},
-    elements::license::SupportedLicense,
+    converter::ConverterOutput,
+    elements::{license::SupportedLicense, repository::RepositoryPlatform},
     scanner::{scan_dependencies, scan_techs},
     utils::{fantasy_description, paths, shields, Alignment, GenMarkdown},
 };

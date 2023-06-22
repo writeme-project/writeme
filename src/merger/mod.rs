@@ -1,9 +1,9 @@
 use std::fmt::{Debug, Display};
 
 use crate::{
-    converter::{ConverterOutput, Repository},
+    converter::{ConverterOutput},
     dialoguer::{select_option, SelectOption},
-    elements::license::{License, SupportedLicense},
+    elements::{license::{License, SupportedLicense}, repository::Repository},
 };
 use anyhow::{Error, Ok};
 use itertools::Itertools;
