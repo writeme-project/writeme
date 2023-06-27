@@ -260,7 +260,7 @@ impl GenMarkdown for Contributor {
 
         // build md string if at least name and one of the other fields are present
         if self.name.is_some() && (self.url.is_some() || self.email.is_some()) {
-            let author_tpl = paths::read_util_file_contents(paths::UtilityPath::Author);
+            let author_tpl = paths::read_util_file_contents(paths::UtilityPath::AuthorReadme);
             let mut handlebars = handlebars::Handlebars::new();
             handlebars
                 .register_template_string("author_tpl", author_tpl)

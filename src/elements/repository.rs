@@ -204,7 +204,8 @@ impl Repository {
 
 impl GenMarkdown for Repository {
     fn gen_md(&self) -> Result<String, Error> {
-        let contrib_rocks_tpl = paths::read_util_file_contents(paths::UtilityPath::ContribRocks);
+        let contrib_rocks_tpl =
+            paths::read_util_file_contents(paths::UtilityPath::ContribRocksReadme);
         let mut handlebars = handlebars::Handlebars::new();
         handlebars
             .register_template_string("contrib_rocks_tpl", contrib_rocks_tpl)

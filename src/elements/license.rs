@@ -250,7 +250,7 @@ impl License {
 
 impl GenMarkdown for License {
     fn gen_md(&self) -> Result<String, anyhow::Error> {
-        let license_tpl = paths::read_util_file_contents(paths::UtilityPath::License);
+        let license_tpl = paths::read_util_file_contents(paths::UtilityPath::LicenseReadme);
         let mut handlebars = handlebars::Handlebars::new();
         handlebars.register_template_string("license_tpl", license_tpl)?;
 

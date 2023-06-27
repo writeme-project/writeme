@@ -9,6 +9,7 @@ use std::collections::HashMap;
 /// Paths to output files saved to disk produced by the application
 pub mod outputs {
     pub const README: &str = "README.md";
+    pub const CONTRIBUTING: &str = "CONTRIBUTING.md";
 }
 
 /// Paths to significant files
@@ -23,18 +24,22 @@ pub mod paths {
         MIT,
         GNUGPL,
 
+        //README.md templates
         // small pieces of markdown which require some data to be filled in
-        Shield,
-        Author,
-        ContribRocks,
-        Support,
-        License,
+        ShieldReadme,
+        AuthorReadme,
+        ContribRocksReadme,
+        SupportReadme,
+        LicenseReadme,
 
         // large macro templates of the README file
-        Header,
-        Toc,
-        Body,
-        Footer,
+        HeaderReadme,
+        TocReadme,
+        BodyReadme,
+        FooterReadme,
+
+        //CONTRIBUTING.md templates
+        BodyContributing,
     }
 
     /// Returns the path of the given file for the given utility type
@@ -46,15 +51,18 @@ pub mod paths {
             UtilityPath::Apache20 => include_str!("../../conf/lic/APACHE_20.md"),
             UtilityPath::MIT => include_str!("../../conf/lic/MIT.md"),
             UtilityPath::GNUGPL => include_str!("../../conf/lic/GNU_GPL.md"),
-            UtilityPath::Shield => include_str!("../../conf/tpl/SHIELD.md"),
-            UtilityPath::Author => include_str!("../../conf/tpl/AUTHOR.md"),
-            UtilityPath::ContribRocks => include_str!("../../conf/tpl/CONTRIB_ROCKS.md"),
-            UtilityPath::Support => include_str!("../../conf/tpl/SUPPORT.md"),
-            UtilityPath::Header => include_str!("../../conf/tpl/HEADER.md"),
-            UtilityPath::Toc => include_str!("../../conf/tpl/TABLE_OF_CONTENT.md"),
-            UtilityPath::Body => include_str!("../../conf/tpl/BODY.md"),
-            UtilityPath::Footer => include_str!("../../conf/tpl/FOOTER.md"),
-            UtilityPath::License => include_str!("../../conf/tpl/LICENSE.md"),
+            UtilityPath::ShieldReadme => include_str!("../../conf/tpl/readme/SHIELD.md"),
+            UtilityPath::AuthorReadme => include_str!("../../conf/tpl/readme/AUTHOR.md"),
+            UtilityPath::ContribRocksReadme => {
+                include_str!("../../conf/tpl/readme/CONTRIB_ROCKS.md")
+            }
+            UtilityPath::SupportReadme => include_str!("../../conf/tpl/readme/SUPPORT.md"),
+            UtilityPath::HeaderReadme => include_str!("../../conf/tpl/readme/HEADER.md"),
+            UtilityPath::TocReadme => include_str!("../../conf/tpl/readme/TABLE_OF_CONTENT.md"),
+            UtilityPath::BodyReadme => include_str!("../../conf/tpl/readme/BODY.md"),
+            UtilityPath::FooterReadme => include_str!("../../conf/tpl/readme/FOOTER.md"),
+            UtilityPath::LicenseReadme => include_str!("../../conf/tpl/readme/LICENSE.md"),
+            UtilityPath::BodyContributing => include_str!("../../conf/tpl/contributing/BODY.md"),
         };
 
         target.to_string()
@@ -92,7 +100,7 @@ pub struct Tech {
 
 impl GenMarkdown for Shield {
     fn gen_md(&self) -> Result<String, Error> {
-        let shield_tpl = paths::read_util_file_contents(paths::UtilityPath::Shield);
+        let shield_tpl = paths::read_util_file_contents(paths::UtilityPath::ShieldReadme);
         let mut handlebars = Handlebars::new();
         handlebars
             .register_template_string("shield_tpl", shield_tpl)

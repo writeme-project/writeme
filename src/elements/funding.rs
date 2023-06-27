@@ -74,7 +74,7 @@ impl GenMarkdown for Funding {
             return Err(anyhow!("Funding url is missing"));
         }
 
-        let support_tpl: String = paths::read_util_file_contents(paths::UtilityPath::Support);
+        let support_tpl: String = paths::read_util_file_contents(paths::UtilityPath::SupportReadme);
         let mut handlebars = handlebars::Handlebars::new();
         handlebars
             .register_template_string("support_tpl", support_tpl)
