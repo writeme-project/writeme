@@ -6,10 +6,11 @@ mod merger;
 mod scanner;
 mod utils;
 
+use assembler::Assembler;
 use clap::Parser;
 use elements::{license::License, repository::Repository};
 use std::path::Path;
-use utils::{outputs, Project};
+use utils::Project;
 
 /// Writeme helps you generate a fully fledged markdown files (README, CONTRIBUTING, etc.) for your project in a matter
 /// of seconds.
@@ -94,10 +95,7 @@ fn writeme(project_location: &str) {
         }
     }
 
-    match assembler::Assembler::new(merged).assemble(
-        &format!("{}/{}", project_location, outputs::README),
-        &project.paths,
-    ) {
+    match Assembler::new(merged).assemble(project_location, &project.paths) {
         Ok(_) => {}
         Err(e) => {
             dialoguer::error("Error: Failed to assemble: {}", &e);
