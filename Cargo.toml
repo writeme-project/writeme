@@ -25,6 +25,7 @@ clap = { version = "4.2.4", features = ["derive"] }
 colored = "2.0.0"
 derive = "1.0.0"
 dialoguer = "0.10.4"
+enum-assoc = "1.1.0"
 git2 = { version = "0.17.1", features = ["vendored-openssl"] }
 handlebars = "4.3.6"
 itertools = "0.10.5"

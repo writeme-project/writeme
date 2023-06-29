@@ -2,10 +2,12 @@ use std::{collections::HashMap, fmt::Display, fs, io::Write, str::FromStr};
 
 use anyhow::Error;
 use chrono::{self, Datelike};
+use enum_assoc::Assoc;
 use handlebars::Handlebars;
 use serde_json::json;
 use std::fs::File;
 use strum::EnumIter;
+use strum::IntoEnumIterator;
 
 use crate::{
     converter::ConverterOutput,
@@ -15,12 +17,17 @@ use crate::{
     },
 };
 
-#[derive(Debug, Clone, PartialEq, EnumIter, Copy, Eq, Hash)]
+#[derive(Debug, Clone, PartialEq, EnumIter, Copy, Eq, Hash, Assoc)]
+#[func(pub const fn keywords(&self) -> &str)]
 /// The available licenses for a project which a user can choose from
 pub enum SupportedLicense {
+    #[assoc(keywords = "unknown")]
     Unknown,
+    #[assoc(keywords = "apache2, apache-2.0, apache-2, apache2.0, apache")]
     Apache20,
+    #[assoc(keywords = "mit, mit license")]
     MIT,
+    #[assoc(keywords = "gnu general public license, gnu gpl, gpl")]
     GNUGeneralPublicLicense,
 }
 
@@ -43,49 +50,24 @@ impl FromStr for SupportedLicense {
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         let s = s.to_lowercase();
 
-        let mut keywords: HashMap<Vec<String>, SupportedLicense> = HashMap::new();
-
-        // TODO: raplace with file or something more clean
-        keywords.insert(
-            vec![
-                SupportedLicense::Apache20.to_string(),
-                "apache2".to_string(),
-                "apache-2.0".to_string(),
-                "apache-2".to_string(),
-                "apache2.0".to_string(),
-            ],
-            SupportedLicense::Apache20,
-        );
-        keywords.insert(
-            vec![
-                SupportedLicense::MIT.to_string(),
-                "mit".to_string(),
-                "mit license".to_string(),
-            ],
-            SupportedLicense::MIT,
-        );
-        keywords.insert(
-            vec![
-                SupportedLicense::GNUGeneralPublicLicense.to_string(),
-                "gnu general public license".to_string(),
-                "gnu gpl".to_string(),
-                "gpl".to_string(),
-            ],
-            SupportedLicense::GNUGeneralPublicLicense,
-        );
-
-        let found = keywords.iter().find(|option| {
+        let found = SupportedLicense::iter().find(|option| {
             // regex is case insensitive and considers only whole words, example "mit" will not match emit
-            let options: Vec<String> = option.0.iter().map(|c| format!(r"(?i)\b{}\b", c)).collect();
+            let options: Vec<String> = option
+                .keywords()
+                .split(",")
+                .map(|f| f.trim())
+                .collect::<Vec<&str>>()
+                .iter()
+                .map(|c| format!(r"(?i)\b{}\b", c))
+                .collect();
             let regex_set: regex::RegexSet = regex::RegexSet::new(options).unwrap();
 
             regex_set.is_match(s.as_str())
         });
 
-        if let Some((_, license)) = found {
-            Ok(*license)
-        } else {
-            Err(())
+        match found {
+            Some(license) => Ok(license),
+            None => Err(()),
         }
     }
 }
