@@ -29,6 +29,11 @@ pub enum SupportedLicense {
     MIT,
     #[assoc(keywords = "gnu general public license, gnu gpl, gpl")]
     GNUGeneralPublicLicense,
+
+    #[assoc(
+        keywords = "gnu lesser general public license, Attribution-ShareAlike 4.0, cc-by-sa-4.0, cc-by-sa"
+    )]
+    CreativeCommonsAttributionShareAlike40,
 }
 
 impl ToString for SupportedLicense {
@@ -38,6 +43,9 @@ impl ToString for SupportedLicense {
             SupportedLicense::Apache20 => "Apache-2.0",
             SupportedLicense::MIT => "MIT",
             SupportedLicense::GNUGeneralPublicLicense => "GNU General Public License",
+            SupportedLicense::CreativeCommonsAttributionShareAlike40 => {
+                "Creative Commons Attribution-ShareAlike 4.0"
+            }
         }
         .to_string()
     }
@@ -202,6 +210,9 @@ impl License {
             SupportedLicense::MIT => read_util_file_contents(UtilityPath::MIT),
             SupportedLicense::GNUGeneralPublicLicense => {
                 read_util_file_contents(UtilityPath::GNUGPL)
+            }
+            SupportedLicense::CreativeCommonsAttributionShareAlike40 => {
+                read_util_file_contents(UtilityPath::CreativeCommonsAttributionShareAlike40)
             }
             SupportedLicense::Unknown => {
                 return Ok(None);

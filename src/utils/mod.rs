@@ -23,6 +23,7 @@ pub mod paths {
         Apache20,
         MIT,
         GNUGPL,
+        CreativeCommonsAttributionShareAlike40,
 
         //README.md templates
         // small pieces of markdown which require some data to be filled in
@@ -51,6 +52,9 @@ pub mod paths {
             UtilityPath::Apache20 => include_str!("../../conf/lic/APACHE_20.md"),
             UtilityPath::MIT => include_str!("../../conf/lic/MIT.md"),
             UtilityPath::GNUGPL => include_str!("../../conf/lic/GNU_GPL.md"),
+            UtilityPath::CreativeCommonsAttributionShareAlike40 => {
+                include_str!("../../conf/lic/CREATIVE_COMMONS_ATTRIBUTION_SHARE_ALIKE_40.md")
+            }
             UtilityPath::ShieldReadme => include_str!("../../conf/tpl/readme/SHIELD.md"),
             UtilityPath::AuthorReadme => include_str!("../../conf/tpl/readme/AUTHOR.md"),
             UtilityPath::ContribRocksReadme => {
