@@ -1,5 +1,6 @@
 use std::{collections::HashMap, fmt::Display, fs, io::Write, str::FromStr};
 
+use anyhow::anyhow;
 use anyhow::Error;
 use chrono::{self, Datelike};
 use enum_assoc::Assoc;
@@ -68,7 +69,11 @@ impl FromStr for SupportedLicense {
                 .iter()
                 .map(|c| format!(r"(?i)\b{}\b", c))
                 .collect();
-            let regex_set: regex::RegexSet = regex::RegexSet::new(options).unwrap();
+
+            let regex_set = match regex::RegexSet::new(options) {
+                Ok(regex_set) => regex_set,
+                Err(_) => return false,
+            };
 
             regex_set.is_match(s.as_str())
         });
@@ -162,7 +167,10 @@ impl License {
             .map(|c| format!(r"(?i){}$", c))
             .collect();
 
-        let regex_set: regex::RegexSet = regex::RegexSet::new(all_license_file).unwrap();
+        let regex_set: regex::RegexSet = match regex::RegexSet::new(all_license_file) {
+            Ok(regex_set) => regex_set,
+            Err(_) => return Err(anyhow!("Error creating regex set")),
+        };
 
         for path in paths {
             let path_str = path.as_str();

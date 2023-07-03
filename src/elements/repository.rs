@@ -56,7 +56,7 @@ impl Repository {
                 .split('/')
                 .collect::<Vec<&str>>()
                 .last()
-                .unwrap()
+                .unwrap_or(&"")
                 .to_string();
 
             let platform_str = url_split[0].split('@').collect::<Vec<&str>>()[1];
@@ -113,7 +113,7 @@ impl Repository {
             .find_remote("origin")
             .unwrap()
             .url()
-            .unwrap()
+            .unwrap_or(&"".to_string())
             .to_string();
 
         let project_repository = Repository::new(url);
@@ -176,8 +176,8 @@ impl Repository {
             };
 
             let author = commit.author();
-            let name = author.name().unwrap();
-            let email = author.email().unwrap();
+            let name = author.name().unwrap_or(&"");
+            let email = author.email().unwrap_or(&"");
 
             let contributor = Contributor {
                 name: Some(name.to_string()),

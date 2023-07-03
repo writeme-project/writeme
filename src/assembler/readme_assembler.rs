@@ -69,10 +69,10 @@ impl<'a> ReadmeAssembler<'a> {
                         .unwrap()
                         .split('/')
                         .last()
-                        .unwrap()
+                        .unwrap_or(&"")
                         .split('.')
                         .next()
-                        .unwrap();
+                        .unwrap_or(&"");
 
                     license.url = Some(format!(
                         "{}/blob/master/{}",

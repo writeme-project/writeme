@@ -2,14 +2,17 @@ use crate::{
     converter::Dependencies,
     utils::{paths, Tech},
 };
-use anyhow::Error;
+use anyhow::{anyhow, Error};
 
 use std::{collections::HashMap, vec};
 
 // Returns list of config files present in the project
 pub fn scan_configs(paths: &Vec<String>) -> Result<Vec<String>, Error> {
     let contents: String = paths::read_util_file_contents(paths::UtilityPath::Configs);
-    let all_configs: HashMap<String, Vec<String>> = serde_yaml::from_str(&contents).unwrap();
+    let all_configs: HashMap<String, Vec<String>> = match serde_yaml::from_str(&contents) {
+        Ok(configs) => configs,
+        Err(_) => return Err(anyhow!("Error parsing configs")),
+    };
 
     // list configs as they are always at the end of the path
     let all_configs: Vec<String> = all_configs
@@ -18,7 +21,10 @@ pub fn scan_configs(paths: &Vec<String>) -> Result<Vec<String>, Error> {
         .map(|c: &String| format!(r"{}$", c))
         .collect();
 
-    let regex_set: regex::RegexSet = regex::RegexSet::new(all_configs).unwrap();
+    let regex_set: regex::RegexSet = match regex::RegexSet::new(all_configs) {
+        Ok(regex_set) => regex_set,
+        Err(_) => return Err(anyhow!("Error creating regex set")),
+    };
 
     let mut configs_present: Vec<String> = vec![];
 
@@ -37,7 +43,10 @@ pub fn scan_configs(paths: &Vec<String>) -> Result<Vec<String>, Error> {
 // Returns the list of techs present in the project found through the config files
 pub fn scan_techs(paths: &Vec<String>) -> Result<Vec<String>, Error> {
     let contents: String = paths::read_util_file_contents(paths::UtilityPath::Techs);
-    let all_techs: HashMap<String, Tech> = serde_yaml::from_str(&contents).unwrap();
+    let all_techs: HashMap<String, Tech> = match serde_yaml::from_str(&contents) {
+        Ok(all_techs) => all_techs,
+        Err(_) => return Err(anyhow!("Error parsing techs file")),
+    };
 
     let mut techs_present: Vec<String> = vec![];
     let index = 0;
@@ -49,7 +58,11 @@ pub fn scan_techs(paths: &Vec<String>) -> Result<Vec<String>, Error> {
         if index > 40 {
             break;
         }
-        let regex_set = regex::RegexSet::new(tech.config_files).unwrap();
+
+        let regex_set = match regex::RegexSet::new(tech.config_files) {
+            Ok(regex_set) => regex_set,
+            Err(_) => return Err(anyhow!("Error creating regex set")),
+        };
 
         for path in paths {
             let path_str = path.as_str();
@@ -67,7 +80,11 @@ pub fn scan_techs(paths: &Vec<String>) -> Result<Vec<String>, Error> {
 /// Returns the list of dependencies present in the project found through the dependencies field in the configs files
 pub fn scan_dependencies(dependencies: Dependencies) -> Result<Vec<String>, Error> {
     let contents: String = paths::read_util_file_contents(paths::UtilityPath::Techs);
-    let all_techs: HashMap<String, Tech> = serde_yaml::from_str(&contents).unwrap();
+    let all_techs: HashMap<String, Tech> = match serde_yaml::from_str(&contents) {
+        Ok(all_techs) => all_techs,
+        Err(_) => return Err(anyhow!("Error parsing techs file")),
+    };
+
     let mut dependencies_present: Vec<String> = vec![];
 
     let index = 0;
@@ -75,7 +92,10 @@ pub fn scan_dependencies(dependencies: Dependencies) -> Result<Vec<String>, Erro
         if index > 40 {
             break;
         }
-        let regex_set = regex::RegexSet::new(tech.dependency_names).unwrap();
+        let regex_set = match regex::RegexSet::new(tech.dependency_names) {
+            Ok(regex_set) => regex_set,
+            Err(_) => return Err(anyhow!("Error creating regex set")),
+        };
 
         for dependency in dependencies.clone() {
             let matches: Vec<_> = regex_set

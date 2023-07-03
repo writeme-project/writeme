@@ -1,4 +1,4 @@
-use anyhow::Error;
+use anyhow::{anyhow, Error};
 use handlebars::Handlebars;
 use rand::seq::SliceRandom;
 use rust_search::{FilterExt, SearchBuilder};
@@ -132,8 +132,13 @@ pub enum Alignment {
 /// Returns the markdown of shields related with the technologies in the project
 pub fn shields(techs: Vec<String>, aligment: Alignment) -> Result<String, Error> {
     let contents: String = paths::read_util_file_contents(paths::UtilityPath::Techs);
-    let all_techs: HashMap<String, Tech> = serde_yaml::from_str(&contents).unwrap();
+    let all_techs: HashMap<String, Tech> = match serde_yaml::from_str(&contents) {
+        Ok(t) => t,
+        Err(_) => return Err(anyhow!("Error while parsing techs.yml")),
+    };
+
     let mut shields: String = String::new();
+
     for (name, tech) in all_techs {
         if techs.contains(&name) {
             match tech.shield.gen_md() {
