@@ -42,6 +42,7 @@ impl<'a> ReadmeAssembler<'a> {
             "description": self.converted_config.description.clone(),
             "shields": Some(shields),
             "fantasy_description": Some(fantasy_description()),
+            "link_one": "/CONTRIBUTING.md",
         });
 
         self.handlebars

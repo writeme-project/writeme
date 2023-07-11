@@ -14,7 +14,7 @@
 <div align="center">
     <h4>
         <a href="{{link_one}}">
-            👥 LINK ONE
+            👥 Contributing
         </a>
         <span>&nbsp;&nbsp;•&nbsp;&nbsp;</span>
         <a href="{{link_two}}">
