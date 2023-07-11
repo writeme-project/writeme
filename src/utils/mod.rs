@@ -167,7 +167,28 @@ pub struct Project {
 
 /// Filter used to blacklist some directories from the search
 fn blacklist_filter(entry: &rust_search::DirEntry) -> bool {
-    let blacklist = vec!["node_modules", "target", "dist", "build", "vendor", "bin"];
+    let blacklist = vec![
+        "node_modules",
+        "target",
+        "dist",
+        "build",
+        "vendor",
+        "bin",
+        ".git",
+        ".bashrc",
+        ".bash_profile",
+        ".zshrc",
+        ".zprofile",
+        ".ssh",
+        ".cargo",
+        ".cache",
+        ".config",
+        ".vscode",
+        ".idea",
+        ".DS_Store",
+        ".local",
+        ".npm",
+    ];
     !blacklist.contains(&entry.file_name().to_str().unwrap())
 }
 
@@ -178,6 +199,7 @@ impl Project {
         let paths: Vec<String> = SearchBuilder::default()
             .location(project_location)
             .custom_filter(blacklist_filter)
+            .hidden()
             .build()
             .collect();
 
