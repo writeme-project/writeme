@@ -204,7 +204,7 @@ impl License {
             return Ok(None);
         }
 
-        let output_path = format!("{}LICENSE", project_location);
+        let output_path = format!("{}/LICENSE", project_location);
         let mut license_file = match File::create(output_path.clone()) {
             Ok(f) => f,
             Err(e) => {
