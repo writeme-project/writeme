@@ -20,7 +20,8 @@ futher instructions...
 command to run the project
 ```
 futher instructions...
+{{usage}}
 
 
-# 📄 License <a name = "license"></a>
-{{license}}
+# 📄 License <a name="license"></a>
+{{{license}}}

@@ -13,14 +13,27 @@ use std::{
     str::FromStr,
 };
 
-use crate::utils::{paths, trim, GenMarkdown};
 use anyhow::{anyhow, Error};
 use serde::Serialize;
 use serde_json::{json, Value};
+use strum::IntoEnumIterator;
 
-pub mod cargo_toml;
-pub mod composer_json;
-pub mod package_json;
+pub mod parsers {
+    pub mod cargo_toml;
+    pub mod composer_json;
+    pub mod package_json;
+}
+
+use crate::{
+    elements::{
+        funding::{Funding, FundingType, Fundings},
+        license::License,
+        repository::Repository,
+    },
+    utils::{paths, trim, GenMarkdown},
+};
+
+use self::parsers::{cargo_toml, composer_json, package_json};
 
 // The base Component trait defines operations that can be altered by
 // decorators.
@@ -57,7 +70,7 @@ impl Component for ConcreteComponent {
             contributors: None,
             license: None,
             keywords: None,
-            repository_url: None,
+            repository: None,
             homepage_url: None,
             dependencies: None,
             dev_dependencies: None,
@@ -82,14 +95,9 @@ impl Component for ConcreteComponent {
     }
 
     fn parse_funding(&self, funding: &Value) -> Result<Funding, Error> {
-        let possible_values: [&str; 6] = [
-            (FundingType::BITCOIN.to_string()),
-            (FundingType::BuyMeACoffee.to_string()),
-            (FundingType::GITHUB.to_string()),
-            (FundingType::KOFI.to_string()),
-            (FundingType::PATREON.to_string()),
-            (FundingType::GITHUB.to_string()),
-        ];
+        let possible_values = FundingType::iter()
+            .map(|t| t.to_string())
+            .collect::<Vec<_>>();
 
         let f_type = funding["type"].to_string();
         let url = funding["url"].to_string();
@@ -252,7 +260,7 @@ impl GenMarkdown for Contributor {
 
         // build md string if at least name and one of the other fields are present
         if self.name.is_some() && (self.url.is_some() || self.email.is_some()) {
-            let author_tpl = paths::read_util_file_contents(paths::UtilityPath::Author);
+            let author_tpl = paths::read_util_file_contents(paths::UtilityPath::AuthorReadme);
             let mut handlebars = handlebars::Handlebars::new();
             handlebars
                 .register_template_string("author_tpl", author_tpl)
@@ -308,157 +316,6 @@ impl Iterator for Contributors {
 }
 
 #[derive(Debug, Clone)]
-/// How a project could be funded
-pub struct Funding {
-    f_type: FundingType,
-    pub url: Option<String>,
-}
-
-#[derive(Debug, Clone)]
-/// The possible funding types
-enum FundingType {
-    PAYPAL,
-    PATREON,
-    BITCOIN,
-    BuyMeACoffee,
-    KOFI,
-    GITHUB,
-}
-
-impl FundingType {
-    fn to_string(&self) -> &'static str {
-        match self {
-            FundingType::BITCOIN => "bitcoin",
-            FundingType::BuyMeACoffee => "buymeacoffee",
-            FundingType::GITHUB => "github",
-            FundingType::KOFI => "kofi",
-            FundingType::PATREON => "patreon",
-            FundingType::PAYPAL => "paypal",
-        }
-    }
-}
-
-enum FundingError {
-    FundingNotSupported,
-}
-
-impl FromStr for FundingType {
-    type Err = FundingError;
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        match s {
-            "bitcoin" => Ok(FundingType::BITCOIN),
-            "buymeacoffee" => Ok(FundingType::BuyMeACoffee),
-            "github" => Ok(FundingType::GITHUB),
-            "kofi" => Ok(FundingType::KOFI),
-            "patreon" => Ok(FundingType::PATREON),
-            "paypal" => Ok(FundingType::PAYPAL),
-            _ => Err(FundingError::FundingNotSupported),
-        }
-    }
-}
-
-trait EnumIterator {
-    type Item;
-
-    fn enum_iterator() -> std::slice::Iter<'static, Self::Item>;
-}
-
-impl EnumIterator for FundingType {
-    type Item = FundingType;
-
-    fn enum_iterator() -> std::slice::Iter<'static, FundingType> {
-        static VARIANTS: [FundingType; 6] = [
-            FundingType::BITCOIN,
-            FundingType::BuyMeACoffee,
-            FundingType::GITHUB,
-            FundingType::KOFI,
-            FundingType::PATREON,
-            FundingType::PAYPAL,
-        ];
-        VARIANTS.iter()
-    }
-}
-
-impl Display for Funding {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(
-            f,
-            "{} {}",
-            self.f_type.to_string(),
-            self.url.as_ref().unwrap_or(&"None".to_string())
-        )
-    }
-}
-
-impl GenMarkdown for Funding {
-    fn gen_md(&self) -> Result<String, Error> {
-        if self.url.is_none() {
-            return Err(anyhow!("Funding url is missing"));
-        }
-
-        let support_tpl: String = paths::read_util_file_contents(paths::UtilityPath::Support);
-        let mut handlebars = handlebars::Handlebars::new();
-        handlebars
-            .register_template_string("support_tpl", support_tpl)
-            .unwrap();
-
-        // use only url for now type is useless
-        let url = self.url.as_ref().unwrap();
-
-        let template_url = match self.f_type {
-            FundingType::BITCOIN => "https://img.shields.io/badge/PayPal-00457C?style=for-the-badge&logo=paypal&logoColor=white",
-            FundingType::BuyMeACoffee => "https://img.shields.io/badge/BuyMeACoffee-F16061?style=for-the-badge&logo=buymeacoffee&logoColor=FFDD00",
-            FundingType::GITHUB => "https://img.shields.io/badge/GitHub-100000?style=for-the-badge&logo=github&logoColor=white",
-            FundingType::KOFI => "https://img.shields.io/badge/Ko--fi-F16061?style=for-the-badge&logo=ko-fi&logoColor=white",
-            FundingType::PATREON => "https://img.shields.io/badge/Patreon-F16061?style=for-the-badge&logo=patreon&logoColor=white",
-            FundingType::PAYPAL => "https://img.shields.io/badge/PayPal-00457C?style=for-the-badge&logo=paypal&logoColor=white",
-        };
-
-        let data: Value = json!({
-            "url": url ,
-            "template_url": template_url,
-        });
-
-        Ok(handlebars.render("support_tpl", &data).unwrap())
-    }
-}
-
-#[derive(Debug, Clone)]
-/// This Vec variant is needed to implement the Display trait for the Vec<T> scenarios
-///
-/// Reference: https://stackoverflow.com/a/30633256/11802618
-pub struct Fundings(Vec<Funding>);
-
-impl Display for Fundings {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let mut funding = String::new();
-        for f in &self.0 {
-            funding.push_str(&format!("{} ", f));
-        }
-        write!(f, "{}", funding)
-    }
-}
-
-impl FromIterator<Funding> for Fundings {
-    fn from_iter<I: IntoIterator<Item = Funding>>(iter: I) -> Self {
-        let mut funding = Vec::new();
-        for f in iter {
-            funding.push(f);
-        }
-        Fundings(funding)
-    }
-}
-
-impl Iterator for Fundings {
-    type Item = Funding;
-
-    fn next(&mut self) -> Option<Self::Item> {
-        self.0.pop()
-    }
-}
-
-#[derive(Debug, Clone)]
 /// The output object that will be returned from each converter implementation regardless of the config file provided
 pub struct ConverterOutput {
     pub source_config_file_path: String,
@@ -467,10 +324,12 @@ pub struct ConverterOutput {
     pub description: Option<String>,
     pub version: Option<String>,
     pub contributors: Option<Contributors>,
-    pub license: Option<String>,
+    pub license: Option<License>,
     pub keywords: Option<Vec<String>>,
-    pub repository_url: Option<String>,
     pub homepage_url: Option<String>,
+
+    /// repository info
+    pub repository: Option<Repository>,
 
     /// dependencies of the project
     pub dependencies: Option<Dependencies>,
@@ -496,7 +355,7 @@ impl ConverterOutput {
             contributors: None,
             license: None,
             keywords: None,
-            repository_url: None,
+            repository: None,
             homepage_url: None,
             dependencies: None,
             dev_dependencies: None,
@@ -510,8 +369,7 @@ impl ConverterOutput {
         self.name = self.name.take().map(|s| trim(s).unwrap());
         self.description = self.description.take().map(|s| trim(s).unwrap());
         self.version = self.version.take().map(|s| trim(s).unwrap());
-        self.license = self.license.take().map(|s| trim(s).unwrap());
-        self.repository_url = self.repository_url.take().map(|s| trim(s).unwrap());
+        // self.license = self.license.take().map(|s| trim(s).unwrap());
         self.homepage_url = self.homepage_url.take().map(|s| trim(s).unwrap());
     }
 }

@@ -1,25 +1,13 @@
 use std::fmt::{Debug, Display};
 
-use crate::converter::{ConverterOutput};
-use crate::dialoguer::conflict;
+use crate::{
+    converter::{ConverterOutput},
+    dialoguer::{select_option, SelectOption},
+    elements::{license::{License, SupportedLicense}, repository::Repository},
+};
 use anyhow::{Error, Ok};
 use itertools::Itertools;
-
-#[derive(Clone, Debug)]
-/// Identifies a value that needs to be merged. It contains the value itself and some metadata
-pub struct MergeValue<T> {
-    pub value: Option<T>,
-    pub source_config_file_path: String,
-}
-
-impl<T: Display> Display for MergeValue<T> {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match &self.value {
-            Some(value) => write!(f, "{} ({})", value, self.source_config_file_path),
-            None => write!(f, "None ({})", self.source_config_file_path),
-        }
-    }
-}
+use strum::IntoEnumIterator;
 
 /// Merges the information of multiple config files into a single object
 ///
@@ -35,9 +23,10 @@ impl Merger {
     fn merge_field<T: Clone + Debug + Display>(
         &self,
         field_name: &str,
-        values: Vec<MergeValue<T>>,
+        values: Vec<SelectOption<T>>,
+        custom_label: Option<String>,
     ) -> Option<T> {
-        conflict(field_name, values)
+        select_option(field_name, values, custom_label)
     }
 
     /// Merges the vector fields of the provided configs into a single value by asking the user which one to keep
@@ -50,11 +39,12 @@ impl Merger {
                 .iter()
                 .filter(|config| config.name.is_some() && !config.name.as_ref().unwrap().is_empty())
                 .unique_by(|item| item.name.clone())
-                .map(|config| MergeValue {
+                .map(|config| SelectOption {
                     value: config.name.clone(),
-                    source_config_file_path: config.source_config_file_path.clone(),
+                    name: config.source_config_file_path.clone(),
                 })
                 .collect(),
+            None,
         );
 
         output.description = self.merge_field(
@@ -65,11 +55,12 @@ impl Merger {
                     config.description.is_some() && !config.description.as_ref().unwrap().is_empty()
                 })
                 .unique_by(|item| item.description.clone())
-                .map(|config| MergeValue {
+                .map(|config| SelectOption {
                     value: config.description.clone(),
-                    source_config_file_path: config.source_config_file_path.clone(),
+                    name: config.source_config_file_path.clone(),
                 })
                 .collect(),
+            None,
         );
 
         output.version = self.merge_field(
@@ -80,43 +71,33 @@ impl Merger {
                     config.version.is_some() && !config.version.as_ref().unwrap().is_empty()
                 })
                 .unique_by(|item| item.version.clone())
-                .map(|config| MergeValue {
+                .map(|config| SelectOption {
                     value: config.version.clone(),
-                    source_config_file_path: config.source_config_file_path.clone(),
+                    name: config.source_config_file_path.clone(),
                 })
                 .collect(),
+            None,
         );
 
-        output.license = self.merge_field(
-            "license",
+        output.license = self.merge_licenses(converted_configs.clone());
+
+        let repository_url = self.merge_field(
+            "repository",
             converted_configs
                 .iter()
                 .filter(|config| {
-                    config.license.is_some() && !config.license.as_ref().unwrap().is_empty()
+                    config.repository.is_some()
+                        && !config.repository.as_ref().unwrap().url.is_empty()
                 })
-                .unique_by(|item| item.license.clone())
-                .map(|config| MergeValue {
-                    value: config.license.clone(),
-                    source_config_file_path: config.source_config_file_path.clone(),
-                })
-                .collect(),
-        );
-
-        output.repository_url = self.merge_field(
-            "repository_url",
-            converted_configs
-                .iter()
-                .filter(|config| {
-                    config.repository_url.is_some()
-                        && !config.repository_url.as_ref().unwrap().is_empty()
-                })
-                .unique_by(|item| item.repository_url.clone())
-                .map(|config| MergeValue {
-                    value: config.repository_url.clone(),
-                    source_config_file_path: config.source_config_file_path.clone(),
+                .unique_by(|item| item.repository.as_ref().unwrap().url.clone())
+                .map(|config| SelectOption {
+                    value: Option::from(config.repository.as_ref().unwrap().url.clone()),
+                    name: config.source_config_file_path.clone(),
                 })
                 .collect(),
+            None,
         );
+        output.repository = Option::from(Repository::new(repository_url.unwrap_or("".to_string())));
 
         // don't merge authors, contributors, dependencies, dev_dependencies, build_dependencies, funding
         // but apply a distinct on them, base on each unique property
@@ -166,5 +147,54 @@ impl Merger {
         );
 
         Ok(output)
+    }
+
+    fn merge_licenses(&self, converted_configs: Vec<ConverterOutput>) -> Option<License>{
+        let selected:Option<License>;
+
+        // check if thereisn't any license
+        if converted_configs.iter().all(|config| {
+            config.license.is_none()
+                || config.license.as_ref().unwrap().name == SupportedLicense::Unknown
+        }) {
+            // make the user select one new license
+
+            // get all available licenses, name is license name, value is license itself
+            let available = SupportedLicense::iter()
+                .map(|license| SelectOption {
+                    name: license.to_string(),
+                    value: Some(License::from_name(license.to_string())),
+                })
+                .collect();
+            
+            // make choese between them
+            selected = self.merge_field(
+                "license", 
+                available, 
+                Some("Oops! It seems I couldn't find a license for your project. Choose one from the list:".to_string())
+            );
+
+            return selected;
+        } 
+        // values are the actual licenses, so the value that we see in the merger
+        // are the Display trait of the license
+        selected = self.merge_field(
+            "license",
+            converted_configs
+                .iter()
+                .filter(|config| {
+                    config.license.is_some()
+                        && config.license.as_ref().unwrap().name != SupportedLicense::Unknown
+                })
+                .unique_by(|item| item.license.as_ref().unwrap().name)
+                .map(|config| SelectOption {
+                    name: config.source_config_file_path.clone(),
+                    value: Some(config.license.clone().unwrap()),
+                })
+                .collect(),
+            None,
+        );
+
+        selected
     }
 }

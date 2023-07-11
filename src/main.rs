@@ -1,13 +1,16 @@
 mod assembler;
 mod converter;
 mod dialoguer;
+mod elements;
 mod merger;
 mod scanner;
 mod utils;
 
+use assembler::Assembler;
 use clap::Parser;
+use elements::{license::License, repository::Repository};
 use std::path::Path;
-use utils::{outputs, Project};
+use utils::Project;
 
 /// Writeme helps you generate a fully fledged markdown files (README, CONTRIBUTING, etc.) for your project in a matter
 /// of seconds.
@@ -51,15 +54,25 @@ fn writeme(project_location: &str) {
         if output.is_err() {
             continue;
         }
+
         outputs.push(output.unwrap());
     }
 
-    match scanner::scan_git(project_location) {
+    match Repository::scan(project_location) {
         Ok(scan_git) => outputs.push(scan_git),
-        Err(_) => {} //if unable to scan git do nothing
+        Err(_) => {} // if unable to scan git do nothing
     };
 
-    let merged = match merger.merge(outputs) {
+    match License::scan(&project.paths) {
+        Ok(licenses) => {
+            licenses
+                .iter()
+                .for_each(|license| outputs.push(license.clone()));
+        }
+        Err(_) => {} // if unable to scan license file do nothing
+    };
+
+    let mut merged = match merger.merge(outputs) {
         Ok(merged) => merged,
         Err(e) => {
             dialoguer::error("Error: Failed to merge: {}", &e);
@@ -67,10 +80,22 @@ fn writeme(project_location: &str) {
         }
     };
 
-    match assembler::Assembler::new(merged).assemble(
-        &format!("{}/{}", project_location, outputs::README),
-        &project.paths,
+    match License::create(
+        project_location,
+        merged.license.as_ref().unwrap(),
+        merged.name.clone(),
     ) {
+        Ok(output_path) => {
+            if output_path.is_some() {
+                merged.license.as_mut().unwrap().path = output_path
+            }
+        }
+        Err(e) => {
+            dialoguer::error("Error: Failed to create license file: {}", &e);
+        }
+    }
+
+    match Assembler::new(merged).assemble(project_location, &project.paths) {
         Ok(_) => {}
         Err(e) => {
             dialoguer::error("Error: Failed to assemble: {}", &e);

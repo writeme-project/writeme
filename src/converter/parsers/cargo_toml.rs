@@ -2,7 +2,9 @@ use serde_json::Value;
 
 use anyhow::{anyhow, Error, Ok};
 
-use super::{Component, Contributor, ConverterOutput, Decorator, Dependency};
+use crate::converter::{
+    Component, Contributor, ConverterOutput, Decorator, Dependency, Funding, License, Repository,
+};
 
 /// The Cargo.toml file relevant contents
 ///
@@ -164,7 +166,7 @@ impl Component for CargoToml {
             && json["package"]["repository"].as_str().is_some()
             && !json["package"]["repository"].as_str().unwrap().is_empty()
         {
-            output.repository_url = Some(json["package"]["repository"].to_string());
+            output.repository = Some(Repository::new(json["package"]["repository"].to_string()));
         }
 
         output.contributors = json["package"]["authors"].as_array().map(|v| {
@@ -179,11 +181,13 @@ impl Component for CargoToml {
 
         // Cargo.toml reference requires at least a license or license-file!
         // https://doc.rust-lang.org/cargo/reference/manifest.html#the-license-and-license-file-fields
-        output.license = Some(json["package"]["license"].to_string());
-
-        if output.license.is_none() {
-            output.license = Some(json["package"]["license-file"].to_string());
-        }
+        // if there is a license-file, we'll find it during the scan
+        if !json["package"]["license"].is_null()
+            && json["package"]["license"].as_str().is_some()
+            && !json["package"]["license"].as_str().unwrap().is_empty()
+        {
+            output.license = Some(License::from_name(json["package"]["license"].to_string()));
+        };
 
         output.keywords = json["package"]["keywords"]
             .as_array()
@@ -227,7 +231,7 @@ impl Component for CargoToml {
         Ok(output)
     }
 
-    fn parse_funding(&self, _funding: &Value) -> Result<super::Funding, Error> {
+    fn parse_funding(&self, _funding: &Value) -> Result<Funding, Error> {
         Err(anyhow!("Funding is not supported for Cargo.toml!"))
     }
 }

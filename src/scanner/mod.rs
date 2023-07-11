@@ -1,17 +1,18 @@
 use crate::{
-    converter::{Contributor, Contributors, ConverterOutput, Dependencies},
+    converter::Dependencies,
     utils::{paths, Tech},
 };
 use anyhow::{anyhow, Error};
-use itertools::Itertools;
-use std::{collections::HashMap, vec};
 
-use git2::Repository;
+use std::{collections::HashMap, vec};
 
 // Returns list of config files present in the project
 pub fn scan_configs(paths: &Vec<String>) -> Result<Vec<String>, Error> {
     let contents: String = paths::read_util_file_contents(paths::UtilityPath::Configs);
-    let all_configs: HashMap<String, Vec<String>> = serde_yaml::from_str(&contents).unwrap();
+    let all_configs: HashMap<String, Vec<String>> = match serde_yaml::from_str(&contents) {
+        Ok(configs) => configs,
+        Err(_) => return Err(anyhow!("Error parsing configs")),
+    };
 
     // list configs as they are always at the end of the path
     let all_configs: Vec<String> = all_configs
@@ -20,7 +21,10 @@ pub fn scan_configs(paths: &Vec<String>) -> Result<Vec<String>, Error> {
         .map(|c: &String| format!(r"{}$", c))
         .collect();
 
-    let regex_set: regex::RegexSet = regex::RegexSet::new(all_configs).unwrap();
+    let regex_set: regex::RegexSet = match regex::RegexSet::new(all_configs) {
+        Ok(regex_set) => regex_set,
+        Err(_) => return Err(anyhow!("Error creating regex set")),
+    };
 
     let mut configs_present: Vec<String> = vec![];
 
@@ -39,7 +43,10 @@ pub fn scan_configs(paths: &Vec<String>) -> Result<Vec<String>, Error> {
 // Returns the list of techs present in the project found through the config files
 pub fn scan_techs(paths: &Vec<String>) -> Result<Vec<String>, Error> {
     let contents: String = paths::read_util_file_contents(paths::UtilityPath::Techs);
-    let all_techs: HashMap<String, Tech> = serde_yaml::from_str(&contents).unwrap();
+    let all_techs: HashMap<String, Tech> = match serde_yaml::from_str(&contents) {
+        Ok(all_techs) => all_techs,
+        Err(_) => return Err(anyhow!("Error parsing techs file")),
+    };
 
     let mut techs_present: Vec<String> = vec![];
     let index = 0;
@@ -51,7 +58,11 @@ pub fn scan_techs(paths: &Vec<String>) -> Result<Vec<String>, Error> {
         if index > 40 {
             break;
         }
-        let regex_set = regex::RegexSet::new(tech.config_files).unwrap();
+
+        let regex_set = match regex::RegexSet::new(tech.config_files) {
+            Ok(regex_set) => regex_set,
+            Err(_) => return Err(anyhow!("Error creating regex set")),
+        };
 
         for path in paths {
             let path_str = path.as_str();
@@ -69,7 +80,11 @@ pub fn scan_techs(paths: &Vec<String>) -> Result<Vec<String>, Error> {
 /// Returns the list of dependencies present in the project found through the dependencies field in the configs files
 pub fn scan_dependencies(dependencies: Dependencies) -> Result<Vec<String>, Error> {
     let contents: String = paths::read_util_file_contents(paths::UtilityPath::Techs);
-    let all_techs: HashMap<String, Tech> = serde_yaml::from_str(&contents).unwrap();
+    let all_techs: HashMap<String, Tech> = match serde_yaml::from_str(&contents) {
+        Ok(all_techs) => all_techs,
+        Err(_) => return Err(anyhow!("Error parsing techs file")),
+    };
+
     let mut dependencies_present: Vec<String> = vec![];
 
     let index = 0;
@@ -77,7 +92,10 @@ pub fn scan_dependencies(dependencies: Dependencies) -> Result<Vec<String>, Erro
         if index > 40 {
             break;
         }
-        let regex_set = regex::RegexSet::new(tech.dependency_names).unwrap();
+        let regex_set = match regex::RegexSet::new(tech.dependency_names) {
+            Ok(regex_set) => regex_set,
+            Err(_) => return Err(anyhow!("Error creating regex set")),
+        };
 
         for dependency in dependencies.clone() {
             let matches: Vec<_> = regex_set
@@ -93,95 +111,4 @@ pub fn scan_dependencies(dependencies: Dependencies) -> Result<Vec<String>, Erro
     }
 
     Ok(dependencies_present)
-}
-
-/// Returns a ConverterOutput struct with the data found in the .git folder
-pub fn scan_git(project_location: &str) -> Result<ConverterOutput, Error> {
-    let mut git_converter = ConverterOutput::empty();
-
-    git_converter.source_config_file_path = project_location.to_string();
-
-    // Open the repository
-    let repo = match Repository::open(project_location) {
-        Ok(repo) => repo,
-        Err(e) => {
-            return Err(anyhow!("Failed to open repository: {}", e));
-        }
-    };
-
-    // Get the head commit
-    let head = match repo.head() {
-        Ok(head) => head,
-        Err(e) => {
-            return Err(anyhow!("Failed to get head: {}", e));
-        }
-    };
-
-    let head_commit = match head.peel_to_commit() {
-        Ok(commit) => commit,
-        Err(e) => {
-            return Err(anyhow!("Failed to peel to commit: {}", e));
-        }
-    };
-
-    // Iterate over the commits in the repository
-    let mut revwalk = match repo.revwalk() {
-        Ok(revwalk) => revwalk,
-        Err(e) => {
-            return Err(anyhow!("Failed to get revwalk: {}", e));
-        }
-    };
-
-    revwalk.push(head_commit.id()).unwrap();
-
-    let mut contributors: HashMap<Contributor, i32> = std::collections::HashMap::new();
-
-    // fill contributors hashmap counting the number of commits for each contributor
-    for oid in revwalk {
-        let oid = match oid {
-            Ok(oid) => oid,
-            Err(e) => {
-                return Err(anyhow!("Failed to get oid: {}", e));
-            }
-        };
-
-        let commit = match repo.find_commit(oid) {
-            Ok(commit) => commit,
-            Err(e) => {
-                return Err(anyhow!("Failed to find commit: {}", e));
-            }
-        };
-
-        let author = commit.author();
-        let name = author.name().unwrap();
-        let email = author.email().unwrap();
-
-        let contributor = Contributor {
-            name: Some(name.to_string()),
-            email: Some(email.to_string()),
-            url: None,
-        };
-
-        let count = contributors.entry(contributor).or_insert(0);
-        *count += 1;
-    }
-
-    // sort contributors by number of commits
-    let contributors: Contributors = contributors
-        .iter()
-        .sorted_by(|a, b| b.1.cmp(a.1))
-        .map(|(contributor, _)| contributor.clone())
-        .collect();
-
-    git_converter.contributors = Option::from(contributors);
-
-    git_converter.repository_url = Option::from(
-        repo.find_remote("origin")
-            .unwrap()
-            .url()
-            .unwrap()
-            .to_string(),
-    );
-
-    Ok(git_converter)
 }

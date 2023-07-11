@@ -1,0 +1,24 @@
+---
+# This file contains the name of the possible license files that should be searched in the project
+licenses:
+  - license
+  - license.txt
+  - license.md
+  - license.html
+  - license.yml
+  - license.yaml
+  - license.json
+  - copying
+  - copying.txt
+  - copying.md
+  - copying.html
+  - copying.yml
+  - copying.yaml
+  - copying.json
+  - notice
+  - notice.txt
+  - notice.md
+  - notice.html
+  - notice.yml
+  - notice.yaml
+  - notice.json

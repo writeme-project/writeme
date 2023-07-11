@@ -1,4 +1,4 @@
-use anyhow::Error;
+use anyhow::{anyhow, Error};
 use handlebars::Handlebars;
 use rand::seq::SliceRandom;
 use rust_search::{FilterExt, SearchBuilder};
@@ -9,6 +9,7 @@ use std::collections::HashMap;
 /// Paths to output files saved to disk produced by the application
 pub mod outputs {
     pub const README: &str = "README.md";
+    pub const CONTRIBUTING: &str = "CONTRIBUTING.md";
 }
 
 /// Paths to significant files
@@ -16,17 +17,30 @@ pub mod paths {
     pub enum UtilityPath {
         Configs,
         Techs,
+        Lincenses,
 
+        // license templates
+        Apache20,
+        MIT,
+        GNUGPL,
+        CreativeCommonsAttributionShareAlike40,
+
+        //README.md templates
         // small pieces of markdown which require some data to be filled in
-        Shield,
-        Author,
-        Support,
+        ShieldReadme,
+        AuthorReadme,
+        ContribRocksReadme,
+        SupportReadme,
+        LicenseReadme,
 
         // large macro templates of the README file
-        Header,
-        Toc,
-        Body,
-        Footer,
+        HeaderReadme,
+        TocReadme,
+        BodyReadme,
+        FooterReadme,
+
+        //CONTRIBUTING.md templates
+        BodyContributing,
     }
 
     /// Returns the path of the given file for the given utility type
@@ -34,13 +48,25 @@ pub mod paths {
         let target = match path {
             UtilityPath::Configs => include_str!("../../conf/configs.yml"),
             UtilityPath::Techs => include_str!("../../conf/techs.yml"),
-            UtilityPath::Shield => include_str!("../../conf/tpl/SHIELD.md"),
-            UtilityPath::Author => include_str!("../../conf/tpl/AUTHOR.md"),
-            UtilityPath::Support => include_str!("../../conf/tpl/SUPPORT.md"),
-            UtilityPath::Header => include_str!("../../conf/tpl/HEADER.md"),
-            UtilityPath::Toc => include_str!("../../conf/tpl/TABLE_OF_CONTENT.md"),
-            UtilityPath::Body => include_str!("../../conf/tpl/BODY.md"),
-            UtilityPath::Footer => include_str!("../../conf/tpl/FOOTER.md"),
+            UtilityPath::Lincenses => include_str!("../../conf/licenses.yml"),
+            UtilityPath::Apache20 => include_str!("../../conf/lic/APACHE_20.md"),
+            UtilityPath::MIT => include_str!("../../conf/lic/MIT.md"),
+            UtilityPath::GNUGPL => include_str!("../../conf/lic/GNU_GPL.md"),
+            UtilityPath::CreativeCommonsAttributionShareAlike40 => {
+                include_str!("../../conf/lic/CREATIVE_COMMONS_ATTRIBUTION_SHARE_ALIKE_40.md")
+            }
+            UtilityPath::ShieldReadme => include_str!("../../conf/tpl/readme/SHIELD.md"),
+            UtilityPath::AuthorReadme => include_str!("../../conf/tpl/readme/AUTHOR.md"),
+            UtilityPath::ContribRocksReadme => {
+                include_str!("../../conf/tpl/readme/CONTRIB_ROCKS.md")
+            }
+            UtilityPath::SupportReadme => include_str!("../../conf/tpl/readme/SUPPORT.md"),
+            UtilityPath::HeaderReadme => include_str!("../../conf/tpl/readme/HEADER.md"),
+            UtilityPath::TocReadme => include_str!("../../conf/tpl/readme/TABLE_OF_CONTENT.md"),
+            UtilityPath::BodyReadme => include_str!("../../conf/tpl/readme/BODY.md"),
+            UtilityPath::FooterReadme => include_str!("../../conf/tpl/readme/FOOTER.md"),
+            UtilityPath::LicenseReadme => include_str!("../../conf/tpl/readme/LICENSE.md"),
+            UtilityPath::BodyContributing => include_str!("../../conf/tpl/contributing/BODY.md"),
         };
 
         target.to_string()
@@ -78,7 +104,7 @@ pub struct Tech {
 
 impl GenMarkdown for Shield {
     fn gen_md(&self) -> Result<String, Error> {
-        let shield_tpl = paths::read_util_file_contents(paths::UtilityPath::Shield);
+        let shield_tpl = paths::read_util_file_contents(paths::UtilityPath::ShieldReadme);
         let mut handlebars = Handlebars::new();
         handlebars
             .register_template_string("shield_tpl", shield_tpl)
@@ -91,29 +117,36 @@ impl GenMarkdown for Shield {
 }
 
 /// Used to trim string removing quotes and spaces from the extremities
-/// This is used only in cargo_toml.rs for now
+/// Returns a string slice with leading and trailing annoyingChars removed.
+
+/// 'annoyingChars' are whitespace and double quote.
 pub fn trim(s: String) -> Result<String, Error> {
     Ok(s.trim().trim_matches('"').to_string())
 }
 
-pub enum Aligment {
+pub enum Alignment {
     Row,
     // Column,
 }
 
 /// Returns the markdown of shields related with the technologies in the project
-pub fn shields(techs: Vec<String>, aligment: Aligment) -> Result<String, Error> {
+pub fn shields(techs: Vec<String>, aligment: Alignment) -> Result<String, Error> {
     let contents: String = paths::read_util_file_contents(paths::UtilityPath::Techs);
-    let all_techs: HashMap<String, Tech> = serde_yaml::from_str(&contents).unwrap();
+    let all_techs: HashMap<String, Tech> = match serde_yaml::from_str(&contents) {
+        Ok(t) => t,
+        Err(_) => return Err(anyhow!("Error while parsing techs.yml")),
+    };
+
     let mut shields: String = String::new();
+
     for (name, tech) in all_techs {
         if techs.contains(&name) {
             match tech.shield.gen_md() {
                 Ok(md) => {
                     shields.push_str(&md);
                     match aligment {
-                        Aligment::Row => shields.push(' '),
-                        // Aligment::Column => shields.push_str("</br>"),
+                        Alignment::Row => shields.push(' '),
+                        // Alignment::Column => shields.push_str("</br>"),
                     }
                 }
                 // if there is an error to generate markdown, just skip this shield
@@ -125,7 +158,7 @@ pub fn shields(techs: Vec<String>, aligment: Aligment) -> Result<String, Error> 
     Ok(shields)
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 /// Structure used to represent the project aka global stuff useful when scanning a project
 pub struct Project {
     /// it contains the paths of all the files in the project
@@ -134,7 +167,28 @@ pub struct Project {
 
 /// Filter used to blacklist some directories from the search
 fn blacklist_filter(entry: &rust_search::DirEntry) -> bool {
-    let blacklist = vec!["node_modules", "target", "dist", "build", "vendor", "bin"];
+    let blacklist = vec![
+        "node_modules",
+        "target",
+        "dist",
+        "build",
+        "vendor",
+        "bin",
+        ".git",
+        ".bashrc",
+        ".bash_profile",
+        ".zshrc",
+        ".zprofile",
+        ".ssh",
+        ".cargo",
+        ".cache",
+        ".config",
+        ".vscode",
+        ".idea",
+        ".DS_Store",
+        ".local",
+        ".npm",
+    ];
     !blacklist.contains(&entry.file_name().to_str().unwrap())
 }
 
@@ -145,6 +199,7 @@ impl Project {
         let paths: Vec<String> = SearchBuilder::default()
             .location(project_location)
             .custom_filter(blacklist_filter)
+            .hidden()
             .build()
             .collect();
 

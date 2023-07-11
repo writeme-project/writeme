@@ -5,9 +5,30 @@ use dialoguer::{console::style, theme::ColorfulTheme};
 use itertools::Itertools;
 use std::fmt::{Debug, Display};
 
-use crate::merger::MergeValue;
 // use log_update::LogUpdate;
 // use std::{io::stdout, thread::sleep, time::Duration};
+
+#[derive(Debug, Clone)]
+/// Represents a single option in a select menu
+pub struct SelectOption<T> {
+    pub name: String,
+    pub value: Option<T>,
+}
+
+impl<T: Display> Display for SelectOption<T> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match &self.value {
+            Some(value) => {
+                if value.to_string() == self.name {
+                    return write!(f, "{}", value);
+                }
+
+                write!(f, "{} ({})", value, self.name)
+            }
+            None => write!(f, "{}", self.name),
+        }
+    }
+}
 
 // say hi to the user
 pub fn hello() {
@@ -18,71 +39,34 @@ pub fn hello() {
 
 // our little mascot
 fn wirtino() {
-    let eyes = vec!["•", "o", "•", "o"];
-    let mouths = vec!["O", "•", "O", "•"];
+    let eye = "•";
+    let mouth = "O";
     let walls = vec!["─", "|"];
     let corners = vec!["╭", "╮", "╰", "╯"];
 
     println!("{}{}{}", corners[0], walls[0], corners[1]);
     println!(
         "{} {}\t{}",
-        eyes[0].cyan().italic(),
-        eyes[0].cyan().italic(),
+        eye.cyan().italic(),
+        eye.cyan().italic(),
         "HI! I AM WRITINO:".cyan()
     );
     println!("{} {}\tLet's write your README!", walls[1], walls[1]);
-    println!(
-        "{}{}{}\n",
-        corners[2],
-        mouths[0].cyan().italic(),
-        corners[3]
-    );
-
-    // let mut log_update = LogUpdate::new(stdout()).unwrap();
-    // let loading = vec![".", " ", " ", " "];
-    // for i in 0..5 {
-    //     let ind = i % 4;
-    //     log_update
-    //         .render(&format!(
-    //             "{}{}{}\n{}{}{}\t{}\n{}{}{}\t{}\n{}{}{}\n{}\t{}{}{}{}{}\n",
-    //             corners[0],
-    //             walls[0],
-    //             corners[1],
-    //             eyes[ind].cyan().italic(),
-    //             " ",
-    //             eyes[ind].cyan().italic(),
-    //             app_name,
-    //             walls[1],
-    //             " ",
-    //             walls[1],
-    //             catch_phrase,
-    //             corners[2],
-    //             mouths[ind].cyan().italic(),
-    //             corners[3],
-    //             "v0.1.0".bright_green(),
-    //             "I'm reading your stuff",
-    //             loading[(ind) % 4],
-    //             loading[(ind + 3) % 4],
-    //             loading[(ind + 2) % 4],
-    //             loading[(ind + 1) % 4],
-    //         ))
-    //         .unwrap();
-
-    //     sleep(Duration::from_millis(300));
-    // }
+    println!("{}{}{}\n", corners[2], mouth.cyan().italic(), corners[3]);
 }
 
-// show conflicts to the user and ask which value to keep
-pub fn conflict<T: Clone + Debug + Display>(
+/// Asks the user to choose one of the provided values
+pub fn select_option<T: Clone + Debug + Display>(
     field_name: &str,
-    values: Vec<MergeValue<T>>,
+    values: Vec<SelectOption<T>>,
+    custom_label: Option<String>,
 ) -> Option<T> {
     // put a space before and after the field name
     let field_name = format!(" {} ", field_name);
     let label = format!(
         "{} {}",
         field_name.bright_white().on_truecolor(127, 0, 255),
-        "Which of these do you want in your awesome README?"
+        custom_label.unwrap_or("Which of these do you want in your awesome README?".to_string())
     );
 
     let with_value = values.iter().filter(|v| v.value.is_some()).collect_vec();
@@ -160,7 +144,7 @@ pub fn processed_files(files: Vec<String>) {
     ));
 
     // if there are no files, push | 0 files to process |
-    if files.len() == 0 {
+    if files.is_empty() {
         processed_files.push_str(&format!(
             "│ {}{} │\n",
             no_files_str,
@@ -196,7 +180,7 @@ pub fn bye() {
     println!(
         "{} {}",
         "🎉".bright_green(),
-        "Your README is ready!".bright_green()
+        "Your README is ready! I did too fast so I also made CONTRIBUTING".bright_green()
     );
 }
 
