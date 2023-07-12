@@ -32,7 +32,7 @@ cargo install writeme
 
 ### Homebrew
 ```bash
-brew tap writeme-project/writeme  && brew install writeme
+brew tap writeme-project/writeme && brew install writeme
 ```
 
 ## 🎈 Usage <a name="usage"></a>
