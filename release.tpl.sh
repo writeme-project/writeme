@@ -104,3 +104,7 @@ upload_release_file() {
 }
 
 create_release "writeme-project"
+
+# Publish to crates.io
+cargo publish
+echo "Published to crates.io"
