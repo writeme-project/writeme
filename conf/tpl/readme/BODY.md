@@ -24,4 +24,4 @@ futher instructions...
 
 
 # 📄 License <a name="license"></a>
-{{{license}}}
+Published under {{{license}}}
