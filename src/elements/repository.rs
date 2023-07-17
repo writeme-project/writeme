@@ -86,7 +86,7 @@ impl Repository {
             let platform = RepositoryPlatform::from_str(platform_str).unwrap();
 
             Self {
-                url,
+                url: url.split(".git").collect::<Vec<&str>>()[0].to_string(),
                 sign: Some(sign),
                 name: Some(name),
                 platform,
