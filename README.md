@@ -4,9 +4,6 @@
     </h1>
     <p align="center"> Cross-platform Auto-generate README.md for dev projects</p>
 </p>
-<p align="center">
-  <img src="https://github.com/writeme-project/writeme/assets/91274142/50b91018-17cb-47b8-a587-012352e95afa" alt="animated" />
-</p
 
 <p align="center">
   <img src="https://github.com/writeme-project/writeme/assets/91274142/50b91018-17cb-47b8-a587-012352e95afa" alt="animated" />
