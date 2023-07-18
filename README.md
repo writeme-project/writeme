@@ -6,7 +6,7 @@
 </p>
 
 <p align="center">
-  <img src="https://github.com/writeme-project/writeme/assets/91274142/50b91018-17cb-47b8-a587-012352e95afa" alt="animated" />
+  <img src="https://github.com/writeme-project/writeme/assets/91274142/492bf26e-9e87-41be-b1aa-7b92a8a210db" alt="animated" width="500" height="350" />
 </p
 
 **writeme** is a project designed to simplify the process of creating a comprehensive **README.md** file for software development projects.
