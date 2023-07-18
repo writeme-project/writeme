@@ -8,6 +8,10 @@
   <img src="https://github.com/writeme-project/writeme/assets/91274142/50b91018-17cb-47b8-a587-012352e95afa" alt="animated" />
 </p
 
+<p align="center">
+  <img src="https://github.com/writeme-project/writeme/assets/91274142/50b91018-17cb-47b8-a587-012352e95afa" alt="animated" />
+</p
+
 **writeme** is a project designed to simplify the process of creating a comprehensive **README.md** file for software development projects.
 The primary purpose of writeme is to automatically extract relevant information from your project and generate for you a well-formatted README.md file that includes important details such as project name, description, repository name, usage and configuration steps, funding details, and collaborators.
 

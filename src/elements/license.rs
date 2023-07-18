@@ -193,7 +193,6 @@ impl License {
     }
 
     /// Create a license file in the project
-    ///
     pub fn create(
         project_location: &str,
         license: &License,
@@ -258,7 +257,7 @@ impl GenMarkdown for License {
         let data = if let Some(url) = &self.url {
             json!({
                 "name": self.name.to_string(),
-                "target": url.clone()
+                "target": url.split(".git").collect::<Vec<&str>>()[0]
             })
         } else {
             json!({
@@ -274,7 +273,7 @@ impl GenMarkdown for License {
 /// This will allow to print the license name
 impl Display for License {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        // we dont want to print the path or the url
+        // we don't want to print the path or the url
         // to avoid duplicate information during merge process
         write!(f, "{}", self.name.to_string())
     }

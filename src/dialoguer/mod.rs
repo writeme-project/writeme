@@ -180,7 +180,7 @@ pub fn bye() {
     println!(
         "{} {}",
         "🎉".bright_green(),
-        "Your README is ready! I did too fast so I also made CONTRIBUTING".bright_green()
+        "Your README is ready! I was too fast so in the meantime I also created a CONTRIBUTING file.".bright_green()
     );
 }
 
