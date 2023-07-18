@@ -4,6 +4,9 @@
     </h1>
     <p align="center"> Cross-platform Auto-generate README.md for dev projects</p>
 </p>
+<p align="center">
+  <img src="https://github.com/writeme-project/writeme/assets/91274142/50b91018-17cb-47b8-a587-012352e95afa" alt="animated" />
+</p
 
 **writeme** is a project designed to simplify the process of creating a comprehensive **README.md** file for software development projects.
 The primary purpose of writeme is to automatically extract relevant information from your project and generate for you a well-formatted README.md file that includes important details such as project name, description, repository name, usage and configuration steps, funding details, and collaborators.
@@ -45,8 +48,9 @@ or to select a different path
 ```bash
 writeme --path 'path/to/your/project'
 ```
-
 Use `writeme --help` to see all the available options.
+
+If you are interested in learning more read the [wiki](https://github.com/writeme-project/writeme/wiki)
 # 📄 License <a name="license"></a>
 <a href="https://github.com/writeme-project/writeme.git/blob/master/LICENSE" target="_blank">
     GNU General Public License
