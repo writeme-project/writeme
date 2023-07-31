@@ -4,7 +4,7 @@ token=""
 app_name="writeme"
 
 # extract version from Cargo.toml
-version=`grep -m1 "version" Cargo.toml | sed 's/version = //' | sed 's/"//g'`
+version=$(grep -m1 "version" Cargo.toml | sed 's/version = //' | sed 's/"//g')
 echo "Program version: $version"
 
 # Run cargo build with the --release flag
@@ -29,11 +29,11 @@ cd ../../..
 # github release
 
 # requires curl and jq on PATH: https://stedolan.github.io/jq/
-# create a new release 
-# user: user's name 
+# create a new release
+# user: user's name
 # repo: the repo's name
 # token: github api user token
-# tag: name of the tag pushed 
+# tag: name of the tag pushed
 create_release() {
     user=$1
     repo="writeme"
@@ -41,10 +41,10 @@ create_release() {
 
     # Get the previous release version
     previous_tag=$(git describe --abbrev=0 --tags)
-    
+
     # Generate the changelog URL
     changelog_url="https://github.com/$user/$repo/compare/$previous_tag...$tag"
-    
+
     # Create the release body with the changelog URL
     body="**Full Changelog**: $changelog_url"
 
@@ -54,7 +54,7 @@ create_release() {
         --header 'content-type: application/json' \
         --data '{\"tag_name\": \"${tag}\", \"body\": \"$body\"}' \
         https://api.github.com/repos/$user/$repo/releases"
-    http_code=`eval $command`
+    http_code=$(eval $command)
     if [ $http_code == "201" ]; then
         echo "created release:"
         cat release.json
@@ -72,17 +72,17 @@ create_release() {
     fi
 }
 
-# upload a release file. 
-# this must be called only after a successful create_release, as create_release saves 
-# the json response in release.json. 
+# upload a release file.
+# this must be called only after a successful create_release, as create_release saves
+# the json response in release.json.
 # token: github api user token
-# file: path to the asset file to upload 
+# file: path to the asset file to upload
 # name: name to use for the uploaded asset
 upload_release_file() {
     file=$1
     name=$2
 
-    url=`jq -r .upload_url release.json | cut -d{ -f'1'`
+    url=$(jq -r .upload_url release.json | cut -d{ -f'1')
     command="\
     curl -s -w '%{http_code}' \
         --request POST \
@@ -90,7 +90,7 @@ upload_release_file() {
         --header 'Content-Type: application/octet-stream' \
         --data-binary '@$file' \
         ${url}?name=${name}"
-    http_code=`eval $command`
+    http_code=$(eval $command)
     if [ $http_code == "201" ]; then
         echo "asset $name uploaded:"
         jq -r .browser_download_url upload.json
