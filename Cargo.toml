@@ -1,6 +1,6 @@
 [package]
 name = "writeme"
-version = "0.2.0"
+version = "0.2.1"
 edition = "2021"
 authors = ["Leonardo Straccali", "Luca Corsetti"]
 license = "GPL-3.0-only"
@@ -42,3 +42,12 @@ toml = "0.7.3"
 
 [badges]
 maintenance = { status = "enable" }
+
+[package.metadata.deb]
+maintainer = "Leonardo Straccali, Luca Corsetti"
+license-file = ["LICENSE", "4"]
+extended-description = """Cross-platform README generator for your project"""
+depends = "$auto"
+section = "utility"
+priority = "optional"
+assets = [["README.md", "usr/share/doc/writeme/README", "644"]]
