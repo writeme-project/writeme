@@ -107,8 +107,14 @@ impl Repository {
     /// now only supports github
     pub fn check_visibility(&self) -> bool {
         let url;
-        let sign = self.sign.clone().unwrap();
-        let platform = self.platform.clone();
+        let sign = match self.sign.clone() {
+            Some(sign) => sign,
+            None => return true,
+        };
+        let platform = match self.platform.clone() {
+            RepositoryPlatform::Github => RepositoryPlatform::Github,
+            _ => return true,
+        };
 
         if platform.eq(&RepositoryPlatform::Github) {
             url = format!("https://api.github.com/repos/{}", sign);
