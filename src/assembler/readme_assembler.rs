@@ -103,7 +103,10 @@ impl<'a> ReadmeAssembler<'a> {
 
         let contrib_section;
         let repository = self.converted_config.repository.as_ref().unwrap();
-        if repository.platform == RepositoryPlatform::Github {
+
+        let repository_is_private = repository.check_visibility();
+
+        if repository.platform == RepositoryPlatform::Github && !repository_is_private {
             contrib_section = Some(repository.gen_md().unwrap());
         } else {
             contrib_section = match self.converted_config.contributors.clone() {

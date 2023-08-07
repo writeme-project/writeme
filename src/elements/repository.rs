@@ -25,13 +25,22 @@ pub struct Repository {
     ///
     /// e.g. https://github.com/writeme-project/writeme.git -> **writeme-project/writeme**
     pub sign: Option<String>,
+    /// Represents the platform of the repository
+    ///
+    /// e.g. GitHub, GitLab, BitBucket
     pub platform: RepositoryPlatform,
+}
+
+#[derive(Deserialize)]
+struct Visibility {
+    private: bool,
 }
 
 impl Repository {
     pub fn new(url: String) -> Self {
         let url = trim(url).unwrap();
         // check that the url is in the https|http://platform/user/name form
+        // or in the git@platform:user/name form
         let regex =
             regex::Regex::new(r"^(git@[^:/]+:[^/]+/[^.]+\.git|https?://[^/]+/[^/]+/[^/]+)$")
                 .unwrap();
@@ -94,6 +103,43 @@ impl Repository {
         }
     }
 
+    /// Returns if the repository is private or not
+    /// now only supports github
+    pub fn check_visibility(&self) -> bool {
+        let url;
+        let sign = self.sign.clone().unwrap();
+        let platform = self.platform.clone();
+
+        if platform.eq(&RepositoryPlatform::Github) {
+            url = format!("https://api.github.com/repos/{}", sign);
+        } else {
+            return true;
+        }
+
+        let client = reqwest::blocking::Client::new();
+        let response = match client.get(&url).header("User-Agent", "writeme").send() {
+            Ok(response) => response,
+            Err(e) => {
+                dialoguer::error("Failed to get repository visibility", &e);
+                return true;
+            }
+        };
+
+        if !response.status().is_success() {
+            return true;
+        }
+
+        let visibility: Visibility = match response.json::<Visibility>() {
+            Ok(visibility) => visibility,
+            Err(e) => {
+                dialoguer::error("Failed to get repository visibility", &e);
+                return true;
+            }
+        };
+
+        visibility.private
+    }
+
     /// Returns a ConverterOutput struct with the data found in the .git folder
     pub fn scan(project_location: &str) -> Result<ConverterOutput, Error> {
         let mut git_converter = ConverterOutput::empty();
@@ -104,7 +150,7 @@ impl Repository {
         let repo: GitRepository = match GitRepository::open(project_location) {
             Ok(repo) => repo,
             Err(e) => {
-                dialoguer::error("Failed to open repository: {}", &e);
+                dialoguer::error("Failed to open local repository: {}", &e);
                 return Ok(git_converter);
             }
         };
