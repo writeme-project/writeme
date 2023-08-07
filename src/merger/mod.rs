@@ -1,7 +1,7 @@
 use std::fmt::{Debug, Display};
 
 use crate::{
-    converter::{ConverterOutput},
+    converter::ConverterOutput,
     dialoguer::{select_option, SelectOption},
     elements::{license::{License, SupportedLicense}, repository::Repository},
 };
